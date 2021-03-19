@@ -22,7 +22,113 @@ opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, 
 
 \begin{document}
 
+\section{Etap I}
+
+<<Load and view data>>=
+df <- read.csv('churn.txt')
+
+dim(df)
+head(df)
+str(df)
+@
+
+<<Change types>>=
+df$Area.Code <- as.factor(df$Area.Code)
+df$Day.Charge <- as.integer(df$Day.Charge)
+@
+
+<<Check NAs>>=
+sapply(df, function(x) sum(is.na(x)))
+@
+
+<<Delete `Phone` column>>=
+df <- subset(df, select=-Phone)
+@
+
+<<Check levels>>=
+sapply(df[, sapply(df, is.factor)], levels)
+@
+
+<<Summary data>>=
+summary(df)
+@
+
+\section{Etap II}
+
+<<Import libraries, warning=FALSE, echo=FALSE>>=
+library(ggplot2)
+library(GGally)
+library(tidyr)
+library(dplyr)
+@
+
+<<Split data by numerics and factors>>=
+factors <- subset(df, select=sapply(df, is.factor))
+numerics <- subset(df, select=sapply(df, function(x) !is.factor(x)))
+@
+
+\begin{description}
 
 
+\item{a)}
+
+
+
+\item{b)}
+
+<<Overviews plots>>=
+ggplot(gather(factors), aes(value)) +
+  geom_bar() +
+  facet_wrap(~key, scales='free')
+
+ggplot(gather(numerics), aes(value)) +
+  geom_histogram() +
+  facet_wrap(~key, scales='free')
+
+ggplot(gather(numerics), aes(value)) +
+  geom_boxplot() +
+  facet_wrap(~key, scales='free')
+@
+
+\item{c)}
+
+<<Pair plot for continuous variables>>=
+continuous <- subset(numerics, select=sapply(numerics, function(x) !is.integer(x)))
+ggpairs(continuous)
+@
+
+\item{d)}
+
+<<Identify ranges>>=
+sapply(numerics, range)
+@
+
+<<Identify levels>>=
+sapply(factors, levels)
+@
+
+<<Identify symmetry>>=
+library(moments)
+sapply(numerics, skewness)
+@
+
+<<Identify coefficient of variation>>=
+cv <- function(X) sd(X) / mean(X)
+
+sapply(numerics, cv)
+@
+
+\end{description}
+
+\section{Etap III}
+
+\begin{description}
+
+\item{a)}
+
+
+\item{b)}
+
+\end{description}
 
 \end{document}
