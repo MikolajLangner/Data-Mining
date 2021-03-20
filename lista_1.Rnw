@@ -126,6 +126,41 @@ sapply(numerics, cv)
 
 \item{a)}
 
+<<Overviews plots grouped>>=
+ggplot(gather(factors, "key", "value", -Churn.), aes(value, color=Churn.)) +
+  geom_bar(position='dodge') +
+  facet_wrap(~key, scales='free')
+
+numerics <- data.frame(numerics, Churn. = df$Churn.)
+
+ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
+  geom_histogram() +
+  facet_wrap(~key, scales='free')
+
+ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
+  geom_boxplot() +
+  facet_wrap(~key, scales='free')
+@
+
+<<Pair plot for continuous variables grouped>>=
+continuous <- subset(numerics, select=sapply(numerics, function(x) !is.integer(x)))
+continuous %>% ggpairs(., 
+               mapping = ggplot2::aes(color=Churn.),
+               legend=1,
+               columns=1:7)
+@
+
+<<Identify ranges grouped>>=
+numerics %>% group_by(Churn.) %>% group_map(~summarize(.x, across(everything(), range)))
+@
+
+<<Identify symmetry grouped>>=
+numerics %>% group_by(Churn.) %>% group_map(~summarize(.x, across(everything(), skewness)))
+@
+
+<<Identify coefficient of variation grouped>>=
+numerics %>% group_by(Churn.) %>% group_map(~summarize(.x, across(everything(), cv)))
+@
 
 \item{b)}
 

@@ -444,6 +444,154 @@
 
 \item{a)}
 
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(factors,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
+  \hlkwd{geom_bar}\hlstd{(}\hlkwc{position}\hlstd{=}\hlstr{'dodge'}\hlstd{)} \hlopt{+}
+  \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\color{warningcolor}{\#\# Warning: attributes are not identical across measure variables;\\\#\# they will be dropped}}\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-1} 
+
+}
+
+
+\begin{kframe}\begin{alltt}
+\hlstd{numerics} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(numerics,} \hlkwc{Churn.} \hlstd{= df}\hlopt{$}\hlstd{Churn.)}
+
+\hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
+  \hlkwd{geom_histogram}\hlstd{()} \hlopt{+}
+  \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# `stat\_bin()` using `bins = 30`. Pick better value with `binwidth`.}}\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-2} 
+
+}
+
+
+\begin{kframe}\begin{alltt}
+\hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
+  \hlkwd{geom_boxplot}\hlstd{()} \hlopt{+}
+  \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-3} 
+
+}
+
+
+
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{continuous} \hlkwb{<-} \hlkwd{subset}\hlstd{(numerics,} \hlkwc{select}\hlstd{=}\hlkwd{sapply}\hlstd{(numerics,} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{)} \hlopt{!}\hlkwd{is.integer}\hlstd{(x)))}
+\hlstd{continuous} \hlopt{%>%} \hlkwd{ggpairs}\hlstd{(.,}
+               \hlkwc{mapping} \hlstd{= ggplot2}\hlopt{::}\hlkwd{aes}\hlstd{(}\hlkwc{color}\hlstd{=Churn.),}
+               \hlkwc{legend}\hlstd{=}\hlnum{1}\hlstd{,}
+               \hlkwc{columns}\hlstd{=}\hlnum{1}\hlopt{:}\hlnum{7}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/Pair_plot_for_continuous_variables_grouped-1} 
+
+}
+
+
+
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{numerics} \hlopt{%>%} \hlkwd{group_by}\hlstd{(Churn.)} \hlopt{%>%} \hlkwd{group_map}\hlstd{(}\hlopt{~}\hlkwd{summarize}\hlstd{(.x,} \hlkwd{across}\hlstd{(}\hlkwd{everything}\hlstd{(), range)))}
+\end{alltt}
+\begin{verbatim}
+## [[1]]
+## # A tibble: 2 x 15
+##   Account.Length VMail.Message Day.Mins Day.Calls Day.Charge Eve.Mins Eve.Calls
+##            <int>         <int>    <dbl>     <int>      <int>    <dbl>     <int>
+## 1              1             0       0          0          0       0          0
+## 2            243            51     316.       163         53     362.       170
+## # ... with 8 more variables: Eve.Charge <dbl>, Night.Mins <dbl>,
+## #   Night.Calls <int>, Night.Charge <dbl>, Intl.Mins <dbl>, Intl.Calls <int>,
+## #   Intl.Charge <dbl>, CustServ.Calls <int>
+## 
+## [[2]]
+## # A tibble: 2 x 15
+##   Account.Length VMail.Message Day.Mins Day.Calls Day.Charge Eve.Mins Eve.Calls
+##            <int>         <int>    <dbl>     <int>      <int>    <dbl>     <int>
+## 1              1             0       0          0          0     70.9        48
+## 2            225            48     351.       165         59    364.        168
+## # ... with 8 more variables: Eve.Charge <dbl>, Night.Mins <dbl>,
+## #   Night.Calls <int>, Night.Charge <dbl>, Intl.Mins <dbl>, Intl.Calls <int>,
+## #   Intl.Charge <dbl>, CustServ.Calls <int>
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{numerics} \hlopt{%>%} \hlkwd{group_by}\hlstd{(Churn.)} \hlopt{%>%} \hlkwd{group_map}\hlstd{(}\hlopt{~}\hlkwd{summarize}\hlstd{(.x,} \hlkwd{across}\hlstd{(}\hlkwd{everything}\hlstd{(), skewness)))}
+\end{alltt}
+\begin{verbatim}
+## [[1]]
+## # A tibble: 1 x 15
+##   Account.Length VMail.Message Day.Mins Day.Calls Day.Charge Eve.Mins Eve.Calls
+##            <dbl>         <dbl>    <dbl>     <dbl>      <dbl>    <dbl>     <dbl>
+## 1         0.0905          1.17   -0.226   -0.0633     -0.224  -0.0431   -0.0692
+## # ... with 8 more variables: Eve.Charge <dbl>, Night.Mins <dbl>,
+## #   Night.Calls <dbl>, Night.Charge <dbl>, Intl.Mins <dbl>, Intl.Calls <dbl>,
+## #   Intl.Charge <dbl>, CustServ.Calls <dbl>
+## 
+## [[2]]
+## # A tibble: 1 x 15
+##   Account.Length VMail.Message Day.Mins Day.Calls Day.Charge Eve.Mins Eve.Calls
+##            <dbl>         <dbl>    <dbl>     <dbl>      <dbl>    <dbl>     <dbl>
+## 1          0.137          2.03   -0.199    -0.352     -0.198   0.0330    0.0298
+## # ... with 8 more variables: Eve.Charge <dbl>, Night.Mins <dbl>,
+## #   Night.Calls <dbl>, Night.Charge <dbl>, Intl.Mins <dbl>, Intl.Calls <dbl>,
+## #   Intl.Charge <dbl>, CustServ.Calls <dbl>
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{numerics} \hlopt{%>%} \hlkwd{group_by}\hlstd{(Churn.)} \hlopt{%>%} \hlkwd{group_map}\hlstd{(}\hlopt{~}\hlkwd{summarize}\hlstd{(.x,} \hlkwd{across}\hlstd{(}\hlkwd{everything}\hlstd{(), cv)))}
+\end{alltt}
+\begin{verbatim}
+## [[1]]
+## # A tibble: 1 x 15
+##   Account.Length VMail.Message Day.Mins Day.Calls Day.Charge Eve.Mins Eve.Calls
+##            <dbl>         <dbl>    <dbl>     <dbl>      <dbl>    <dbl>     <dbl>
+## 1          0.396          1.62    0.286     0.197      0.291    0.253     0.200
+## # ... with 8 more variables: Eve.Charge <dbl>, Night.Mins <dbl>,
+## #   Night.Calls <dbl>, Night.Charge <dbl>, Intl.Mins <dbl>, Intl.Calls <dbl>,
+## #   Intl.Charge <dbl>, CustServ.Calls <dbl>
+## 
+## [[2]]
+## # A tibble: 1 x 15
+##   Account.Length VMail.Message Day.Mins Day.Calls Day.Charge Eve.Mins Eve.Calls
+##            <dbl>         <dbl>    <dbl>     <dbl>      <dbl>    <dbl>     <dbl>
+## 1          0.384          2.32    0.333     0.213      0.338    0.244     0.196
+## # ... with 8 more variables: Eve.Charge <dbl>, Night.Mins <dbl>,
+## #   Night.Calls <dbl>, Night.Charge <dbl>, Intl.Mins <dbl>, Intl.Calls <dbl>,
+## #   Intl.Charge <dbl>, CustServ.Calls <dbl>
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
 
 \item{b)}
 
