@@ -67,6 +67,7 @@
 \date{31.3.2021}
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \begin{document}
+\maketitle
 
 \section{Etap I}
 
@@ -261,15 +262,13 @@
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Registered S3 method overwritten by 'GGally':\\\#\#\ \  method from\ \  \\\#\#\ \  +.gg\ \  ggplot2}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# \\\#\# Attaching package: 'dplyr'}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following objects are masked from 'package:stats':\\\#\# \\\#\#\ \ \ \  filter, lag}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following objects are masked from 'package:base':\\\#\# \\\#\#\ \ \ \  intersect, setdiff, setequal, union}}\end{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(ggplot2)}
+\hlkwd{library}\hlstd{(GGally)}
+\hlkwd{library}\hlstd{(tidyr)}
+\hlkwd{library}\hlstd{(dplyr)}
+\end{alltt}
+\end{kframe}
 \end{knitrout}
 
 \begin{knitrout}
@@ -286,6 +285,55 @@
 
 \item{a)}
 
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{extended.summary} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{X}\hlstd{) \{}
+    \hlkwd{c}\hlstd{(}\hlkwc{mean} \hlstd{=} \hlkwd{mean}\hlstd{(X),} \hlkwc{trimmed.mean} \hlstd{=} \hlkwd{mean}\hlstd{(X,} \hlkwc{trim}\hlstd{=}\hlnum{.0025}\hlstd{),} \hlkwc{min} \hlstd{=} \hlkwd{min}\hlstd{(X),} \hlkwc{Q1} \hlstd{=} \hlkwd{quantile}\hlstd{(X,} \hlnum{.25}\hlstd{,} \hlkwc{names}\hlstd{=F),} \hlkwc{median} \hlstd{=} \hlkwd{median}\hlstd{(X),} \hlkwc{Q3} \hlstd{=} \hlkwd{quantile}\hlstd{(X,} \hlnum{.75}\hlstd{,} \hlkwc{names}\hlstd{=F),} \hlkwc{max} \hlstd{=} \hlkwd{max}\hlstd{(X),} \hlkwc{range} \hlstd{=} \hlkwd{range}\hlstd{(X),} \hlkwc{sd} \hlstd{=} \hlkwd{sd}\hlstd{(X),} \hlkwc{IQR} \hlstd{=} \hlkwd{IQR}\hlstd{(X))}
+\hlstd{\}}
+
+\hlkwd{sapply}\hlstd{(numerics, extended.summary)}
+\end{alltt}
+\begin{verbatim}
+##              Account.Length VMail.Message  Day.Mins Day.Calls Day.Charge
+## mean              101.06481       8.09901 179.77510 100.43564  30.068407
+## trimmed.mean      101.00392       8.02050 179.80413 100.46850  30.072957
+## min                 1.00000       0.00000   0.00000   0.00000   0.000000
+## Q1                 74.00000       0.00000 143.70000  87.00000  24.000000
+## median            101.00000       0.00000 179.40000 101.00000  30.000000
+## Q3                127.00000      20.00000 216.40000 114.00000  36.000000
+## max               243.00000      51.00000 350.80000 165.00000  59.000000
+## range1              1.00000       0.00000   0.00000   0.00000   0.000000
+## range2            243.00000      51.00000 350.80000 165.00000  59.000000
+## sd                 39.82211      13.68837  54.46739  20.06908   9.261643
+## IQR                53.00000      20.00000  72.70000  27.00000  12.000000
+##               Eve.Mins Eve.Calls Eve.Charge Night.Mins Night.Calls Night.Charge
+## mean         200.98035 100.11431  17.083540  200.87204   100.10771     9.039325
+## trimmed.mean 201.00362 100.13205  17.085520  200.83841   100.10280     9.037814
+## min            0.00000   0.00000   0.000000   23.20000    33.00000     1.040000
+## Q1           166.60000  87.00000  14.160000  167.00000    87.00000     7.520000
+## median       201.40000 100.00000  17.120000  201.20000   100.00000     9.050000
+## Q3           235.30000 114.00000  20.000000  235.30000   113.00000    10.590000
+## max          363.70000 170.00000  30.910000  395.00000   175.00000    17.770000
+## range1         0.00000   0.00000   0.000000   23.20000    33.00000     1.040000
+## range2       363.70000 170.00000  30.910000  395.00000   175.00000    17.770000
+## sd            50.71384  19.92263   4.310668   50.57385    19.56861     2.275873
+## IQR           68.70000  27.00000   5.840000   68.30000    26.00000     3.070000
+##              Intl.Mins Intl.Calls Intl.Charge CustServ.Calls
+## mean          10.23729   4.479448   2.7645815       1.562856
+## trimmed.mean  10.24206   4.458245   2.7658728       1.551703
+## min            0.00000   0.000000   0.0000000       0.000000
+## Q1             8.50000   3.000000   2.3000000       1.000000
+## median        10.30000   4.000000   2.7800000       1.000000
+## Q3            12.10000   6.000000   3.2700000       2.000000
+## max           20.00000  20.000000   5.4000000       9.000000
+## range1         0.00000   0.000000   0.0000000       0.000000
+## range2        20.00000  20.000000   5.4000000       9.000000
+## sd             2.79184   2.461214   0.7537726       1.315491
+## IQR            3.60000   3.000000   0.9700000       1.000000
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
 
 
 \item{b)}
@@ -297,9 +345,7 @@
   \hlkwd{geom_bar}\hlstd{()} \hlopt{+}
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
-
-
-{\ttfamily\noindent\color{warningcolor}{\#\# Warning: attributes are not identical across measure variables;\\\#\# they will be dropped}}\end{kframe}
+\end{kframe}
 
 {\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots-1} 
 
@@ -311,9 +357,7 @@
   \hlkwd{geom_histogram}\hlstd{()} \hlopt{+}
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
-
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# `stat\_bin()` using `bins = 30`. Pick better value with `binwidth`.}}\end{kframe}
+\end{kframe}
 
 {\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots-2} 
 
@@ -447,13 +491,152 @@
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
+\hlstd{numerics} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(numerics,} \hlkwc{Churn.} \hlstd{= df}\hlopt{$}\hlstd{Churn.)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{aggregate}\hlstd{(.} \hlopt{~} \hlstd{Churn., numerics, extended.summary)}
+\end{alltt}
+\begin{verbatim}
+##   Churn. Account.Length.mean Account.Length.trimmed.mean Account.Length.min
+## 1 False.           100.79368                   100.73202            1.00000
+## 2  True.           102.66460                   102.62162            1.00000
+##   Account.Length.Q1 Account.Length.median Account.Length.Q3 Account.Length.max
+## 1          73.00000             100.00000         127.00000          243.00000
+## 2          76.00000             103.00000         127.00000          225.00000
+##   Account.Length.range1 Account.Length.range2 Account.Length.sd
+## 1               1.00000             243.00000          39.88235
+## 2               1.00000             225.00000          39.46782
+##   Account.Length.IQR VMail.Message.mean VMail.Message.trimmed.mean
+## 1           54.00000           8.604561                   8.526446
+## 2           51.00000           5.115942                   5.037422
+##   VMail.Message.min VMail.Message.Q1 VMail.Message.median VMail.Message.Q3
+## 1          0.000000         0.000000             0.000000        22.000000
+## 2          0.000000         0.000000             0.000000         0.000000
+##   VMail.Message.max VMail.Message.range1 VMail.Message.range2 VMail.Message.sd
+## 1         51.000000             0.000000            51.000000        13.913125
+## 2         48.000000             0.000000            48.000000        11.860138
+##   VMail.Message.IQR Day.Mins.mean Day.Mins.trimmed.mean Day.Mins.min
+## 1         22.000000     175.17575             175.25127      0.00000
+## 2          0.000000     206.91408             207.04511      0.00000
+##   Day.Mins.Q1 Day.Mins.median Day.Mins.Q3 Day.Mins.max Day.Mins.range1
+## 1   142.82500       177.20000   210.30000    315.60000         0.00000
+## 2   153.25000       217.60000   265.95000    350.80000         0.00000
+##   Day.Mins.range2 Day.Mins.sd Day.Mins.IQR Day.Calls.mean
+## 1       315.60000    50.18166     67.47500      100.28316
+## 2       350.80000    68.99779    112.70000      101.33540
+##   Day.Calls.trimmed.mean Day.Calls.min Day.Calls.Q1 Day.Calls.median
+## 1              100.30959       0.00000     87.00000        100.00000
+## 2              101.41372       0.00000     87.50000        103.00000
+##   Day.Calls.Q3 Day.Calls.max Day.Calls.range1 Day.Calls.range2 Day.Calls.sd
+## 1    114.00000     163.00000          0.00000        163.00000     19.80116
+## 2    116.50000     165.00000          0.00000        165.00000     21.58231
+##   Day.Calls.IQR Day.Charge.mean Day.Charge.trimmed.mean Day.Charge.min
+## 1      27.00000       29.284561               29.296897       0.000000
+## 2      29.00000       34.693582               34.715177       0.000000
+##   Day.Charge.Q1 Day.Charge.median Day.Charge.Q3 Day.Charge.max
+## 1     24.000000         30.000000     35.000000      53.000000
+## 2     26.000000         36.000000     45.000000      59.000000
+##   Day.Charge.range1 Day.Charge.range2 Day.Charge.sd Day.Charge.IQR
+## 1          0.000000         53.000000      8.534904      11.000000
+## 2          0.000000         59.000000     11.718929      19.000000
+##   Eve.Mins.mean Eve.Mins.trimmed.mean Eve.Mins.min Eve.Mins.Q1 Eve.Mins.median
+## 1     199.04330             199.07831      0.00000   164.50000       199.60000
+## 2     212.41014             212.38981     70.90000   177.10000       211.30000
+##   Eve.Mins.Q3 Eve.Mins.max Eve.Mins.range1 Eve.Mins.range2 Eve.Mins.sd
+## 1   233.20000    361.80000         0.00000       361.80000    50.29217
+## 2   249.45000    363.70000        70.90000       363.70000    51.72891
+##   Eve.Mins.IQR Eve.Calls.mean Eve.Calls.trimmed.mean Eve.Calls.min Eve.Calls.Q1
+## 1     68.70000      100.03860              100.06488       0.00000     87.00000
+## 2     72.35000      100.56108              100.53015      48.00000     87.00000
+##   Eve.Calls.median Eve.Calls.Q3 Eve.Calls.max Eve.Calls.range1 Eve.Calls.range2
+## 1        100.00000    114.00000     170.00000          0.00000        170.00000
+## 2        101.00000    114.00000     168.00000         48.00000        168.00000
+##   Eve.Calls.sd Eve.Calls.IQR Eve.Charge.mean Eve.Charge.trimmed.mean
+## 1     19.95841      27.00000       16.918909               16.921890
+## 2     19.72471      27.00000       18.054969               18.053243
+##   Eve.Charge.min Eve.Charge.Q1 Eve.Charge.median Eve.Charge.Q3 Eve.Charge.max
+## 1       0.000000     13.980000         16.970000     19.820000      30.750000
+## 2       6.030000     15.055000         17.960000     21.205000      30.910000
+##   Eve.Charge.range1 Eve.Charge.range2 Eve.Charge.sd Eve.Charge.IQR
+## 1          0.000000         30.750000      4.274863       5.840000
+## 2          6.030000         30.910000      4.396762       6.150000
+##   Night.Mins.mean Night.Mins.trimmed.mean Night.Mins.min Night.Mins.Q1
+## 1       200.13319               200.09041       23.20000     165.90000
+## 2       205.23168               205.24865       47.40000     171.25000
+##   Night.Mins.median Night.Mins.Q3 Night.Mins.max Night.Mins.range1
+## 1         200.25000     234.90000      395.00000          23.20000
+## 2         204.80000     239.85000      354.90000          47.40000
+##   Night.Mins.range2 Night.Mins.sd Night.Mins.IQR Night.Calls.mean
+## 1         395.00000      51.10503       69.00000        100.05825
+## 2         354.90000      47.13282       68.60000        100.39959
+##   Night.Calls.trimmed.mean Night.Calls.min Night.Calls.Q1 Night.Calls.median
+## 1                100.05430        33.00000       87.00000          100.00000
+## 2                100.38669        49.00000       85.00000          100.00000
+##   Night.Calls.Q3 Night.Calls.max Night.Calls.range1 Night.Calls.range2
+## 1      113.00000       175.00000           33.00000          175.00000
+## 2      115.00000       158.00000           49.00000          158.00000
+##   Night.Calls.sd Night.Calls.IQR Night.Charge.mean Night.Charge.trimmed.mean
+## 1       19.50625        26.00000          9.006074                  9.004150
+## 2       19.95066        30.00000          9.235528                  9.236299
+##   Night.Charge.min Night.Charge.Q1 Night.Charge.median Night.Charge.Q3
+## 1         1.040000        7.470000            9.010000       10.570000
+## 2         2.130000        7.705000            9.220000       10.795000
+##   Night.Charge.max Night.Charge.range1 Night.Charge.range2 Night.Charge.sd
+## 1        17.770000            1.040000           17.770000        2.299768
+## 2        15.970000            2.130000           15.970000        2.121081
+##   Night.Charge.IQR Intl.Mins.mean Intl.Mins.trimmed.mean Intl.Mins.min
+## 1         3.100000      10.158877              10.163999      0.000000
+## 2         3.090000      10.700000              10.698753      2.000000
+##   Intl.Mins.Q1 Intl.Mins.median Intl.Mins.Q3 Intl.Mins.max Intl.Mins.range1
+## 1     8.400000        10.200000    12.000000     18.900000         0.000000
+## 2     8.800000        10.600000    12.800000     20.000000         2.000000
+##   Intl.Mins.range2 Intl.Mins.sd Intl.Mins.IQR Intl.Calls.mean
+## 1        18.900000     2.784489      3.600000        4.532982
+## 2        20.000000     2.793190      4.000000        4.163561
+##   Intl.Calls.trimmed.mean Intl.Calls.min Intl.Calls.Q1 Intl.Calls.median
+## 1                4.512341       0.000000      3.000000          4.000000
+## 2                4.137214       1.000000      2.000000          4.000000
+##   Intl.Calls.Q3 Intl.Calls.max Intl.Calls.range1 Intl.Calls.range2
+## 1      6.000000      19.000000          0.000000         19.000000
+## 2      5.000000      20.000000          1.000000         20.000000
+##   Intl.Calls.sd Intl.Calls.IQR Intl.Charge.mean Intl.Charge.trimmed.mean
+## 1      2.441984       3.000000        2.7434035                2.7447920
+## 2      2.551575       3.000000        2.8895445                2.8892100
+##   Intl.Charge.min Intl.Charge.Q1 Intl.Charge.median Intl.Charge.Q3
+## 1       0.0000000      2.2700000          2.7500000      3.2400000
+## 2       0.5400000      2.3800000          2.8600000      3.4600000
+##   Intl.Charge.max Intl.Charge.range1 Intl.Charge.range2 Intl.Charge.sd
+## 1       5.1000000          0.0000000          5.1000000      0.7517843
+## 2       5.4000000          0.5400000          5.4000000      0.7541521
+##   Intl.Charge.IQR CustServ.Calls.mean CustServ.Calls.trimmed.mean
+## 1       0.9700000            1.449825                    1.440056
+## 2       1.0800000            2.229814                    2.220374
+##   CustServ.Calls.min CustServ.Calls.Q1 CustServ.Calls.median CustServ.Calls.Q3
+## 1           0.000000          1.000000              1.000000          2.000000
+## 2           0.000000          1.000000              2.000000          4.000000
+##   CustServ.Calls.max CustServ.Calls.range1 CustServ.Calls.range2
+## 1           8.000000              0.000000              8.000000
+## 2           9.000000              0.000000              9.000000
+##   CustServ.Calls.sd CustServ.Calls.IQR
+## 1          1.163883           1.000000
+## 2          1.853275           3.000000
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
 \hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(factors,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
   \hlkwd{geom_bar}\hlstd{(}\hlkwc{position}\hlstd{=}\hlstr{'dodge'}\hlstd{)} \hlopt{+}
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
-
-
-{\ttfamily\noindent\color{warningcolor}{\#\# Warning: attributes are not identical across measure variables;\\\#\# they will be dropped}}\end{kframe}
+\end{kframe}
 
 {\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-1} 
 
@@ -461,15 +644,11 @@
 
 
 \begin{kframe}\begin{alltt}
-\hlstd{numerics} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(numerics,} \hlkwc{Churn.} \hlstd{= df}\hlopt{$}\hlstd{Churn.)}
-
 \hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
   \hlkwd{geom_histogram}\hlstd{()} \hlopt{+}
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
-
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# `stat\_bin()` using `bins = 30`. Pick better value with `binwidth`.}}\end{kframe}
+\end{kframe}
 
 {\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-2} 
 
@@ -513,28 +692,27 @@
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{numerics} \hlopt{%>%} \hlkwd{group_by}\hlstd{(Churn.)} \hlopt{%>%} \hlkwd{group_map}\hlstd{(}\hlopt{~}\hlkwd{summarize}\hlstd{(.x,} \hlkwd{across}\hlstd{(}\hlkwd{everything}\hlstd{(), range)))}
+\hlkwd{aggregate}\hlstd{(.} \hlopt{~} \hlstd{Churn., numerics, range)}
 \end{alltt}
 \begin{verbatim}
-## [[1]]
-## # A tibble: 2 x 15
-##   Account.Length VMail.Message Day.Mins Day.Calls Day.Charge Eve.Mins Eve.Calls
-##            <int>         <int>    <dbl>     <int>      <int>    <dbl>     <int>
-## 1              1             0       0          0          0       0          0
-## 2            243            51     316.       163         53     362.       170
-## # ... with 8 more variables: Eve.Charge <dbl>, Night.Mins <dbl>,
-## #   Night.Calls <int>, Night.Charge <dbl>, Intl.Mins <dbl>, Intl.Calls <int>,
-## #   Intl.Charge <dbl>, CustServ.Calls <int>
-## 
-## [[2]]
-## # A tibble: 2 x 15
-##   Account.Length VMail.Message Day.Mins Day.Calls Day.Charge Eve.Mins Eve.Calls
-##            <int>         <int>    <dbl>     <int>      <int>    <dbl>     <int>
-## 1              1             0       0          0          0     70.9        48
-## 2            225            48     351.       165         59    364.        168
-## # ... with 8 more variables: Eve.Charge <dbl>, Night.Mins <dbl>,
-## #   Night.Calls <int>, Night.Charge <dbl>, Intl.Mins <dbl>, Intl.Calls <int>,
-## #   Intl.Charge <dbl>, CustServ.Calls <int>
+##   Churn. Account.Length.1 Account.Length.2 VMail.Message.1 VMail.Message.2
+## 1 False.                1              243               0              51
+## 2  True.                1              225               0              48
+##   Day.Mins.1 Day.Mins.2 Day.Calls.1 Day.Calls.2 Day.Charge.1 Day.Charge.2
+## 1        0.0      315.6           0         163            0           53
+## 2        0.0      350.8           0         165            0           59
+##   Eve.Mins.1 Eve.Mins.2 Eve.Calls.1 Eve.Calls.2 Eve.Charge.1 Eve.Charge.2
+## 1        0.0      361.8           0         170         0.00        30.75
+## 2       70.9      363.7          48         168         6.03        30.91
+##   Night.Mins.1 Night.Mins.2 Night.Calls.1 Night.Calls.2 Night.Charge.1
+## 1         23.2        395.0            33           175           1.04
+## 2         47.4        354.9            49           158           2.13
+##   Night.Charge.2 Intl.Mins.1 Intl.Mins.2 Intl.Calls.1 Intl.Calls.2
+## 1          17.77         0.0        18.9            0           19
+## 2          15.97         2.0        20.0            1           20
+##   Intl.Charge.1 Intl.Charge.2 CustServ.Calls.1 CustServ.Calls.2
+## 1          0.00          5.10                0                8
+## 2          0.54          5.40                0                9
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -542,26 +720,12 @@
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{numerics} \hlopt{%>%} \hlkwd{group_by}\hlstd{(Churn.)} \hlopt{%>%} \hlkwd{group_map}\hlstd{(}\hlopt{~}\hlkwd{summarize}\hlstd{(.x,} \hlkwd{across}\hlstd{(}\hlkwd{everything}\hlstd{(), skewness)))}
+\hlkwd{aggregate}\hlstd{(.} \hlopt{~} \hlstd{Churn., factors, levels)}
 \end{alltt}
 \begin{verbatim}
-## [[1]]
-## # A tibble: 1 x 15
-##   Account.Length VMail.Message Day.Mins Day.Calls Day.Charge Eve.Mins Eve.Calls
-##            <dbl>         <dbl>    <dbl>     <dbl>      <dbl>    <dbl>     <dbl>
-## 1         0.0905          1.17   -0.226   -0.0633     -0.224  -0.0431   -0.0692
-## # ... with 8 more variables: Eve.Charge <dbl>, Night.Mins <dbl>,
-## #   Night.Calls <dbl>, Night.Charge <dbl>, Intl.Mins <dbl>, Intl.Calls <dbl>,
-## #   Intl.Charge <dbl>, CustServ.Calls <dbl>
-## 
-## [[2]]
-## # A tibble: 1 x 15
-##   Account.Length VMail.Message Day.Mins Day.Calls Day.Charge Eve.Mins Eve.Calls
-##            <dbl>         <dbl>    <dbl>     <dbl>      <dbl>    <dbl>     <dbl>
-## 1          0.137          2.03   -0.199    -0.352     -0.198   0.0330    0.0298
-## # ... with 8 more variables: Eve.Charge <dbl>, Night.Mins <dbl>,
-## #   Night.Calls <dbl>, Night.Charge <dbl>, Intl.Mins <dbl>, Intl.Calls <dbl>,
-## #   Intl.Charge <dbl>, CustServ.Calls <dbl>
+##   Churn. State Area.Code Int.l.Plan VMail.Plan
+## 1 False.  NULL      NULL       NULL       NULL
+## 2  True.  NULL      NULL       NULL       NULL
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -569,26 +733,37 @@
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{numerics} \hlopt{%>%} \hlkwd{group_by}\hlstd{(Churn.)} \hlopt{%>%} \hlkwd{group_map}\hlstd{(}\hlopt{~}\hlkwd{summarize}\hlstd{(.x,} \hlkwd{across}\hlstd{(}\hlkwd{everything}\hlstd{(), cv)))}
+\hlkwd{aggregate}\hlstd{(.} \hlopt{~} \hlstd{Churn., numerics, skewness)}
 \end{alltt}
 \begin{verbatim}
-## [[1]]
-## # A tibble: 1 x 15
-##   Account.Length VMail.Message Day.Mins Day.Calls Day.Charge Eve.Mins Eve.Calls
-##            <dbl>         <dbl>    <dbl>     <dbl>      <dbl>    <dbl>     <dbl>
-## 1          0.396          1.62    0.286     0.197      0.291    0.253     0.200
-## # ... with 8 more variables: Eve.Charge <dbl>, Night.Mins <dbl>,
-## #   Night.Calls <dbl>, Night.Charge <dbl>, Intl.Mins <dbl>, Intl.Calls <dbl>,
-## #   Intl.Charge <dbl>, CustServ.Calls <dbl>
-## 
-## [[2]]
-## # A tibble: 1 x 15
-##   Account.Length VMail.Message Day.Mins Day.Calls Day.Charge Eve.Mins Eve.Calls
-##            <dbl>         <dbl>    <dbl>     <dbl>      <dbl>    <dbl>     <dbl>
-## 1          0.384          2.32    0.333     0.213      0.338    0.244     0.196
-## # ... with 8 more variables: Eve.Charge <dbl>, Night.Mins <dbl>,
-## #   Night.Calls <dbl>, Night.Charge <dbl>, Intl.Mins <dbl>, Intl.Calls <dbl>,
-## #   Intl.Charge <dbl>, CustServ.Calls <dbl>
+##   Churn. Account.Length VMail.Message   Day.Mins   Day.Calls Day.Charge
+## 1 False.     0.09047562      1.166821 -0.2262589 -0.06326218 -0.2235919
+## 2  True.     0.13670581      2.034070 -0.1986036 -0.35229396 -0.1975210
+##      Eve.Mins   Eve.Calls  Eve.Charge   Night.Mins Night.Calls Night.Charge
+## 1 -0.04311686 -0.06918067 -0.04308068  0.017220792  0.02693433  0.017231078
+## 2  0.03302640  0.02976338  0.03304071 -0.005057646  0.06130261 -0.005446713
+##     Intl.Mins Intl.Calls Intl.Charge CustServ.Calls
+## 1 -0.29362525   1.258381 -0.29374711      0.8863340
+## 2  0.02132514   1.708902  0.02094336      0.7014171
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{aggregate}\hlstd{(.} \hlopt{~} \hlstd{Churn., numerics, cv)}
+\end{alltt}
+\begin{verbatim}
+##   Churn. Account.Length VMail.Message  Day.Mins Day.Calls Day.Charge  Eve.Mins
+## 1 False.      0.3956830      1.616948 0.2864646 0.1974525  0.2914472 0.2526695
+## 2  True.      0.3844346      2.318271 0.3334611 0.2129789  0.3377838 0.2435331
+##   Eve.Calls Eve.Charge Night.Mins Night.Calls Night.Charge Intl.Mins Intl.Calls
+## 1 0.1995071  0.2526678  0.2553551   0.1949489    0.2553574 0.2740942  0.5387146
+## 2 0.1961466  0.2435209  0.2296567   0.1987126    0.2296653 0.2610458  0.6128349
+##   Intl.Charge CustServ.Calls
+## 1   0.2740335      0.8027753
+## 2   0.2609934      0.8311344
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -596,5 +771,7 @@
 \item{b)}
 
 \end{description}
+
+\section{Etap IV}
 
 \end{document}

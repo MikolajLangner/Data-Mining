@@ -21,6 +21,7 @@ opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, 
 \date{31.3.2021}
 
 \begin{document}
+\maketitle
 
 \section{Etap I}
 
@@ -55,7 +56,7 @@ summary(df)
 
 \section{Etap II}
 
-<<Import libraries, warning=FALSE, echo=FALSE>>=
+<<Import libraries, warning=FALSE, message=FALSE>>=
 library(ggplot2)
 library(GGally)
 library(tidyr)
@@ -72,11 +73,18 @@ numerics <- subset(df, select=sapply(df, function(x) !is.factor(x)))
 
 \item{a)}
 
+<<Summary statistics>>=
+extended.summary <- function(X) {
+    c(mean = mean(X), trimmed.mean = mean(X, trim=.0025), min = min(X), Q1 = quantile(X, .25, names=F), median = median(X), Q3 = quantile(X, .75, names=F), max = max(X), range = range(X), sd = sd(X), IQR = IQR(X))
+}
+
+sapply(numerics, extended.summary)
+@
 
 
 \item{b)}
 
-<<Overviews plots>>=
+<<Overviews plots, warning=FALSE, message=FALSE>>=
 ggplot(gather(factors), aes(value)) +
   geom_bar() +
   facet_wrap(~key, scales='free')
@@ -126,12 +134,18 @@ sapply(numerics, cv)
 
 \item{a)}
 
-<<Overviews plots grouped>>=
+<<Add grouping category to numerics>>=
+numerics <- data.frame(numerics, Churn. = df$Churn.)
+@
+
+<<Summary statistics grouped>>=
+aggregate(. ~ Churn., numerics, extended.summary)
+@
+
+<<Overviews plots grouped, warning=FALSE, message=FALSE>>=
 ggplot(gather(factors, "key", "value", -Churn.), aes(value, color=Churn.)) +
   geom_bar(position='dodge') +
   facet_wrap(~key, scales='free')
-
-numerics <- data.frame(numerics, Churn. = df$Churn.)
 
 ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
   geom_histogram() +
@@ -151,19 +165,25 @@ continuous %>% ggpairs(.,
 @
 
 <<Identify ranges grouped>>=
-numerics %>% group_by(Churn.) %>% group_map(~summarize(.x, across(everything(), range)))
+aggregate(. ~ Churn., numerics, range)
+@
+
+<<Identify levels grouped>>=
+aggregate(. ~ Churn., factors, levels)
 @
 
 <<Identify symmetry grouped>>=
-numerics %>% group_by(Churn.) %>% group_map(~summarize(.x, across(everything(), skewness)))
+aggregate(. ~ Churn., numerics, skewness)
 @
 
 <<Identify coefficient of variation grouped>>=
-numerics %>% group_by(Churn.) %>% group_map(~summarize(.x, across(everything(), cv)))
+aggregate(. ~ Churn., numerics, cv)
 @
 
 \item{b)}
 
 \end{description}
+
+\section{Etap IV}
 
 \end{document}
