@@ -75,7 +75,6 @@
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{df} \hlkwb{<-} \hlkwd{read.csv}\hlstd{(}\hlstr{'churn.txt'}\hlstd{)}
-
 \hlkwd{dim}\hlstd{(df)}
 \end{alltt}
 \begin{verbatim}
@@ -148,7 +147,6 @@
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{df}\hlopt{$}\hlstd{Area.Code} \hlkwb{<-} \hlkwd{as.factor}\hlstd{(df}\hlopt{$}\hlstd{Area.Code)}
-\hlstd{df}\hlopt{$}\hlstd{Day.Charge} \hlkwb{<-} \hlkwd{as.integer}\hlstd{(df}\hlopt{$}\hlstd{Day.Charge)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -224,11 +222,11 @@
 ##  (Other):2824                                                   
 ##  VMail.Message       Day.Mins       Day.Calls       Day.Charge   
 ##  Min.   : 0.000   Min.   :  0.0   Min.   :  0.0   Min.   : 0.00  
-##  1st Qu.: 0.000   1st Qu.:143.7   1st Qu.: 87.0   1st Qu.:24.00  
-##  Median : 0.000   Median :179.4   Median :101.0   Median :30.00  
-##  Mean   : 8.099   Mean   :179.8   Mean   :100.4   Mean   :30.07  
-##  3rd Qu.:20.000   3rd Qu.:216.4   3rd Qu.:114.0   3rd Qu.:36.00  
-##  Max.   :51.000   Max.   :350.8   Max.   :165.0   Max.   :59.00  
+##  1st Qu.: 0.000   1st Qu.:143.7   1st Qu.: 87.0   1st Qu.:24.43  
+##  Median : 0.000   Median :179.4   Median :101.0   Median :30.50  
+##  Mean   : 8.099   Mean   :179.8   Mean   :100.4   Mean   :30.56  
+##  3rd Qu.:20.000   3rd Qu.:216.4   3rd Qu.:114.0   3rd Qu.:36.79  
+##  Max.   :51.000   Max.   :350.8   Max.   :165.0   Max.   :59.64  
 ##                                                                  
 ##     Eve.Mins       Eve.Calls       Eve.Charge      Night.Mins   
 ##  Min.   :  0.0   Min.   :  0.0   Min.   : 0.00   Min.   : 23.2  
@@ -267,6 +265,8 @@
 \hlkwd{library}\hlstd{(GGally)}
 \hlkwd{library}\hlstd{(tidyr)}
 \hlkwd{library}\hlstd{(dplyr)}
+\hlkwd{library}\hlstd{(EnvStats)}
+\hlkwd{library}\hlstd{(DescTools)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -296,17 +296,17 @@
 \end{alltt}
 \begin{verbatim}
 ##              Account.Length VMail.Message  Day.Mins Day.Calls Day.Charge
-## mean              101.06481       8.09901 179.77510 100.43564  30.068407
-## trimmed.mean      101.00392       8.02050 179.80413 100.46850  30.072957
+## mean              101.06481       8.09901 179.77510 100.43564  30.562307
+## trimmed.mean      101.00392       8.02050 179.80413 100.46850  30.567241
 ## min                 1.00000       0.00000   0.00000   0.00000   0.000000
-## Q1                 74.00000       0.00000 143.70000  87.00000  24.000000
-## median            101.00000       0.00000 179.40000 101.00000  30.000000
-## Q3                127.00000      20.00000 216.40000 114.00000  36.000000
-## max               243.00000      51.00000 350.80000 165.00000  59.000000
+## Q1                 74.00000       0.00000 143.70000  87.00000  24.430000
+## median            101.00000       0.00000 179.40000 101.00000  30.500000
+## Q3                127.00000      20.00000 216.40000 114.00000  36.790000
+## max               243.00000      51.00000 350.80000 165.00000  59.640000
 ## range1              1.00000       0.00000   0.00000   0.00000   0.000000
-## range2            243.00000      51.00000 350.80000 165.00000  59.000000
-## sd                 39.82211      13.68837  54.46739  20.06908   9.261643
-## IQR                53.00000      20.00000  72.70000  27.00000  12.000000
+## range2            243.00000      51.00000 350.80000 165.00000  59.640000
+## sd                 39.82211      13.68837  54.46739  20.06908   9.259435
+## IQR                53.00000      20.00000  72.70000  27.00000  12.360000
 ##               Eve.Mins Eve.Calls Eve.Charge Night.Mins Night.Calls Night.Charge
 ## mean         200.98035 100.11431  17.083540  200.87204   100.10771     9.039325
 ## trimmed.mean 201.00362 100.13205  17.085520  200.83841   100.10280     9.037814
@@ -342,7 +342,7 @@
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(factors),} \hlkwd{aes}\hlstd{(value))} \hlopt{+}
-  \hlkwd{geom_bar}\hlstd{()} \hlopt{+}
+  \hlkwd{geom_bar}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..prop..,} \hlkwc{group}\hlstd{=}\hlnum{1}\hlstd{))} \hlopt{+}
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
 \end{kframe}
@@ -354,7 +354,7 @@
 
 \begin{kframe}\begin{alltt}
 \hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics),} \hlkwd{aes}\hlstd{(value))} \hlopt{+}
-  \hlkwd{geom_histogram}\hlstd{()} \hlopt{+}
+  \hlkwd{geom_freqpoly}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..))} \hlopt{+}
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
 \end{kframe}
@@ -366,7 +366,7 @@
 
 \begin{kframe}\begin{alltt}
 \hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics),} \hlkwd{aes}\hlstd{(value))} \hlopt{+}
-  \hlkwd{geom_boxplot}\hlstd{()} \hlopt{+}
+  \hlkwd{geom_boxplot}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=value))} \hlopt{+}
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
 \end{kframe}
@@ -385,7 +385,8 @@
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{continuous} \hlkwb{<-} \hlkwd{subset}\hlstd{(numerics,} \hlkwc{select}\hlstd{=}\hlkwd{sapply}\hlstd{(numerics,} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{)} \hlopt{!}\hlkwd{is.integer}\hlstd{(x)))}
-\hlkwd{ggpairs}\hlstd{(continuous)}
+\hlkwd{ggpairs}\hlstd{(continuous,}
+        \hlkwc{lower}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{continuous}\hlstd{=}\hlkwd{wrap}\hlstd{(}\hlstr{"points"}\hlstd{,} \hlkwc{alpha}\hlstd{=}\hlnum{.4}\hlstd{,} \hlkwc{size}\hlstd{=}\hlnum{.01}\hlstd{)))}
 \end{alltt}
 \end{kframe}
 
@@ -402,18 +403,15 @@
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{sapply}\hlstd{(numerics, range)}
+\hlkwd{sapply}\hlstd{(numerics, Range)}
 \end{alltt}
 \begin{verbatim}
-##      Account.Length VMail.Message Day.Mins Day.Calls Day.Charge Eve.Mins
-## [1,]              1             0      0.0         0          0      0.0
-## [2,]            243            51    350.8       165         59    363.7
-##      Eve.Calls Eve.Charge Night.Mins Night.Calls Night.Charge Intl.Mins
-## [1,]         0       0.00       23.2          33         1.04         0
-## [2,]       170      30.91      395.0         175        17.77        20
-##      Intl.Calls Intl.Charge CustServ.Calls
-## [1,]          0         0.0              0
-## [2,]         20         5.4              9
+## Account.Length  VMail.Message       Day.Mins      Day.Calls     Day.Charge 
+##         242.00          51.00         350.80         165.00          59.64 
+##       Eve.Mins      Eve.Calls     Eve.Charge     Night.Mins    Night.Calls 
+##         363.70         170.00          30.91         371.80         142.00 
+##   Night.Charge      Intl.Mins     Intl.Calls    Intl.Charge CustServ.Calls 
+##          16.73          20.00          20.00           5.40           9.00
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -448,30 +446,22 @@
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{library}\hlstd{(moments)}
 \hlkwd{sapply}\hlstd{(numerics, skewness)}
 \end{alltt}
 \begin{verbatim}
 ## Account.Length  VMail.Message       Day.Mins      Day.Calls     Day.Charge 
-##    0.096562812    1.264254335   -0.029063980   -0.111736324   -0.027264807 
+##    0.096606294    1.264823634   -0.029077067   -0.111786639   -0.029083268 
 ##       Eve.Mins      Eve.Calls     Eve.Charge     Night.Mins    Night.Calls 
-##   -0.023866709   -0.055538130   -0.023847250    0.008917276    0.032484942 
+##   -0.023877456   -0.055563139   -0.023857989    0.008921291    0.032499570 
 ##   Night.Charge      Intl.Mins     Intl.Calls    Intl.Charge CustServ.Calls 
-##    0.008882237   -0.245025603    1.320883367   -0.245176105    1.090868260
+##    0.008886237   -0.245135939    1.321478166   -0.245286508    1.091359482
 \end{verbatim}
-\end{kframe}
-\end{knitrout}
-
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{cv} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{X}\hlstd{)} \hlkwd{sd}\hlstd{(X)} \hlopt{/} \hlkwd{mean}\hlstd{(X)}
-
 \hlkwd{sapply}\hlstd{(numerics, cv)}
 \end{alltt}
 \begin{verbatim}
 ## Account.Length  VMail.Message       Day.Mins      Day.Calls     Day.Charge 
-##      0.3940255      1.6901282      0.3029752      0.1998203      0.3080191 
+##      0.3940255      1.6901282      0.3029752      0.1998203      0.3029691 
 ##       Eve.Mins      Eve.Calls     Eve.Charge     Night.Mins    Night.Calls 
 ##      0.2523324      0.1989988      0.2523287      0.2517715      0.1954755 
 ##   Night.Charge      Intl.Mins     Intl.Calls    Intl.Charge CustServ.Calls 
@@ -536,14 +526,14 @@
 ## 1    114.00000     163.00000          0.00000        163.00000     19.80116
 ## 2    116.50000     165.00000          0.00000        165.00000     21.58231
 ##   Day.Calls.IQR Day.Charge.mean Day.Charge.trimmed.mean Day.Charge.min
-## 1      27.00000       29.284561               29.296897       0.000000
-## 2      29.00000       34.693582               34.715177       0.000000
+## 1      27.00000       29.780421               29.793262       0.000000
+## 2      29.00000       35.175921               35.198191       0.000000
 ##   Day.Charge.Q1 Day.Charge.median Day.Charge.Q3 Day.Charge.max
-## 1     24.000000         30.000000     35.000000      53.000000
-## 2     26.000000         36.000000     45.000000      59.000000
+## 1     24.282500         30.120000     35.750000      53.650000
+## 2     26.055000         36.990000     45.210000      59.640000
 ##   Day.Charge.range1 Day.Charge.range2 Day.Charge.sd Day.Charge.IQR
-## 1          0.000000         53.000000      8.534904      11.000000
-## 2          0.000000         59.000000     11.718929      19.000000
+## 1          0.000000         53.650000      8.530835      11.467500
+## 2          0.000000         59.640000     11.729710      19.155000
 ##   Eve.Mins.mean Eve.Mins.trimmed.mean Eve.Mins.min Eve.Mins.Q1 Eve.Mins.median
 ## 1     199.04330             199.07831      0.00000   164.50000       199.60000
 ## 2     212.41014             212.38981     70.90000   177.10000       211.30000
@@ -633,7 +623,7 @@
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(factors,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
-  \hlkwd{geom_bar}\hlstd{(}\hlkwc{position}\hlstd{=}\hlstr{'dodge'}\hlstd{)} \hlopt{+}
+  \hlkwd{geom_bar}\hlstd{(}\hlkwc{position}\hlstd{=}\hlstr{'dodge'}\hlstd{,} \hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=(..count..)}\hlopt{/}\hlkwd{sum}\hlstd{(..count..)))} \hlopt{+}
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
 \end{kframe}
@@ -645,7 +635,7 @@
 
 \begin{kframe}\begin{alltt}
 \hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
-  \hlkwd{geom_histogram}\hlstd{()} \hlopt{+}
+  \hlkwd{geom_freqpoly}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..))} \hlopt{+}
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
 \end{kframe}
@@ -657,7 +647,7 @@
 
 \begin{kframe}\begin{alltt}
 \hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
-  \hlkwd{geom_boxplot}\hlstd{()} \hlopt{+}
+  \hlkwd{geom_boxplot}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=value))} \hlopt{+}
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
 \end{kframe}
@@ -674,14 +664,31 @@
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{continuous} \hlkwb{<-} \hlkwd{subset}\hlstd{(numerics,} \hlkwc{select}\hlstd{=}\hlkwd{sapply}\hlstd{(numerics,} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{)} \hlopt{!}\hlkwd{is.integer}\hlstd{(x)))}
+\hlstd{integers} \hlkwb{<-} \hlkwd{subset}\hlstd{(numerics,} \hlkwc{select}\hlstd{=}\hlkwd{sapply}\hlstd{(numerics, is.integer))}
+\hlstd{integers} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(integers,} \hlkwc{Churn.} \hlstd{= continuous}\hlopt{$}\hlstd{Churn.)}
 \hlstd{continuous} \hlopt{%>%} \hlkwd{ggpairs}\hlstd{(.,}
                \hlkwc{mapping} \hlstd{= ggplot2}\hlopt{::}\hlkwd{aes}\hlstd{(}\hlkwc{color}\hlstd{=Churn.),}
                \hlkwc{legend}\hlstd{=}\hlnum{1}\hlstd{,}
-               \hlkwc{columns}\hlstd{=}\hlnum{1}\hlopt{:}\hlnum{7}\hlstd{)}
+               \hlkwc{lower}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{continuous}\hlstd{=}\hlkwd{wrap}\hlstd{(}\hlstr{"points"}\hlstd{,} \hlkwc{alpha}\hlstd{=}\hlnum{.4}\hlstd{,} \hlkwc{size}\hlstd{=}\hlnum{.01}\hlstd{)),}
+               \hlkwc{diag}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{continuous}\hlstd{=}\hlkwd{wrap}\hlstd{(}\hlstr{"densityDiag"}\hlstd{,} \hlkwc{alpha}\hlstd{=}\hlnum{.4}\hlstd{)))}
 \end{alltt}
 \end{kframe}
 
 {\centering \includegraphics[width=\maxwidth]{figure/Pair_plot_for_continuous_variables_grouped-1} 
+
+}
+
+
+\begin{kframe}\begin{alltt}
+\hlstd{integers} \hlopt{%>%} \hlkwd{ggpairs}\hlstd{(.,}
+               \hlkwc{mapping} \hlstd{= ggplot2}\hlopt{::}\hlkwd{aes}\hlstd{(}\hlkwc{color}\hlstd{=Churn.),}
+               \hlkwc{legend}\hlstd{=}\hlnum{1}\hlstd{,}
+               \hlkwc{lower}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{continuous}\hlstd{=}\hlkwd{wrap}\hlstd{(}\hlstr{"points"}\hlstd{,} \hlkwc{alpha}\hlstd{=}\hlnum{.4}\hlstd{,} \hlkwc{size}\hlstd{=}\hlnum{.01}\hlstd{)),}
+               \hlkwc{diag}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{continuous}\hlstd{=}\hlkwd{wrap}\hlstd{(}\hlstr{"densityDiag"}\hlstd{,} \hlkwc{alpha}\hlstd{=}\hlnum{.4}\hlstd{)))}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/Pair_plot_for_continuous_variables_grouped-2} 
 
 }
 
@@ -692,27 +699,18 @@
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{aggregate}\hlstd{(.} \hlopt{~} \hlstd{Churn., numerics, range)}
+\hlkwd{aggregate}\hlstd{(.} \hlopt{~} \hlstd{Churn., numerics, Range)}
 \end{alltt}
 \begin{verbatim}
-##   Churn. Account.Length.1 Account.Length.2 VMail.Message.1 VMail.Message.2
-## 1 False.                1              243               0              51
-## 2  True.                1              225               0              48
-##   Day.Mins.1 Day.Mins.2 Day.Calls.1 Day.Calls.2 Day.Charge.1 Day.Charge.2
-## 1        0.0      315.6           0         163            0           53
-## 2        0.0      350.8           0         165            0           59
-##   Eve.Mins.1 Eve.Mins.2 Eve.Calls.1 Eve.Calls.2 Eve.Charge.1 Eve.Charge.2
-## 1        0.0      361.8           0         170         0.00        30.75
-## 2       70.9      363.7          48         168         6.03        30.91
-##   Night.Mins.1 Night.Mins.2 Night.Calls.1 Night.Calls.2 Night.Charge.1
-## 1         23.2        395.0            33           175           1.04
-## 2         47.4        354.9            49           158           2.13
-##   Night.Charge.2 Intl.Mins.1 Intl.Mins.2 Intl.Calls.1 Intl.Calls.2
-## 1          17.77         0.0        18.9            0           19
-## 2          15.97         2.0        20.0            1           20
-##   Intl.Charge.1 Intl.Charge.2 CustServ.Calls.1 CustServ.Calls.2
-## 1          0.00          5.10                0                8
-## 2          0.54          5.40                0                9
+##   Churn. Account.Length VMail.Message Day.Mins Day.Calls Day.Charge Eve.Mins
+## 1 False.            242            51    315.6       163      53.65    361.8
+## 2  True.            224            48    350.8       165      59.64    292.8
+##   Eve.Calls Eve.Charge Night.Mins Night.Calls Night.Charge Intl.Mins Intl.Calls
+## 1       170      30.75      371.8         142        16.73      18.9         19
+## 2       120      24.88      307.5         109        13.84      18.0         19
+##   Intl.Charge CustServ.Calls
+## 1        5.10              8
+## 2        4.86              9
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -736,15 +734,15 @@
 \hlkwd{aggregate}\hlstd{(.} \hlopt{~} \hlstd{Churn., numerics, skewness)}
 \end{alltt}
 \begin{verbatim}
-##   Churn. Account.Length VMail.Message   Day.Mins   Day.Calls Day.Charge
-## 1 False.     0.09047562      1.166821 -0.2262589 -0.06326218 -0.2235919
-## 2  True.     0.13670581      2.034070 -0.1986036 -0.35229396 -0.1975210
+##   Churn. Account.Length VMail.Message   Day.Mins  Day.Calls Day.Charge
+## 1 False.     0.09052327      1.167435 -0.2263781 -0.0632955 -0.2264046
+## 2  True.     0.13713205      2.040412 -0.1992228 -0.3533924 -0.1992087
 ##      Eve.Mins   Eve.Calls  Eve.Charge   Night.Mins Night.Calls Night.Charge
-## 1 -0.04311686 -0.06918067 -0.04308068  0.017220792  0.02693433  0.017231078
-## 2  0.03302640  0.02976338  0.03304071 -0.005057646  0.06130261 -0.005446713
+## 1 -0.04313957 -0.06921711 -0.04310337  0.017229862  0.02694851  0.017240153
+## 2  0.03312938  0.02985619  0.03314373 -0.005073416  0.06149375 -0.005463696
 ##     Intl.Mins Intl.Calls Intl.Charge CustServ.Calls
-## 1 -0.29362525   1.258381 -0.29374711      0.8863340
-## 2  0.02132514   1.708902  0.02094336      0.7014171
+## 1 -0.29377989   1.259044 -0.29390182      0.8868008
+## 2  0.02139163   1.714231  0.02100866      0.7036041
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -756,8 +754,8 @@
 \end{alltt}
 \begin{verbatim}
 ##   Churn. Account.Length VMail.Message  Day.Mins Day.Calls Day.Charge  Eve.Mins
-## 1 False.      0.3956830      1.616948 0.2864646 0.1974525  0.2914472 0.2526695
-## 2  True.      0.3844346      2.318271 0.3334611 0.2129789  0.3377838 0.2435331
+## 1 False.      0.3956830      1.616948 0.2864646 0.1974525  0.2864579 0.2526695
+## 2  True.      0.3844346      2.318271 0.3334611 0.2129789  0.3334585 0.2435331
 ##   Eve.Calls Eve.Charge Night.Mins Night.Calls Night.Charge Intl.Mins Intl.Calls
 ## 1 0.1995071  0.2526678  0.2553551   0.1949489    0.2553574 0.2740942  0.5387146
 ## 2 0.1961466  0.2435209  0.2296567   0.1987126    0.2296653 0.2610458  0.6128349

@@ -27,15 +27,13 @@ opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, 
 
 <<Load and view data>>=
 df <- read.csv('churn.txt')
-
 dim(df)
 head(df)
 str(df)
 @
 
-<<Change types>>=
+<<Change type>>=
 df$Area.Code <- as.factor(df$Area.Code)
-df$Day.Charge <- as.integer(df$Day.Charge)
 @
 
 <<Check NAs>>=
@@ -61,6 +59,8 @@ library(ggplot2)
 library(GGally)
 library(tidyr)
 library(dplyr)
+library(EnvStats)
+library(DescTools)
 @
 
 <<Split data by numerics and factors>>=
@@ -86,15 +86,15 @@ sapply(numerics, extended.summary)
 
 <<Overviews plots, warning=FALSE, message=FALSE>>=
 ggplot(gather(factors), aes(value)) +
-  geom_bar() +
+  geom_bar(aes(y=..prop.., group=1)) +
   facet_wrap(~key, scales='free')
 
 ggplot(gather(numerics), aes(value)) +
-  geom_histogram() +
+  geom_freqpoly(aes(y=..density..)) +
   facet_wrap(~key, scales='free')
 
 ggplot(gather(numerics), aes(value)) +
-  geom_boxplot() +
+  geom_boxplot(aes(x=value)) +
   facet_wrap(~key, scales='free')
 @
 
@@ -102,27 +102,22 @@ ggplot(gather(numerics), aes(value)) +
 
 <<Pair plot for continuous variables>>=
 continuous <- subset(numerics, select=sapply(numerics, function(x) !is.integer(x)))
-ggpairs(continuous)
+ggpairs(continuous,
+        lower=list(continuous=wrap("points", alpha=.4, size=.01)))
 @
 
 \item{d)}
 
 <<Identify ranges>>=
-sapply(numerics, range)
+sapply(numerics, Range)
 @
 
 <<Identify levels>>=
 sapply(factors, levels)
 @
 
-<<Identify symmetry>>=
-library(moments)
+<<Identify symmetry and variation>>=
 sapply(numerics, skewness)
-@
-
-<<Identify coefficient of variation>>=
-cv <- function(X) sd(X) / mean(X)
-
 sapply(numerics, cv)
 @
 
@@ -144,28 +139,36 @@ aggregate(. ~ Churn., numerics, extended.summary)
 
 <<Overviews plots grouped, warning=FALSE, message=FALSE>>=
 ggplot(gather(factors, "key", "value", -Churn.), aes(value, color=Churn.)) +
-  geom_bar(position='dodge') +
+  geom_bar(position='dodge', aes(y=(..count..)/sum(..count..))) +
   facet_wrap(~key, scales='free')
 
 ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
-  geom_histogram() +
+  geom_freqpoly(aes(y=..density..)) +
   facet_wrap(~key, scales='free')
 
 ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
-  geom_boxplot() +
+  geom_boxplot(aes(x=value)) +
   facet_wrap(~key, scales='free')
 @
 
-<<Pair plot for continuous variables grouped>>=
+<<Pair plot for continuous variables grouped, message=FALSE>>=
 continuous <- subset(numerics, select=sapply(numerics, function(x) !is.integer(x)))
+integers <- subset(numerics, select=sapply(numerics, is.integer))
+integers <- data.frame(integers, Churn. = continuous$Churn.)
 continuous %>% ggpairs(., 
                mapping = ggplot2::aes(color=Churn.),
                legend=1,
-               columns=1:7)
+               lower=list(continuous=wrap("points", alpha=.4, size=.01)),
+               diag=list(continuous=wrap("densityDiag", alpha=.4)))
+integers %>% ggpairs(., 
+               mapping = ggplot2::aes(color=Churn.),
+               legend=1,
+               lower=list(continuous=wrap("points", alpha=.4, size=.01)),
+               diag=list(continuous=wrap("densityDiag", alpha=.4)))
 @
 
 <<Identify ranges grouped>>=
-aggregate(. ~ Churn., numerics, range)
+aggregate(. ~ Churn., numerics, Range)
 @
 
 <<Identify levels grouped>>=
