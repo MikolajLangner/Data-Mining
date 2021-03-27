@@ -60,7 +60,12 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: <text>:4:0: unexpected end of input\\\#\# 2: library(xtable)\\\#\# 3: opts\_chunk\$set(fig.path='figure/', fighelp(.align='center', fig.pos='H',fig.width=5, fig.height=4)\\\#\#\ \  \textasciicircum{}}}\end{kframe}
+\end{knitrout}
 
 \title{Lista 1}
 \author{Mikołaj Langner, Marcin Kostrzewa}
@@ -147,6 +152,10 @@
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{df}\hlopt{$}\hlstd{Area.Code} \hlkwb{<-} \hlkwd{as.factor}\hlstd{(df}\hlopt{$}\hlstd{Area.Code)}
+\hlstd{df}\hlopt{$}\hlstd{Churn.} \hlkwb{<-} \hlkwd{as.factor}\hlstd{(df}\hlopt{$}\hlstd{Churn.)}
+\hlstd{df}\hlopt{$}\hlstd{Int.l.Plan} \hlkwb{<-} \hlkwd{as.factor}\hlstd{(df}\hlopt{$}\hlstd{Int.l.Plan)}
+\hlstd{df}\hlopt{$}\hlstd{VMail.Plan} \hlkwb{<-} \hlkwd{as.factor}\hlstd{(df}\hlopt{$}\hlstd{VMail.Plan)}
+\hlstd{df}\hlopt{$}\hlstd{State} \hlkwb{<-} \hlkwd{as.factor}\hlstd{(df}\hlopt{$}\hlstd{State)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -346,36 +355,21 @@
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
 \end{kframe}
-
-{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots-1} 
-
-}
-
-
+\includegraphics[width=\maxwidth]{figure/Overviews_plots-1} 
 \begin{kframe}\begin{alltt}
 \hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics),} \hlkwd{aes}\hlstd{(value))} \hlopt{+}
   \hlkwd{geom_freqpoly}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..))} \hlopt{+}
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
 \end{kframe}
-
-{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots-2} 
-
-}
-
-
+\includegraphics[width=\maxwidth]{figure/Overviews_plots-2} 
 \begin{kframe}\begin{alltt}
 \hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics),} \hlkwd{aes}\hlstd{(value))} \hlopt{+}
   \hlkwd{geom_boxplot}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=value))} \hlopt{+}
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
 \end{kframe}
-
-{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots-3} 
-
-}
-
-
+\includegraphics[width=\maxwidth]{figure/Overviews_plots-3} 
 
 \end{knitrout}
 
@@ -389,12 +383,7 @@
         \hlkwc{lower}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{continuous}\hlstd{=}\hlkwd{wrap}\hlstd{(}\hlstr{"points"}\hlstd{,} \hlkwc{alpha}\hlstd{=}\hlnum{.4}\hlstd{,} \hlkwc{size}\hlstd{=}\hlnum{.01}\hlstd{)))}
 \end{alltt}
 \end{kframe}
-
-{\centering \includegraphics[width=\maxwidth]{figure/Pair_plot_for_continuous_variables-1} 
-
-}
-
-
+\includegraphics[width=\maxwidth]{figure/Pair_plot_for_continuous_variables-1} 
 
 \end{knitrout}
 
@@ -627,36 +616,21 @@
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
 \end{kframe}
-
-{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-1} 
-
-}
-
-
+\includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-1} 
 \begin{kframe}\begin{alltt}
 \hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
   \hlkwd{geom_freqpoly}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..))} \hlopt{+}
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
 \end{kframe}
-
-{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-2} 
-
-}
-
-
+\includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-2} 
 \begin{kframe}\begin{alltt}
 \hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
   \hlkwd{geom_boxplot}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=value))} \hlopt{+}
   \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
 \end{alltt}
 \end{kframe}
-
-{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-3} 
-
-}
-
-
+\includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-3} 
 
 \end{knitrout}
 
@@ -673,12 +647,7 @@
                \hlkwc{diag}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{continuous}\hlstd{=}\hlkwd{wrap}\hlstd{(}\hlstr{"densityDiag"}\hlstd{,} \hlkwc{alpha}\hlstd{=}\hlnum{.4}\hlstd{)))}
 \end{alltt}
 \end{kframe}
-
-{\centering \includegraphics[width=\maxwidth]{figure/Pair_plot_for_continuous_variables_grouped-1} 
-
-}
-
-
+\includegraphics[width=\maxwidth]{figure/Pair_plot_for_continuous_variables_grouped-1} 
 \begin{kframe}\begin{alltt}
 \hlstd{integers} \hlopt{%>%} \hlkwd{ggpairs}\hlstd{(.,}
                \hlkwc{mapping} \hlstd{= ggplot2}\hlopt{::}\hlkwd{aes}\hlstd{(}\hlkwc{color}\hlstd{=Churn.),}
@@ -687,12 +656,7 @@
                \hlkwc{diag}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{continuous}\hlstd{=}\hlkwd{wrap}\hlstd{(}\hlstr{"densityDiag"}\hlstd{,} \hlkwc{alpha}\hlstd{=}\hlnum{.4}\hlstd{)))}
 \end{alltt}
 \end{kframe}
-
-{\centering \includegraphics[width=\maxwidth]{figure/Pair_plot_for_continuous_variables_grouped-2} 
-
-}
-
-
+\includegraphics[width=\maxwidth]{figure/Pair_plot_for_continuous_variables_grouped-2} 
 
 \end{knitrout}
 

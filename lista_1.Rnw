@@ -13,7 +13,7 @@
 <<Globals, echo=FALSE, warning=FALSE>>=
 library(knitr)
 library(xtable)
-opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, fig.height=4)
+opts_chunk$set(fig.path='figure/', fighelp(.align='center', fig.pos='H',fig.width=5, fig.height=4)
 @
 
 \title{Lista 1}
@@ -34,6 +34,10 @@ str(df)
 
 <<Change type>>=
 df$Area.Code <- as.factor(df$Area.Code)
+df$Churn. <- as.factor(df$Churn.)
+df$Int.l.Plan <- as.factor(df$Int.l.Plan)
+df$VMail.Plan <- as.factor(df$VMail.Plan)
+df$State <- as.factor(df$State)
 @
 
 <<Check NAs>>=
