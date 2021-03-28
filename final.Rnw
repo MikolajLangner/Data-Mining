@@ -21,19 +21,27 @@ opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, 
 \date{31.3.2021}
 
 \begin{document}
+
 \maketitle
+
+\section{Wstęp}
+W niniejszym sprawozdaniu zajmować się będziemy analizą \ldots
 
 \section{Etap I}
 Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
+
 <<Load and view data>>=
 df <- read.csv('churn.txt', stringsAsFactors = TRUE)
+df$Area.Code = as.factor(df$Area.Code)
 @ 
 
 \begin{itemize}
+
 \item poznajmy rozmiar naszych danych:
 <<rozmiar danych>>=
 dim(df)
 @
+--- są więc 21 zmienne i 3333 obserwacji;
 
 \item sprawdźmy ich typ:
 <<tabela_1, echo=FALSE, eval=TRUE, results='asis'>>=
@@ -53,6 +61,61 @@ sum(sapply(df, function(x) sum(is.na(x))))
 df <- subset(df, select=-Phone)
 @
 
+\end{itemize}
+
+Teraz podzielimy zmmienne ze względu na typ oraz wykonamy kilka wykresów, które pomogą w zauważeniu pewnych zależności.
+<<Import libraries, warning=FALSE, message=FALSE>>=
+library(ggplot2)
+library(GGally)
+library(tidyr)
+library(dplyr)
+library(EnvStats)
+library(DescTools)
+@
+
+<<Split data by numerics and factors>>=
+factors <- subset(df, select=sapply(df, is.factor))
+numerics <- subset(df, select=sapply(df, function(x) !is.factor(x)))
+@
+
+<<Add grouping category to numerics>>=
+numerics <- data.frame(numerics, Churn. = df$Churn.)
+@
+
+<<Pair plot for continuous variables, warning=FALSE, message=FALSE>>=
+continuous <- subset(numerics, select=sapply(numerics, function(x) !is.integer(x)))
+ggpairs(continuous,
+        lower=list(continuous=wrap("points", alpha=.4, size=.01)))
+@
+
+<<Overviews plots grouped, warning=FALSE, message=FALSE>>=
+ggplot(gather(factors, "key", "value", -Churn.), aes(value, color=Churn.)) +
+  geom_bar(position='dodge', aes(y=(..count..)/sum(..count..))) +
+  facet_wrap(~key, scales='free')
+
+ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
+  geom_freqpoly(aes(y=..density..)) +
+  facet_wrap(~key, scales='free')
+
+ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
+  geom_boxplot(aes(x=value)) +
+  facet_wrap(~key, scales='free')
+@
+
+Po przeanalizowaniu wykresów, decydujemy się na dalszą analizę następujących zmiennych:
+\begin{itemize}
+  \item ilościowych:
+    \begin{itemize}
+    \item CustServ.Calls,
+    \item Day.Mins,
+    \item Eve.Mins;
+    \end{itemize}
+  \item jakościowych
+    \begin{itemize}
+    \item Int.l.Plan,
+    \item VMail.Plan,
+    \item Churn.
+    \end{itemize}
 \end{itemize}
 
 \section{Etap II}

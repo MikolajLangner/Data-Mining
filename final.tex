@@ -67,19 +67,26 @@
 \date{31.3.2021}
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \begin{document}
+
 \maketitle
+
+\section{Wstęp}
+W niniejszym sprawozdaniu zajmować się będziemy analizą \ldots
 
 \section{Etap I}
 Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
+
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{df} \hlkwb{<-} \hlkwd{read.csv}\hlstd{(}\hlstr{'churn.txt'}\hlstd{,} \hlkwc{stringsAsFactors} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\hlstd{df}\hlopt{$}\hlstd{Area.Code} \hlkwb{=} \hlkwd{as.factor}\hlstd{(df}\hlopt{$}\hlstd{Area.Code)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
 
 \begin{itemize}
+
 \item poznajmy rozmiar naszych danych:
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -91,10 +98,11 @@ Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
+--- są więc 21 zmienne i 3333 obserwacji;
 
 \item sprawdźmy ich typ:
 % latex table generated in R 4.0.4 by xtable 1.8-4 package
-% Sun Mar 28 16:46:02 2021
+% Sun Mar 28 22:27:56 2021
 \begin{table}[H]
 \centering
 \begin{tabular}{rl}
@@ -103,7 +111,7 @@ Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
   \hline
 State & factor \\ 
   Account.Length & integer \\ 
-  Area.Code & integer \\ 
+  Area.Code & factor \\ 
   Phone & factor \\ 
   Int.l.Plan & factor \\ 
   VMail.Plan & factor \\ 
@@ -150,6 +158,111 @@ State & factor \\
 \end{kframe}
 \end{knitrout}
 
+\end{itemize}
+
+Teraz podzielimy zmmienne ze względu na typ oraz wykonamy kilka wykresów, które pomogą w zauważeniu pewnych zależności.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(ggplot2)}
+\hlkwd{library}\hlstd{(GGally)}
+\hlkwd{library}\hlstd{(tidyr)}
+\hlkwd{library}\hlstd{(dplyr)}
+\hlkwd{library}\hlstd{(EnvStats)}
+\hlkwd{library}\hlstd{(DescTools)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{factors} \hlkwb{<-} \hlkwd{subset}\hlstd{(df,} \hlkwc{select}\hlstd{=}\hlkwd{sapply}\hlstd{(df, is.factor))}
+\hlstd{numerics} \hlkwb{<-} \hlkwd{subset}\hlstd{(df,} \hlkwc{select}\hlstd{=}\hlkwd{sapply}\hlstd{(df,} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{)} \hlopt{!}\hlkwd{is.factor}\hlstd{(x)))}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{numerics} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(numerics,} \hlkwc{Churn.} \hlstd{= df}\hlopt{$}\hlstd{Churn.)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{continuous} \hlkwb{<-} \hlkwd{subset}\hlstd{(numerics,} \hlkwc{select}\hlstd{=}\hlkwd{sapply}\hlstd{(numerics,} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{)} \hlopt{!}\hlkwd{is.integer}\hlstd{(x)))}
+\hlkwd{ggpairs}\hlstd{(continuous,}
+        \hlkwc{lower}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{continuous}\hlstd{=}\hlkwd{wrap}\hlstd{(}\hlstr{"points"}\hlstd{,} \hlkwc{alpha}\hlstd{=}\hlnum{.4}\hlstd{,} \hlkwc{size}\hlstd{=}\hlnum{.01}\hlstd{)))}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/Pair_plot_for_continuous_variables-1} 
+
+}
+
+
+
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(factors,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
+  \hlkwd{geom_bar}\hlstd{(}\hlkwc{position}\hlstd{=}\hlstr{'dodge'}\hlstd{,} \hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=(..count..)}\hlopt{/}\hlkwd{sum}\hlstd{(..count..)))} \hlopt{+}
+  \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-1} 
+
+}
+
+
+\begin{kframe}\begin{alltt}
+\hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
+  \hlkwd{geom_freqpoly}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..))} \hlopt{+}
+  \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-2} 
+
+}
+
+
+\begin{kframe}\begin{alltt}
+\hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
+  \hlkwd{geom_boxplot}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=value))} \hlopt{+}
+  \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-3} 
+
+}
+
+
+
+\end{knitrout}
+
+Po przeanalizowaniu wykresów, decydujemy się na dalszą analizę następujących zmiennych:
+\begin{itemize}
+  \item ilościowych:
+    \begin{itemize}
+    \item CustServ.Calls,
+    \item Day.Mins,
+    \item Eve.Mins;
+    \end{itemize}
+  \item jakościowych
+    \begin{itemize}
+    \item Int.l.Plan,
+    \item VMail.Plan,
+    \item Churn.
+    \end{itemize}
 \end{itemize}
 
 \section{Etap II}
