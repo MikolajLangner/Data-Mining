@@ -1,0 +1,53 @@
+\documentclass{article}
+
+\usepackage[OT4]{polski}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[colorlinks=true, linkcolor=blue]{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+<<Globals, echo=FALSE, warning=FALSE>>=
+library(knitr)
+library(xtable)
+opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, fig.height=4)
+@
+
+\title{Lista 1}
+\author{Mikołaj Langner, Marcin Kostrzewa}
+\date{31.3.2021}
+
+\begin{document}
+\maketitle
+
+\section{Etap I}
+Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
+<<Load and view data>>=
+df <- read.csv('churn.txt', stringsAsFactors = TRUE)
+@ 
+
+\begin{itemize}
+\item sprawdźmy ich typ.
+<<przykladowa_tabela, echo=FALSE, eval=TRUE, results='asis'>>=
+table1 <- data.frame(sapply(df, class))
+colnames(table1) <- c("Typ zmiennej")
+tab1 <- xtable(table1, caption = "Hello", label = "tab:tabela1")
+print(tab1, type = "latex", table.placement = "H")
+@
+
+\item sprawdźmy czy pojawiają się wartości brakujące:
+\end{itemize}
+
+\section{Etap II}
+
+
+\section{Etap III}
+
+
+\section{Etap IV}
+
+
+\end{document}
