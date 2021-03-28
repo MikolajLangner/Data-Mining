@@ -80,9 +80,21 @@ Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
 \end{knitrout}
 
 \begin{itemize}
-\item sprawdźmy ich typ.
+\item poznajmy rozmiar naszych danych:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{dim}\hlstd{(df)}
+\end{alltt}
+\begin{verbatim}
+## [1] 3333   21
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\item sprawdźmy ich typ:
 % latex table generated in R 4.0.4 by xtable 1.8-4 package
-% Sun Mar 28 16:35:35 2021
+% Sun Mar 28 16:46:02 2021
 \begin{table}[H]
 \centering
 \begin{tabular}{rl}
@@ -118,6 +130,26 @@ State & factor \\
 
 
 \item sprawdźmy czy pojawiają się wartości brakujące:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{sum}\hlstd{(}\hlkwd{sapply}\hlstd{(df,} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{)} \hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x))))}
+\end{alltt}
+\begin{verbatim}
+## [1] 0
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\item usuńmy dane pełniące rolę indentyfikatora:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{df} \hlkwb{<-} \hlkwd{subset}\hlstd{(df,} \hlkwc{select}\hlstd{=}\hlopt{-}\hlstd{Phone)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
 \end{itemize}
 
 \section{Etap II}

@@ -30,8 +30,13 @@ df <- read.csv('churn.txt', stringsAsFactors = TRUE)
 @ 
 
 \begin{itemize}
-\item sprawdźmy ich typ.
-<<przykladowa_tabela, echo=FALSE, eval=TRUE, results='asis'>>=
+\item poznajmy rozmiar naszych danych:
+<<rozmiar danych>>=
+dim(df)
+@
+
+\item sprawdźmy ich typ:
+<<tabela_1, echo=FALSE, eval=TRUE, results='asis'>>=
 table1 <- data.frame(sapply(df, class))
 colnames(table1) <- c("Typ zmiennej")
 tab1 <- xtable(table1, caption = "Hello", label = "tab:tabela1")
@@ -39,6 +44,15 @@ print(tab1, type = "latex", table.placement = "H")
 @
 
 \item sprawdźmy czy pojawiają się wartości brakujące:
+<<brakujące dane>>=
+sum(sapply(df, function(x) sum(is.na(x))))
+@
+
+\item usuńmy dane pełniące rolę indentyfikatora:
+<<Delete `Phone` column>>=
+df <- subset(df, select=-Phone)
+@
+
 \end{itemize}
 
 \section{Etap II}
