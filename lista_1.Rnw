@@ -13,7 +13,7 @@
 <<Globals, echo=FALSE, warning=FALSE>>=
 library(knitr)
 library(xtable)
-opts_chunk$set(fig.path='figure/', fighelp(.align='center', fig.pos='H',fig.width=5, fig.height=4)
+opts_chunk$set(fig.path='figure/', fighelp(.align='center', fig.pos='H',fig.width=5, fig.height=4))
 @
 
 \title{Lista 1}

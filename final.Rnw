@@ -25,9 +25,9 @@ opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, 
 \maketitle
 
 \section{Wstęp}
-W niniejszym sprawozdaniu zajmować się będziemy analizą \ldots
+W niniejszym sprawozdaniu zajmować się będziemy danymi sieci telefonii komórkowej ze względu na rezygnacje klientów z oferty (churn analysis).
 
-\section{Etap I}
+\section{Wczytanie i identyfikacja danych}
 Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
 
 <<Load and view data>>=
@@ -50,6 +50,7 @@ colnames(table1) <- c("Typ zmiennej")
 tab1 <- xtable(table1, caption = "Hello", label = "tab:tabela1")
 print(tab1, type = "latex", table.placement = "H")
 @
+Zmienna `Churn.` mówi o tym, czy dany klient zrezygnował z oferty.
 
 \item sprawdźmy czy pojawiają się wartości brakujące:
 <<brakujące dane>>=
@@ -63,9 +64,11 @@ df <- subset(df, select=-Phone)
 
 \end{itemize}
 
-Teraz podzielimy zmmienne ze względu na typ oraz wykonamy kilka wykresów, które pomogą w zauważeniu pewnych zależności.
+\section{Wybór zmiennych}
+Teraz podzielimy zmmienne ze względu na typ oraz wykonamy kilka wykresów, które pomogą w zauważeniu pewnych zależności i wyborze najistotniejszych zmiennych.
 <<Import libraries, warning=FALSE, message=FALSE>>=
 library(ggplot2)
+library(ggmosaic)
 library(GGally)
 library(tidyr)
 library(dplyr)
@@ -82,24 +85,44 @@ numerics <- subset(df, select=sapply(df, function(x) !is.factor(x)))
 numerics <- data.frame(numerics, Churn. = df$Churn.)
 @
 
+Sprawdźmy zależności pomiędzy zmiennymi ciągłymi.
 <<Pair plot for continuous variables, warning=FALSE, message=FALSE>>=
 continuous <- subset(numerics, select=sapply(numerics, function(x) !is.integer(x)))
 ggpairs(continuous,
         lower=list(continuous=wrap("points", alpha=.4, size=.01)))
 @
+Możemy zauważyć, że zmienne z przyrostkami `.Mins` oraz `.Charge` są ze sobą idealnie skorelowane. Odrzućmy zatem od razu dane z przyrostkiem `.Charge` dla ułatwienia dalszej analizy.
+
+<<Drop .Charhe variables>>=
+numerics <- subset(numerics, select=-c(Day.Charge, Eve.Charge, Night.Charge, Intl.Charge))
+@
 
 <<Overviews plots grouped, warning=FALSE, message=FALSE>>=
-ggplot(gather(factors, "key", "value", -Churn.), aes(value, color=Churn.)) +
-  geom_bar(position='dodge', aes(y=(..count..)/sum(..count..))) +
+ggplot(gather(factors, "key", "value", -Churn.), aes(value, fill=Churn.)) +
+  geom_bar(position="fill") +
   facet_wrap(~key, scales='free')
 
-ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
-  geom_freqpoly(aes(y=..density..)) +
+ggplot(gather(numerics, "key", "value", -Churn.), aes(x=value, color=Churn.)) +
+  geom_freqpoly(aes(y=..density..), position="identity") +
   facet_wrap(~key, scales='free')
 
 ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
   geom_boxplot(aes(x=value)) +
   facet_wrap(~key, scales='free')
+
+ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
+  stat_ecdf() +
+  facet_wrap(~key, scales='free')
+@
+
+<<kstest>>=
+churn.kstest <- function(feature) {
+  yes <- subset(numerics, subset=Churn.=="True.")
+  no <- subset(numerics, subset=Churn.=="False.")
+  c(feature, ks.test(yes[[feature]], no[[feature]])[c("statistic", "p.value")])
+}
+
+lapply(colnames(subset(numerics, select=-Churn.)), churn.kstest)
 @
 
 Po przeanalizowaniu wykresów, decydujemy się na dalszą analizę następujących zmiennych:
