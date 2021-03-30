@@ -82,7 +82,7 @@ Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
 \begin{alltt}
 \hlstd{df} \hlkwb{<-} \hlkwd{read.csv}\hlstd{(}\hlstr{'churn.txt'}\hlstd{,} \hlkwc{stringsAsFactors} \hlstd{=} \hlnum{TRUE}\hlstd{)}
 \hlstd{df}\hlopt{$}\hlstd{Area.Code} \hlkwb{=} \hlkwd{as.factor}\hlstd{(df}\hlopt{$}\hlstd{Area.Code)}
-\hlcom{# Area.Code powinnien by<U+0107> zmienn<U+0105> jako<U+015B>ciow<U+0105>}
+\hlcom{# Area.Code powinnien by<U+0107> zmienna jakosciowa}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -103,40 +103,20 @@ Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
 --- są więc 21 zmienne i 3333 obserwacji;
 
 \item sprawdźmy ich typ:
-% latex table generated in R 4.0.4 by xtable 1.8-4 package
-% Tue Mar 30 16:55:50 2021
-\begin{table}[H]
+\begin{table}[!h]
+
+\caption{\label{tab:tabela_1}Typy zmiennych}
 \centering
-\begin{tabular}{rl}
-  \hline
- & Typ zmiennej \\ 
-  \hline
-State & factor \\ 
-  Account.Length & integer \\ 
-  Area.Code & factor \\ 
-  Phone & factor \\ 
-  Int.l.Plan & factor \\ 
-  VMail.Plan & factor \\ 
-  VMail.Message & integer \\ 
-  Day.Mins & numeric \\ 
-  Day.Calls & integer \\ 
-  Day.Charge & numeric \\ 
-  Eve.Mins & numeric \\ 
-  Eve.Calls & integer \\ 
-  Eve.Charge & numeric \\ 
-  Night.Mins & numeric \\ 
-  Night.Calls & integer \\ 
-  Night.Charge & numeric \\ 
-  Intl.Mins & numeric \\ 
-  Intl.Calls & integer \\ 
-  Intl.Charge & numeric \\ 
-  CustServ.Calls & integer \\ 
-  Churn. & factor \\ 
-   \hline
-\end{tabular}
-\caption{Hello} 
-\label{tab:tabela1}
+\resizebox{\linewidth}{!}{
+\begin{tabular}[t]{l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l}
+\hline
+  & State & Account.Length & Area.Code & Phone & Int.l.Plan & VMail.Plan & VMail.Message & Day.Mins & Day.Calls & Day.Charge & Eve.Mins & Eve.Calls & Eve.Charge & Night.Mins & Night.Calls & Night.Charge & Intl.Mins & Intl.Calls & Intl.Charge & CustServ.Calls & Churn.\\
+\hline
+Typ zmiennej & factor & integer & factor & factor & factor & factor & integer & numeric & integer & numeric & numeric & integer & numeric & numeric & integer & numeric & numeric & integer & numeric & integer & factor\\
+\hline
+\end{tabular}}
 \end{table}
+
 
 Zmienna `Churn.` mówi o tym, czy dany klient zrezygnował z oferty.
 
@@ -151,7 +131,7 @@ Zmienna `Churn.` mówi o tym, czy dany klient zrezygnował z oferty.
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
-
+--- nie ma więc brakujących obserwacji;
 \item usuńmy dane pełniące rolę indentyfikatora:
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -339,7 +319,6 @@ Wyznaczmy dla nich wskaźniki sumaryczne.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{# w<U+0142>asna funkcja zwracaj<U+0105>ca wska<U+017A>niki sumaryczne}
 \hlstd{my_summary} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{) \{}
   \hlstd{statistics} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlkwd{mean}\hlstd{(x),} \hlkwd{quantile}\hlstd{(x,} \hlnum{0.25}\hlstd{),} \hlkwd{median}\hlstd{(x),} \hlkwd{quantile}\hlstd{(x,} \hlnum{0.75}\hlstd{),}
                   \hlkwd{IQR}\hlstd{(x),} \hlkwd{min}\hlstd{(x),} \hlkwd{max}\hlstd{(x),} \hlkwd{var}\hlstd{(x),} \hlkwd{sd}\hlstd{(x),} \hlkwd{kurtosis}\hlstd{(x),} \hlkwd{skewness}\hlstd{(x))}
@@ -371,10 +350,7 @@ Eve.Mins & 200.980348 & 166.6 & 201.4 & 235.3 & 68.7 & 0 & 363.7 & 2571.894016 &
 
 
 
-\section{Etap III}
-
-
-\section{Etap IV}
+\section{Podsumowanie}
 
 
 \end{document}

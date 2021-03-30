@@ -35,7 +35,7 @@ Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
 <<Load and view data>>=
 df <- read.csv('churn.txt', stringsAsFactors = TRUE)
 df$Area.Code = as.factor(df$Area.Code)
-# Area.Code powinnien być zmienną jakościową
+# Area.Code powinnien być zmienna jakosciowa
 @ 
 
 \begin{itemize}
@@ -50,8 +50,9 @@ dim(df)
 <<tabela_1, echo=FALSE, eval=TRUE, results='asis'>>=
 table1 <- data.frame(sapply(df, class))
 colnames(table1) <- c("Typ zmiennej")
-tab1 <- xtable(table1, caption = "Hello", label = "tab:tabela1")
-print(tab1, type = "latex", table.placement = "H")
+t(table1) %>% kbl(caption="Typy zmiennych", format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+# tab1 <- xtable(t(table1), caption = "Hello", label = "tab:tabela1")
+# print(tab1, type = "latex", table.placement = "H")
 @
 Zmienna `Churn.` mówi o tym, czy dany klient zrezygnował z oferty.
 
@@ -59,7 +60,7 @@ Zmienna `Churn.` mówi o tym, czy dany klient zrezygnował z oferty.
 <<brakujące dane>>=
 sum(sapply(df, function(x) sum(is.na(x))))
 @
-
+--- nie ma więc brakujących obserwacji;
 \item usuńmy dane pełniące rolę indentyfikatora:
 <<Delete `Phone` column>>=
 df <- subset(df, select=-Phone)
@@ -165,7 +166,6 @@ important <- subset(df, select=c(CustServ.Calls, Day.Mins, Eve.Mins, Int.l.Plan,
 Wyznaczmy dla nich wskaźniki sumaryczne.
 
 <<funkcja do wyznaczania statystyk opisowych>>=
-# własna funkcja zwracająca wskaźniki sumaryczne
 my_summary <- function(x) {
   statistics <- c(mean(x), quantile(x, 0.25), median(x), quantile(x, 0.75), 
                   IQR(x), min(x), max(x), var(x), sd(x), kurtosis(x), skewness(x))
@@ -187,10 +187,7 @@ colnames(summary.matrix) <- nazwy.wskaznikow
 summary.matrix %>% kbl(caption="Wskazniki sumaryczne dla wybranych zmiennych", format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
 @
 
-\section{Etap III}
-
-
-\section{Etap IV}
+\section{Podsumowanie}
 
 
 \end{document}
