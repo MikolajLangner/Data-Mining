@@ -82,7 +82,6 @@ Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
 \begin{alltt}
 \hlstd{df} \hlkwb{<-} \hlkwd{read.csv}\hlstd{(}\hlstr{'churn.txt'}\hlstd{,} \hlkwc{stringsAsFactors} \hlstd{=} \hlnum{TRUE}\hlstd{)}
 \hlstd{df}\hlopt{$}\hlstd{Area.Code} \hlkwb{=} \hlkwd{as.factor}\hlstd{(df}\hlopt{$}\hlstd{Area.Code)}
-\hlcom{# Area.Code powinnien by<U+0107> zmienna jakosciowa}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -100,7 +99,7 @@ Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
---- są więc 21 zmienne i 3333 obserwacji;
+--- jest 21 zmiennych i 3333 obserwacji;
 
 \item sprawdźmy ich typ:
 \begin{table}[!h]
@@ -132,7 +131,7 @@ Zmienna `Churn.` mówi o tym, czy dany klient zrezygnował z oferty.
 \end{kframe}
 \end{knitrout}
 --- nie ma więc brakujących obserwacji;
-\item usuńmy dane pełniące rolę indentyfikatora:
+\item usuńmy dane pełniące rolę indentyfikatora (numer telefonu):
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -143,8 +142,8 @@ Zmienna `Churn.` mówi o tym, czy dany klient zrezygnował z oferty.
 
 \end{itemize}
 
-\section{Wybór zmiennych}
-Teraz podzielimy zmmienne ze względu na ich typ oraz wykonamy kilka wykresów, które pomogą w zauważeniu pewnych zależności i wyborze najistotniejszych pod względem naszej analizy atrybutów.
+\section{Analiza zmiennych, szkanie zależności}
+Teraz podzielimy zmienne ze względu na ich typ oraz wykonamy kilka wykresów, które pomogą w zauważeniu pewnych zależności i wyborze najistotniejszych pod względem naszej analizy atrybutów.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -161,19 +160,12 @@ Teraz podzielimy zmmienne ze względu na ich typ oraz wykonamy kilka wykresów, 
 \end{kframe}
 \end{knitrout}
 
+
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{factors} \hlkwb{<-} \hlkwd{subset}\hlstd{(df,} \hlkwc{select}\hlstd{=}\hlkwd{sapply}\hlstd{(df, is.factor))}
 \hlstd{numerics} \hlkwb{<-} \hlkwd{subset}\hlstd{(df,} \hlkwc{select}\hlstd{=}\hlkwd{sapply}\hlstd{(df,} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{)} \hlopt{!}\hlkwd{is.factor}\hlstd{(x)))}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
-
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{numerics} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(numerics,} \hlkwc{Churn.} \hlstd{= df}\hlopt{$}\hlstd{Churn.)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -201,6 +193,14 @@ Możemy zauważyć, że zmienne z przyrostkami `.Mins` oraz `.Charge` są ze sob
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{numerics} \hlkwb{<-} \hlkwd{subset}\hlstd{(numerics,} \hlkwc{select}\hlstd{=}\hlopt{-}\hlkwd{c}\hlstd{(Day.Charge, Eve.Charge, Night.Charge, Intl.Charge))}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{numerics} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(numerics,} \hlkwc{Churn.} \hlstd{= df}\hlopt{$}\hlstd{Churn.)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -258,6 +258,7 @@ Możemy zauważyć, że zmienne z przyrostkami `.Mins` oraz `.Charge` są ze sob
 
 \end{knitrout}
 
+By wykryć, dla których zmiennych następuja najważniejsza różnica pomiędzy klientami lojalnymi, a tymi którzy zrezygnowali z usług, posłużymy się również testem Kołmogorova-Smirnova. Poniżej znajduje się funkcja, która wyznacza wyniki tego testu dla naszych zmiennych. 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -270,6 +271,7 @@ Możemy zauważyć, że zmienne z przyrostkami `.Mins` oraz `.Charge` są ze sob
 \end{kframe}
 \end{knitrout}
 
+Tabela poniżej zbiera wyniki przeprowadzonych testów statystycznych.
 \begin{table}[!h]
 
 \caption{\label{tab:tabela_3}Wyniki testu Kolmogorova-Smirnova}
@@ -287,7 +289,9 @@ pvalue & 0.5581609 & 0.0000018 & 0.0000000 & 0.1550801 & 0.0000264 & 0.9980118 &
 \end{table}
 
 
-Po przeanalizowaniu wykresów, decydujemy się na dalszą analizę następujących zmiennych:
+Możemy zauważyć, że testy na największe różnice(duża wartość zmiennej \verb|statistic|) wskazują w przypadku zmiennych: CustServ.Calls, Day.Mins, Eve.Mins, 
+
+Po przeanalizowaniu wykresów, decydujemy się na dalszą analizę następujących zmiennych: 
 \begin{itemize}
   \item ilościowych:
     \begin{itemize}

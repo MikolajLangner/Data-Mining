@@ -12,7 +12,6 @@
 
 <<Globals, echo=FALSE, warning=FALSE>>=
 library(knitr)
-library(xtable)
 library(kableExtra)
 opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, fig.height=4)
 @
@@ -35,7 +34,6 @@ Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
 <<Load and view data>>=
 df <- read.csv('churn.txt', stringsAsFactors = TRUE)
 df$Area.Code = as.factor(df$Area.Code)
-# Area.Code powinnien być zmienna jakosciowa
 @ 
 
 \begin{itemize}
@@ -44,15 +42,13 @@ df$Area.Code = as.factor(df$Area.Code)
 <<rozmiar danych>>=
 dim(df)
 @
---- są więc 21 zmienne i 3333 obserwacji;
+--- jest 21 zmiennych i 3333 obserwacji;
 
 \item sprawdźmy ich typ:
 <<tabela_1, echo=FALSE, eval=TRUE, results='asis'>>=
 table1 <- data.frame(sapply(df, class))
 colnames(table1) <- c("Typ zmiennej")
 t(table1) %>% kbl(caption="Typy zmiennych", format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
-# tab1 <- xtable(t(table1), caption = "Hello", label = "tab:tabela1")
-# print(tab1, type = "latex", table.placement = "H")
 @
 Zmienna `Churn.` mówi o tym, czy dany klient zrezygnował z oferty.
 
@@ -61,15 +57,15 @@ Zmienna `Churn.` mówi o tym, czy dany klient zrezygnował z oferty.
 sum(sapply(df, function(x) sum(is.na(x))))
 @
 --- nie ma więc brakujących obserwacji;
-\item usuńmy dane pełniące rolę indentyfikatora:
+\item usuńmy dane pełniące rolę indentyfikatora (numer telefonu):
 <<Delete `Phone` column>>=
 df <- subset(df, select=-Phone)
 @
 
 \end{itemize}
 
-\section{Wybór zmiennych}
-Teraz podzielimy zmmienne ze względu na ich typ oraz wykonamy kilka wykresów, które pomogą w zauważeniu pewnych zależności i wyborze najistotniejszych pod względem naszej analizy atrybutów.
+\section{Analiza zmiennych, szkanie zależności}
+Teraz podzielimy zmienne ze względu na ich typ oraz wykonamy kilka wykresów, które pomogą w zauważeniu pewnych zależności i wyborze najistotniejszych pod względem naszej analizy atrybutów.
 <<Import libraries, warning=FALSE, message=FALSE>>=
 # wczytanie potrzebnych bibliotek
 library(ggplot2)
@@ -82,13 +78,10 @@ library(DescTools)
 library(moments)
 @
 
+
 <<Split data by numerics and factors>>=
 factors <- subset(df, select=sapply(df, is.factor))
 numerics <- subset(df, select=sapply(df, function(x) !is.factor(x)))
-@
-
-<<Add grouping category to numerics>>=
-numerics <- data.frame(numerics, Churn. = df$Churn.)
 @
 
 Sprawdźmy zależności pomiędzy zmiennymi ciągłymi.
@@ -101,6 +94,10 @@ Możemy zauważyć, że zmienne z przyrostkami `.Mins` oraz `.Charge` są ze sob
 
 <<Drop .Charhe variables>>=
 numerics <- subset(numerics, select=-c(Day.Charge, Eve.Charge, Night.Charge, Intl.Charge))
+@
+
+<<Add grouping category to numerics>>=
+numerics <- data.frame(numerics, Churn. = df$Churn.)
 @
 
 <<Overviews plots grouped, warning=FALSE, message=FALSE>>=
@@ -121,6 +118,7 @@ ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
   facet_wrap(~key, scales='free')
 @
 
+By wykryć, dla których zmiennych następuja najważniejsza różnica pomiędzy klientami lojalnymi, a tymi którzy zrezygnowali z usług, posłużymy się również testem Kołmogorova-Smirnova. Poniżej znajduje się funkcja, która wyznacza wyniki tego testu dla naszych zmiennych. 
 <<kstest, warning=FALSE>>=
 churn.kstest <- function(feature) {
   yes <- subset(numerics, subset=Churn.=="True.")
@@ -129,6 +127,7 @@ churn.kstest <- function(feature) {
 }
 @
 
+Tabela poniżej zbiera wyniki przeprowadzonych testów statystycznych.
 <<tabela_3, echo=FALSE, eval=TRUE, results='asis', warning=FALSE>>=
 data = data.frame(Zmienna=c("statistic", "pvalue"))
 yes <- subset(numerics, subset=Churn.=="True.")
@@ -140,7 +139,9 @@ for (i in colnames(subset(numerics, select=-Churn.))) {
 
 data %>% kbl(caption="Wyniki testu Kolmogorova-Smirnova", format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
 @
-Po przeanalizowaniu wykresów, decydujemy się na dalszą analizę następujących zmiennych:
+Możemy zauważyć, że testy na największe różnice(duża wartość zmiennej \verb|statistic|) wskazują w przypadku zmiennych: CustServ.Calls, Day.Mins, Eve.Mins, 
+
+Po przeanalizowaniu wykresów, decydujemy się na dalszą analizę następujących zmiennych: 
 \begin{itemize}
   \item ilościowych:
     \begin{itemize}
