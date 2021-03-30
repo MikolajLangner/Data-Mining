@@ -59,6 +59,8 @@
 \usepackage[colorlinks=true, linkcolor=blue]{hyperref}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{wrapfig}
+
 
 
 
@@ -107,11 +109,23 @@ Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
 \caption{\label{tab:tabela_1}Typy zmiennych}
 \centering
 \resizebox{\linewidth}{!}{
-\begin{tabular}[t]{l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l}
+\begin{tabular}[t]{l|l|l|l|l|l|l|l|l|l|l|l}
 \hline
-  & State & Account.Length & Area.Code & Phone & Int.l.Plan & VMail.Plan & VMail.Message & Day.Mins & Day.Calls & Day.Charge & Eve.Mins & Eve.Calls & Eve.Charge & Night.Mins & Night.Calls & Night.Charge & Intl.Mins & Intl.Calls & Intl.Charge & CustServ.Calls & Churn.\\
+  & State & Account.Length & Area.Code & Phone & Int.l.Plan & VMail.Plan & VMail.Message & Day.Mins & Day.Calls & Day.Charge & Eve.Mins\\
 \hline
-Typ zmiennej & factor & integer & factor & factor & factor & factor & integer & numeric & integer & numeric & numeric & integer & numeric & numeric & integer & numeric & numeric & integer & numeric & integer & factor\\
+Typ zmiennej & factor & integer & factor & factor & factor & factor & integer & numeric & integer & numeric & numeric\\
+\hline
+\end{tabular}}
+\end{table}
+
+\begin{table}[!h]
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l}
+\hline
+  & Eve.Calls & Eve.Charge & Night.Mins & Night.Calls & Night.Charge & Intl.Mins & Intl.Calls & Intl.Charge & CustServ.Calls & Churn.\\
+\hline
+Typ zmiennej & integer & numeric & numeric & integer & numeric & numeric & integer & numeric & integer & factor\\
 \hline
 \end{tabular}}
 \end{table}
@@ -143,7 +157,7 @@ Zmienna `Churn.` mówi o tym, czy dany klient zrezygnował z oferty.
 \end{itemize}
 
 \section{Analiza zmiennych, szkanie zależności}
-Teraz podzielimy zmienne ze względu na ich typ oraz wykonamy kilka wykresów, które pomogą w zauważeniu pewnych zależności i wyborze najistotniejszych pod względem naszej analizy atrybutów.
+
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -160,7 +174,7 @@ Teraz podzielimy zmienne ze względu na ich typ oraz wykonamy kilka wykresów, k
 \end{kframe}
 \end{knitrout}
 
-
+Teraz podzielimy zmienne ze względu na ich typ (jakościowe --- \verb|factors|, ilościowe --- \verb|numerics|) oraz wykonamy kilka wykresów, które pomogą w zauważeniu pewnych zależności i wyborze najistotniejszych pod względem naszej analizy atrybutów.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -187,7 +201,7 @@ Sprawdźmy zależności pomiędzy zmiennymi ciągłymi.
 
 
 \end{knitrout}
-Możemy zauważyć, że zmienne z przyrostkami `.Mins` oraz `.Charge` są ze sobą idealnie skorelowane. Odrzućmy zatem od razu dane z przyrostkiem `.Charge` dla ułatwienia dalszej analizy.
+Możemy zauważyć, że zmienne z przyrostkami `.Mins` oraz `.Charge` są ze sobą idealnie skorelowane. Odrzućmy zatem od razu dane z przyrostkiem `.Charge` dla ułatwienia dalszej analizy. Nie ma natomiast korelacji pomiędzy pozostałymi atrybutami.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -197,6 +211,11 @@ Możemy zauważyć, że zmienne z przyrostkami `.Mins` oraz `.Charge` są ze sob
 \end{kframe}
 \end{knitrout}
 
+Wykonamy teraz wykresy zmiennych ilościowych, dzieląc klientów na dwie grupy:
+\begin{itemize}
+  \item tych, którzy zrezygnowali --- \verb|Churn. == TRUE |,
+  \item tych, którzy pozostali lojalni --- \verb|Churn. == FALSE|.
+\end{itemize}
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -205,6 +224,7 @@ Możemy zauważyć, że zmienne z przyrostkami `.Mins` oraz `.Charge` są ze sob
 \end{kframe}
 \end{knitrout}
 
+Poniżej wykresy słupkowe dla danych jakościowych.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -214,49 +234,73 @@ Możemy zauważyć, że zmienne z przyrostkami `.Mins` oraz `.Charge` są ze sob
 \end{alltt}
 \end{kframe}
 
-{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-1} 
-
-}
-
-
-\begin{kframe}\begin{alltt}
-\hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
-  \hlkwd{geom_freqpoly}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..),} \hlkwc{position}\hlstd{=}\hlstr{"identity"}\hlstd{)} \hlopt{+}
-  \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
-\end{alltt}
-\end{kframe}
-
-{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-2} 
-
-}
-
-
-\begin{kframe}\begin{alltt}
-\hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
-  \hlkwd{geom_boxplot}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=value))} \hlopt{+}
-  \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
-\end{alltt}
-\end{kframe}
-
-{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-3} 
-
-}
-
-
-\begin{kframe}\begin{alltt}
-\hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
-  \hlkwd{stat_ecdf}\hlstd{()} \hlopt{+}
-  \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
-\end{alltt}
-\end{kframe}
-
-{\centering \includegraphics[width=\maxwidth]{figure/Overviews_plots_grouped-4} 
+{\centering \includegraphics[width=\maxwidth]{figure/Bar_plots-1} 
 
 }
 
 
 
 \end{knitrout}
+
+Możemy zauważyć, że osoby, które posiadały plan międzynarodowy, jak i te, które nie posiadały planu skrzyki głosowej częściej rezygnowały z usług. Zmienne \verb|Area.Code| i \verb|State| nie pokazują żadnych istotnych różnic pomiędzy tymi dwoma grupami.
+
+
+Poniżej znajdują się wykresy empirycznych gęstości.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
+  \hlkwd{geom_freqpoly}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..),} \hlkwc{position}\hlstd{=}\hlstr{"identity"}\hlstd{)} \hlopt{+}
+  \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/Densities-1} 
+
+}
+
+
+
+\end{knitrout}
+Widoczne gołym okiem różnice są zauważalne w przypadku zmiennych: \verb|Day.Mins|, \verb|Customer.Service.Calls|, \verb|Eve.Calls|.
+
+Poniżej generujemy wykresy pudełkowe. 
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
+  \hlkwd{geom_boxplot}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=value))} \hlopt{+}
+  \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/Boxplot-1} 
+
+}
+
+
+
+\end{knitrout}
+Ponownie, duże różnice uwidaczniają się dla zmiennych: \verb|Day.Mins|, \verb|Customer.Service.Calls|, \verb|Eve.Calls|.
+
+Stworzymy również wykresy empirycznych dystrybuant.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(numerics,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
+  \hlkwd{stat_ecdf}\hlstd{()} \hlopt{+}
+  \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/Ecdf-1} 
+
+}
+
+
+
+\end{knitrout}
+Coś tam, coś tam \ldots
 
 By wykryć, dla których zmiennych następuja najważniejsza różnica pomiędzy klientami lojalnymi, a tymi którzy zrezygnowali z usług, posłużymy się również testem Kołmogorova-Smirnova. Poniżej znajduje się funkcja, która wyznacza wyniki tego testu dla naszych zmiennych. 
 \begin{knitrout}
@@ -291,7 +335,8 @@ pvalue & 0.5581609 & 0.0000018 & 0.0000000 & 0.1550801 & 0.0000264 & 0.9980118 &
 
 Możemy zauważyć, że testy na największe różnice(duża wartość zmiennej \verb|statistic|) wskazują w przypadku zmiennych: CustServ.Calls, Day.Mins, Eve.Mins, 
 
-Po przeanalizowaniu wykresów, decydujemy się na dalszą analizę następujących zmiennych: 
+
+Po dogłębnym przeanalizowaniu wykresów i wyników testów Kołmogorova-Smirnova, zauważmy, że istotne dla naszej analizy to następujące zmienne:
 \begin{itemize}
   \item ilościowych:
     \begin{itemize}
@@ -355,6 +400,9 @@ Eve.Mins & 200.980348 & 166.6 & 201.4 & 235.3 & 68.7 & 0 & 363.7 & 2571.894016 &
 
 
 \section{Podsumowanie}
-
+Najważniesze wnioski z naszej analizy to:
+\begin{itemize}
+  \item jakiś wniosek
+\end{itemize}
 
 \end{document}

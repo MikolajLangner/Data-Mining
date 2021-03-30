@@ -13,11 +13,11 @@
 <<Globals, echo=FALSE, warning=FALSE>>=
 library(knitr)
 library(xtable)
-opts_chunk$set(fig.path='figure/', fighelp(.align='center', fig.pos='H',fig.width=5, fig.height=4))
+opts_chunk$set(fig.path='figure/', fighelp(.align='center', fig.pos='h',fig.width=5, fig.height=4))
 @
 
 \title{Lista 1}
-\author{Mikołaj Langner, Marcin Kostrzewa}
+\author{MikoEaj Langner, Marcin Kostrzewa}
 \date{31.3.2021}
 
 \begin{document}

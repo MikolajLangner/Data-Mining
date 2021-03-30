@@ -9,11 +9,13 @@
 \usepackage[colorlinks=true, linkcolor=blue]{hyperref}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{wrapfig}
+
 
 <<Globals, echo=FALSE, warning=FALSE>>=
 library(knitr)
 library(kableExtra)
-opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, fig.height=4)
+opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='h',fig.width=6, fig.height=5)
 @
 
 \title{Lista 1}
@@ -46,9 +48,13 @@ dim(df)
 
 \item sprawdźmy ich typ:
 <<tabela_1, echo=FALSE, eval=TRUE, results='asis'>>=
-table1 <- data.frame(sapply(df, class))
+table1 <- data.frame(sapply(df[, 1:11], class))
 colnames(table1) <- c("Typ zmiennej")
 t(table1) %>% kbl(caption="Typy zmiennych", format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+
+table2 <- data.frame(sapply(df[, -1:-11], class))
+colnames(table2) <- c("Typ zmiennej")
+t(table2) %>% kable(format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
 @
 Zmienna `Churn.` mówi o tym, czy dany klient zrezygnował z oferty.
 
@@ -65,7 +71,7 @@ df <- subset(df, select=-Phone)
 \end{itemize}
 
 \section{Analiza zmiennych, szkanie zależności}
-Teraz podzielimy zmienne ze względu na ich typ oraz wykonamy kilka wykresów, które pomogą w zauważeniu pewnych zależności i wyborze najistotniejszych pod względem naszej analizy atrybutów.
+
 <<Import libraries, warning=FALSE, message=FALSE>>=
 # wczytanie potrzebnych bibliotek
 library(ggplot2)
@@ -78,7 +84,7 @@ library(DescTools)
 library(moments)
 @
 
-
+Teraz podzielimy zmienne ze względu na ich typ (jakościowe --- \verb|factors|, ilościowe --- \verb|numerics|) oraz wykonamy kilka wykresów, które pomogą w zauważeniu pewnych zależności i wyborze najistotniejszych pod względem naszej analizy atrybutów.
 <<Split data by numerics and factors>>=
 factors <- subset(df, select=sapply(df, is.factor))
 numerics <- subset(df, select=sapply(df, function(x) !is.factor(x)))
@@ -90,33 +96,54 @@ continuous <- subset(numerics, select=sapply(numerics, function(x) !is.integer(x
 ggpairs(continuous,
         lower=list(continuous=wrap("points", alpha=.4, size=.01)))
 @
-Możemy zauważyć, że zmienne z przyrostkami `.Mins` oraz `.Charge` są ze sobą idealnie skorelowane. Odrzućmy zatem od razu dane z przyrostkiem `.Charge` dla ułatwienia dalszej analizy.
+Możemy zauważyć, że zmienne z przyrostkami `.Mins` oraz `.Charge` są ze sobą idealnie skorelowane. Odrzućmy zatem od razu dane z przyrostkiem `.Charge` dla ułatwienia dalszej analizy. Nie ma natomiast korelacji pomiędzy pozostałymi atrybutami.
 
 <<Drop .Charhe variables>>=
 numerics <- subset(numerics, select=-c(Day.Charge, Eve.Charge, Night.Charge, Intl.Charge))
 @
 
+Wykonamy teraz wykresy zmiennych ilościowych, dzieląc klientów na dwie grupy:
+\begin{itemize}
+  \item tych, którzy zrezygnowali --- \verb|Churn. == TRUE |,
+  \item tych, którzy pozostali lojalni --- \verb|Churn. == FALSE|.
+\end{itemize}
 <<Add grouping category to numerics>>=
 numerics <- data.frame(numerics, Churn. = df$Churn.)
 @
 
-<<Overviews plots grouped, warning=FALSE, message=FALSE>>=
+Poniżej wykresy słupkowe dla danych jakościowych.
+<<Bar plots, warning=FALSE, message=FALSE>>=
 ggplot(gather(factors, "key", "value", -Churn.), aes(value, fill=Churn.)) +
   geom_bar(position="fill") +
   facet_wrap(~key, scales='free')
+@
 
+Możemy zauważyć, że osoby, które posiadały plan międzynarodowy, jak i te, które nie posiadały planu skrzyki głosowej częściej rezygnowały z usług. Zmienne \verb|Area.Code| i \verb|State| nie pokazują żadnych istotnych różnic pomiędzy tymi dwoma grupami.
+
+
+Poniżej znajdują się wykresy empirycznych gęstości.
+<<Densities, warning=FALSE, message=FALSE>>=
 ggplot(gather(numerics, "key", "value", -Churn.), aes(x=value, color=Churn.)) +
   geom_freqpoly(aes(y=..density..), position="identity") +
   facet_wrap(~key, scales='free')
+@
+Widoczne gołym okiem różnice są zauważalne w przypadku zmiennych: \verb|Day.Mins|, \verb|Customer.Service.Calls|, \verb|Eve.Calls|.
 
+Poniżej generujemy wykresy pudełkowe. 
+<<Boxplot, warning=FALSE, message=FALSE>>=
 ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
   geom_boxplot(aes(x=value)) +
   facet_wrap(~key, scales='free')
+@
+Ponownie, duże różnice uwidaczniają się dla zmiennych: \verb|Day.Mins|, \verb|Customer.Service.Calls|, \verb|Eve.Calls|.
 
+Stworzymy również wykresy empirycznych dystrybuant.
+<<Ecdf, warning=FALSE, message=FALSE>>=
 ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
   stat_ecdf() +
   facet_wrap(~key, scales='free')
 @
+Coś tam, coś tam \ldots
 
 By wykryć, dla których zmiennych następuja najważniejsza różnica pomiędzy klientami lojalnymi, a tymi którzy zrezygnowali z usług, posłużymy się również testem Kołmogorova-Smirnova. Poniżej znajduje się funkcja, która wyznacza wyniki tego testu dla naszych zmiennych. 
 <<kstest, warning=FALSE>>=
@@ -141,7 +168,8 @@ data %>% kbl(caption="Wyniki testu Kolmogorova-Smirnova", format="latex") %>% ka
 @
 Możemy zauważyć, że testy na największe różnice(duża wartość zmiennej \verb|statistic|) wskazują w przypadku zmiennych: CustServ.Calls, Day.Mins, Eve.Mins, 
 
-Po przeanalizowaniu wykresów, decydujemy się na dalszą analizę następujących zmiennych: 
+
+Po dogłębnym przeanalizowaniu wykresów i wyników testów Kołmogorova-Smirnova, zauważmy, że istotne dla naszej analizy to następujące zmienne:
 \begin{itemize}
   \item ilościowych:
     \begin{itemize}
@@ -189,6 +217,9 @@ summary.matrix %>% kbl(caption="Wskazniki sumaryczne dla wybranych zmiennych", f
 @
 
 \section{Podsumowanie}
-
+Najważniesze wnioski z naszej analizy to:
+\begin{itemize}
+  \item jakiś wniosek
+\end{itemize}
 
 \end{document}
