@@ -13,6 +13,7 @@
 <<Globals, echo=FALSE, warning=FALSE>>=
 library(knitr)
 library(xtable)
+library(kableExtra)
 opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, fig.height=4)
 @
 
@@ -25,7 +26,8 @@ opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='H',fig.width=5, 
 \maketitle
 
 \section{Wstęp}
-W niniejszym sprawozdaniu zajmować się będziemy danymi sieci telefonii komórkowej ze względu na rezygnacje klientów z oferty (churn analysis).
+W niniejszym sprawozdaniu zajmować się będziemy danymi dotyczącymi klientów pewnej sieci telefonii komórkowej.
+Naszym zadaniem będzie odkrycie zależności między zmiennymi, które określą przyczyny rezygnacji klientów z oferty (churn analysis).
 
 \section{Wczytanie i identyfikacja danych}
 Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
@@ -33,6 +35,7 @@ Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
 <<Load and view data>>=
 df <- read.csv('churn.txt', stringsAsFactors = TRUE)
 df$Area.Code = as.factor(df$Area.Code)
+# Area.Code powinnien być zmienną jakościową
 @ 
 
 \begin{itemize}
@@ -65,8 +68,9 @@ df <- subset(df, select=-Phone)
 \end{itemize}
 
 \section{Wybór zmiennych}
-Teraz podzielimy zmmienne ze względu na typ oraz wykonamy kilka wykresów, które pomogą w zauważeniu pewnych zależności i wyborze najistotniejszych zmiennych.
+Teraz podzielimy zmmienne ze względu na ich typ oraz wykonamy kilka wykresów, które pomogą w zauważeniu pewnych zależności i wyborze najistotniejszych pod względem naszej analizy atrybutów.
 <<Import libraries, warning=FALSE, message=FALSE>>=
+# wczytanie potrzebnych bibliotek
 library(ggplot2)
 library(ggmosaic)
 library(GGally)
@@ -74,6 +78,7 @@ library(tidyr)
 library(dplyr)
 library(EnvStats)
 library(DescTools)
+library(moments)
 @
 
 <<Split data by numerics and factors>>=
@@ -115,16 +120,25 @@ ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
   facet_wrap(~key, scales='free')
 @
 
-<<kstest>>=
+<<kstest, warning=FALSE>>=
 churn.kstest <- function(feature) {
   yes <- subset(numerics, subset=Churn.=="True.")
   no <- subset(numerics, subset=Churn.=="False.")
-  c(feature, ks.test(yes[[feature]], no[[feature]])[c("statistic", "p.value")])
+  return(c(ks.test(yes[[feature]], no[[feature]])[c("statistic", "p.value")]))
 }
-
-lapply(colnames(subset(numerics, select=-Churn.)), churn.kstest)
 @
 
+<<tabela_3, echo=FALSE, eval=TRUE, results='asis', warning=FALSE>>=
+data = data.frame(Zmienna=c("statistic", "pvalue"))
+yes <- subset(numerics, subset=Churn.=="True.")
+no <- subset(numerics, subset=Churn.=="False.")
+
+for (i in colnames(subset(numerics, select=-Churn.))) {
+  data[i] = as.numeric(churn.kstest(i))
+}
+
+data %>% kbl(caption="Wyniki testu Kolmogorova-Smirnova", format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+@
 Po przeanalizowaniu wykresów, decydujemy się na dalszą analizę następujących zmiennych:
 \begin{itemize}
   \item ilościowych:
@@ -141,8 +155,37 @@ Po przeanalizowaniu wykresów, decydujemy się na dalszą analizę następujący
     \end{itemize}
 \end{itemize}
 
-\section{Etap II}
+\section{Analiza wybranych zmiennych}
+Skupmy się jedynie na wybranych zmiennych:
+<<nowy podzbiór danych, warning=FALSE>>=
+important <- subset(df, select=c(CustServ.Calls, Day.Mins, Eve.Mins, Int.l.Plan,
+                                 VMail.Plan, Churn.))
+@
 
+Wyznaczmy dla nich wskaźniki sumaryczne.
+
+<<funkcja do wyznaczania statystyk opisowych>>=
+# własna funkcja zwracająca wskaźniki sumaryczne
+my_summary <- function(x) {
+  statistics <- c(mean(x), quantile(x, 0.25), median(x), quantile(x, 0.75), 
+                  IQR(x), min(x), max(x), var(x), sd(x), kurtosis(x), skewness(x))
+  names(statistics) <- c("Srednia", "Q1", "Mediana", "Q3", "IQR", "Min", "Max", 
+                         "Wariancja", "Odchylenie standardowe", "Kurtoza", "Skosnosc")
+  return(statistics)
+}
+@
+
+<<tabela_2, echo=FALSE, eval=TRUE, results='asis'>>=
+nazwy.wskaznikow <- names(my_summary(df$Day.Mins))
+nazwy.zmiennych <- c("CustServ.Calls", "Day.Mins", "Eve.Mins")
+CustServ.Calls.summary <- as.vector(my_summary(df$CustServ.Calls))
+Day.Mins.summary <- as.vector(my_summary(df$Day.Mins))
+Eve.Mins.summary <- as.vector(my_summary(df$Eve.Mins))
+summary.matrix <- rbind(CustServ.Calls.summary, Day.Mins.summary, Eve.Mins.summary)
+row.names(summary.matrix) <- nazwy.zmiennych
+colnames(summary.matrix) <- nazwy.wskaznikow
+summary.matrix %>% kbl(caption="Wskazniki sumaryczne dla wybranych zmiennych", format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+@
 
 \section{Etap III}
 
