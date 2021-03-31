@@ -1,0 +1,377 @@
+\documentclass{article}
+
+\usepackage[OT4]{polski}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[colorlinks=true, linkcolor=blue]{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{wrapfig}
+
+
+<<Zmienne globalne, echo=FALSE, warning=FALSE>>=
+library(knitr)
+library(kableExtra)
+opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='h', fig.width=6, fig.height=5)
+@
+
+\title{Lista 1}
+\author{Mikołaj Langner, Marcin Kostrzewa \\ 255716, 255749}
+\date{31.3.2021}
+
+\begin{document}
+
+\maketitle
+
+\section{Wstęp}
+W niniejszym sprawozdaniu będziemy się zajmować danymi dotyczącymi klientów pewnej sieci telefonii komórkowej.
+Naszym zadaniem będzie odkrycie zależności między zmiennymi, które mogą mieć wpływ na rezygnację klientów z oferty (churn analysis).
+
+\section{Wczytanie i identyfikacja danych}
+Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
+
+<<Wczytywanie danych>>=
+df <- read.csv('churn.txt', stringsAsFactors = TRUE)
+@ 
+
+\begin{itemize}
+
+\item Poznajmy rozmiar naszych danych:
+<<Sprawdzenie rozmiaru danych>>=
+dim(df)
+@
+--- jest 21 zmiennych i 3333 obserwacji;
+
+\item Sprawdźmy typy zmiennych:
+<<Tabele z typami, echo=FALSE, eval=TRUE, results='asis'>>=
+table1 <- data.frame(sapply(df[, 1:11], class))
+colnames(table1) <- c("Typ zmiennej")
+t(table1) %>% kbl(caption="Typy zmiennych", format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+
+table2 <- data.frame(sapply(df[, -1:-11], class))
+colnames(table2) <- c("Typ zmiennej")
+t(table2) %>% kable(format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+@
+
+Zmienna \verb|Area.Code| powinna być interpretowana jako zmienna jakościowa.
+<<Odpowiednie typowanie>>=
+df$Area.Code <- as.factor(df$Area.Code)
+@
+
+\item Sprawdźmy czy pojawiają się wartości brakujące:
+<<brakujące dane>>=
+sum(is.na(df))
+@
+--- nie ma takich obserwacji.
+\item Usuńmy teraz kolumnę pełniącą rolę indentyfikatora (numer telefonu):
+<<Delete `Phone` column>>=
+df <- subset(df, select=-Phone)
+@
+
+\end{itemize}
+
+\section{Wstępna analiza zmiennych i szukanie zależności}
+
+\subsection{Wskaźniki sumaryczne}
+
+
+<<Wczytywanie potrzebnych bibliotek, warning=FALSE, message=FALSE>>=
+library(ggplot2)
+library(GGally)
+library(tidyr)
+library(dplyr)
+library(EnvStats)
+library(DescTools)
+@
+
+Teraz podzielimy zmienne ze względu na ich typ (jakościowe --- \verb|factors|, ilościowe --- \verb|numerics|) oraz wykonamy kilka wykresów, które pomogą nam zauważyć zależności i wyborać najistotniejsze pod względem naszej analizy atrybuty.
+<<Podział danych na typy>>=
+factors <- subset(df, select=sapply(df, is.factor))
+numerics <- subset(df, select=sapply(df, function(x) !is.factor(x)))
+@
+
+Sprawdźmy zależności pomiędzy zmiennymi ciągłymi.
+<<Wykresy dla zmiennych całkowitych, warning=FALSE, message=FALSE, echo=FALSE, eval=FALSE>>=
+integers <- subset(numerics, select=sapply(numerics, function(x) is.integer(x)))
+ggpairs(integers,
+        lower=list(continuous=wrap("points", alpha=.4, size=.01)))
+@
+
+<<Wykresy dla zmiennych ciągłych, warning=FALSE, message=FALSE, fig.width=10>>=
+continuous <- subset(numerics, select=sapply(numerics, function(x) !is.integer(x)))
+ggpairs(continuous,
+        lower=list(continuous=wrap("points", alpha=.4, size=.01)))
+@
+Możemy zauważyć, że zmienne z przyrostkami \verb|.Mins| oraz \verb|.Charge| są ze sobą idealnie skorelowane. Odrzućmy zatem od razu np. kolumny z \verb|.Charge| dla ułatwienia dalszej analizy. Nie ma natomiast korelacji pomiędzy pozostałymi atrybutami.
+
+<<Odrzucanie niepotrzebnych zmiennych>>=
+numerics <- subset(numerics, select=-c(Day.Charge, Eve.Charge, Night.Charge, Intl.Charge))
+@
+
+Wykonamy teraz wykresy zmiennych ilościowych, dzieląc klientów na dwie grupy:
+\begin{itemize}
+  \item tych, którzy zrezygnowali --- \verb|Churn. == TRUE |,
+  \item tych, którzy pozostali lojalni --- \verb|Churn. == FALSE|.
+\end{itemize}
+<<Dodanie zmiennej kategoryzującej do danych ilościowych, echo=FALSE>>=
+numerics <- data.frame(numerics, Churn. = df$Churn.)
+@
+
+Poniżej znajdują się wykresy słupkowe dla danych jakościowych.
+<<Wykresy słupkowe dla wszystkich zmiennych, warning=FALSE, message=FALSE, fig.width=5.5, fig.height=4>>=
+ggplot(gather(factors, "key", "value", -Churn.), aes(value, fill=Churn.)) +
+  geom_bar(position="fill") +
+  facet_wrap(~key, scales='free')
+@
+
+Możemy zauważyć, że osoby, które posiadały plan międzynarodowy, jak i te, które nie posiadały planu skrzynki głosowej, częściej rezygnowały z usług. Zmienne \verb|Area.Code| i \verb|State| nie wykazują żadnych istotnych różnic pomiędzy tymi grupami.
+
+
+Poniżej znajdują się wykresy empirycznych gęstości.
+<<Wykresy gęstości, warning=FALSE, message=FALSE, fig.width=10>>=
+ggplot(gather(numerics, "key", "value", -Churn.), aes(x=value, color=Churn.)) +
+  geom_freqpoly(aes(y=..density..), position="identity") +
+  facet_wrap(~key, scales='free')
+@
+
+Stworzymy również wykresy empirycznych dystrybuant.
+<<Dystrybuanty empiryczne, warning=FALSE, message=FALSE, fig.width=10>>=
+ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
+  stat_ecdf() +
+  facet_wrap(~key, scales='free')
+@
+
+Gołym okiem są widoczne różnice dla zmiennych: \verb|Day.Mins|, \verb|Customer.Service.Calls|, \verb|Eve.Mins|.
+
+Poniżej generujemy wykresy pudełkowe. 
+<<Wykresy pudełkowe, warning=FALSE, message=FALSE, fig.width=10>>=
+ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
+  geom_boxplot(aes(x=value)) +
+  facet_wrap(~key, scales='free')
+@
+Ponownie, duże różnice uwidaczniają się dla zmiennych: \verb|Day.Mins|, \verb|Customer.Service.Calls|, \verb|Eve.Mins|.
+
+By wykryć, dla których zmiennych następują najważniejsze różnice pomiędzy klientami lojalnymi, a tymi którzy zrezygnowali z usług, posłużymy się również testem Kołmogorova-Smirnova.
+<<kstest, warning=FALSE, echo=FALSE>>=
+churn.kstest <- function(feature) {
+  yes <- subset(numerics, subset=Churn.=="True.")
+  no <- subset(numerics, subset=Churn.=="False.")
+  return(c(ks.test(yes[[feature]], no[[feature]])[c("statistic", "p.value")]))
+}
+@
+
+Tabela poniżej zbiera wyniki przeprowadzonych testów statystycznych.
+<<Tabela z testami statystycznymi, echo=FALSE, eval=TRUE, results='asis', warning=FALSE>>=
+data = data.frame(Zmienna=c("statistic", "pvalue"))
+yes <- subset(numerics, subset=Churn.=="True.")
+no <- subset(numerics, subset=Churn.=="False.")
+
+for (i in colnames(subset(numerics, select=-Churn.))) {
+  data[i] = as.numeric(churn.kstest(i))
+}
+
+data %>% kbl(caption="Wyniki testu Kolmogorova-Smirnova", format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+@
+Możemy zauważyć, że testy wykazują największe różnice (duża wartość zmiennej \verb|statistic|, małe \verb|pvalue|) w przypadku zmiennych: \verb|CustServ.Calls|, \verb|Day.Mins|, \verb|Eve.Mins|, \verb|VMail.Message|.
+
+
+Po dogłębnym przeanalizowaniu wykresów i wyników testów Kołmogorova-Smirnova, zauważamy, że istotne dla naszej analizy są zmienne:
+\begin{itemize}
+  \item ilościowych:
+    \begin{itemize}
+    \item CustServ.Calls,
+    \item Day.Mins,
+    \item Eve.Mins,
+    \item VMail.Message;
+    \end{itemize}
+  \item jakościowych
+    \begin{itemize}
+    \item Int.l.Plan,
+    \item VMail.Plan
+    \end{itemize}
+\end{itemize}
+
+\section{Analiza wybranych zmiennych}
+\subsection{Analiza całościowa}
+Skupmy się jedynie na wybranych zmiennych:
+<<Wybieranie najważniejszych zmiennych, warning=FALSE>>=
+important <- subset(df, select=c(CustServ.Calls, Day.Mins, Eve.Mins, Int.l.Plan,
+                                 VMail.Plan, VMail.Message, Churn.))
+@
+
+Wyznaczmy dla nich wskaźniki sumaryczne.
+
+<<Funkcja do wyznaczania statystyk opisowych>>=
+my_summary <- function(x) {
+  statistics <- c(mean(x), quantile(x, 0.25), median(x), quantile(x, 0.75), 
+                  IQR(x), min(x), max(x), var(x), sd(x), sd(x) / mean(x), 
+                  kurtosis(x), skewness(x))
+  names(statistics) <- c("Srednia", "Q1", "Mediana", "Q3", "IQR", "Min", "Max", 
+                         "Wariancja", "Odchylenie standardowe", "Wspolczynnik zmiennosci",
+                         "Kurtoza", "Skosnosc")
+  return(statistics)
+}
+@
+
+<<Tabela ze statystykami, echo=FALSE, eval=TRUE, results='asis'>>=
+nazwy.wskaznikow <- names(my_summary(df$Day.Mins))
+nazwy.zmiennych <- c("CustServ.Calls", "Day.Mins", "Eve.Mins", "VMail.Message")
+CustServ.Calls.summary <- as.vector(my_summary(df$CustServ.Calls))
+Day.Mins.summary <- as.vector(my_summary(df$Day.Mins))
+Eve.Mins.summary <- as.vector(my_summary(df$Eve.Mins))
+VMail.Message.summary <- as.vector(my_summary(df$VMail.Message))
+summary.matrix <- rbind(CustServ.Calls.summary, Day.Mins.summary, Eve.Mins.summary, VMail.Message.summary)
+row.names(summary.matrix) <- nazwy.zmiennych
+colnames(summary.matrix) <- nazwy.wskaznikow
+summary.matrix %>% kbl(caption="Wskazniki sumaryczne dla wybranych zmiennych", format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+@
+
+Przedstawimy również wartości tych zmiennych na histogramach.
+
+<<Histogramy, warning=FALSE, message=FALSE>>=
+subset = subset(important, select=-c(Churn., Int.l.Plan, VMail.Plan))
+ggplot(gather(subset, 'key', 'value'), aes(x=value)) +
+  geom_histogram(aes(y=..density..), position="identity", color="orange") +
+  facet_wrap(~key, scales='free')
+@
+
+
+\verb|Day.Mins| i \verb|Eve.Mins| mają rozkład symetryczny, natomiast pozostałe \verb|CustServ.Calls| i \verb|VMail.Message| mają rozkład prawostronnie skośny. Dodatkowo, te dwie zmiene charakteryzują się one dużą zmiennością.\newline
+\vspace{1cm}
+Teraz przyjrzyjmy się bliżej wybranym zmiennym jakościowym poprzez tabele liczności.
+
+<<Ilościowe, eval=TRUE, echo=FALSE, warning=FALSE>>=
+tab1 <- data.frame(table(df$Churn.))
+tab2 <- data.frame(table(df$Int.l.Plan))
+tab3 <- data.frame(table(df$VMail.Plan))
+tab1 <- tab1 %>% rename(Churn=Var1, Count=Freq) 
+tab2 <- tab2 %>% rename(Int.l.Plan=Var1, Count=Freq) 
+tab3 <- tab3 %>% rename(VMail.Plan=Var1, Count=Freq) 
+tab1 %>% kbl(format="latex") %>% kable_styling(latex_options=c('hold_position'))
+tab2 %>% kbl(format="latex") %>% kable_styling(latex_options=c('hold_position'))
+tab3 %>% kbl(format="latex") %>% kable_styling(latex_options=c('hold_position'))
+@
+
+Stworzymy dla tych zmiennych wykresy słupkowe.
+<<Wykresy słupkowe dla wybranych zmiennych, echo=TRUE, warning=FALSE, fig.height=3.5, fig.width=6>>=
+ggplot(gather(important, "key", "value",
+              -c(CustServ.Calls, Day.Mins, Eve.Mins, VMail.Message)), aes(value)) +
+  geom_bar(position="dodge", color='orange') +
+  facet_wrap(~key, scales='free')
+@
+Łatwo stwierdzić, że większość klientów była lojalna ( $\approx 86$\%), nie miała wykupionego planu międzynarodowego ($\approx 90$ \%) oraz nie miała dostępu do planu poczty głosowej ($\approx 72$\%).  
+
+\subsection{Analiza wybranych zmiennych z podziałem na grupy}
+
+Poniższe tabele zawierają informacje o wartościach wskaźników sumarycznych dla zmiennych ilosciowych, tym razem uwzględniają one podział klientów na grupy.
+<<Statystyki sumaryczne z podziałem na grupy, echo=FALSE, eval=TRUE>>=
+w1 <- by(data=important$Day.Mins, INDICES=important$Churn., my_summary)
+w2 <- by(data=important$Eve.Mins, INDICES=important$Churn., my_summary)
+w3 <- by(data=important$CustServ.Calls, INDICES=important$Churn., my_summary)
+w4 <- by(data=important$VMail.Message, INDICES=important$Churn., my_summary)
+
+tabela1 <- rbind(w1$False., w1$True.) 
+row.names(tabela1) <- c("False.", "True.")
+tabela1 %>% kbl(format="latex", digits=2, caption="Day.Mins"  ) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+ 
+tabela2 <- rbind(w2$False., w2$True.) 
+row.names(tabela2) <- c("False.", "True.")
+tabela2 %>% kbl(format="latex", digits=2, caption="Eve.Mins"  ) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+ 
+tabela3 <- rbind(w3$False., w3$True.) 
+row.names(tabela3) <- c("False.", "True.")
+tabela3 %>% kbl(format = "latex", digits=2, caption="CustServ.Calls"  ) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+
+tabela4 <- rbind(w4$False., w4$True.) 
+row.names(tabela4) <- c("False.", "True.")
+tabela4 %>% kbl(format="latex", digits=2, caption="VMail.Message"  ) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+@
+
+Dla \verb|Churn.=True.| każda z powyższych zmiennych charakteryzuje się wyższą średnią oraz medianą niż dla \verb|Churn.=False.|.
+\vspace{0.3cm}
+Podobnie jak powyżej, przedstawimy wartości zmiennych, korzystając z histogramów. Tym razem uwzględniamy podział na grupy.
+
+<<Histogramy z podziałem na grupy, warning=FALSE, message=FALSE>>=
+subset = subset(important, select=-c(Int.l.Plan, VMail.Plan))
+ggplot(gather(subset, 'key', 'value', -Churn.), aes(x=value, color=Churn.)) +
+  geom_histogram(aes(y=..density..), position="identity", alpha=0.4) +
+  facet_wrap(~key, scales='free')
+@
+
+Zauważmy, że dla zmiennej \verb|Day.Mins| charakterystyka rozkładu zależy od zmiennej grupującej. Dla \verb|Churn=True.| otrzymujemy rozkład dwumodalny. Zmienna \verb|Eve.Mins| dla \verb|Churn.=True.| wykazuje natomiast większą wartość modalną. Dla pozostałych zmiennych nie zauważa się istotnych różnic w typie rozkładu. 
+
+\vspace{0.3cm}
+
+Przyjrzymy się teraz zmiennym jakościowym po podziale na grupy, korzystając z tabel częstości.
+
+<<plan międzynarodowy, echo=FALSE, eval=TRUE>>=
+freq.table <- function(x) {
+  return(table(x) / length(x))
+}
+w1 <- by(data=important$Churn., INDICES=important$Int.l.Plan, freq.table)
+tab1 <- rbind(w1$no, w1$yes)
+row.names(tab1) <- c("no", "yes")
+tab1 %>% kbl(caption="Int.l.Plan", format="latex", digits=2) %>% kable_styling(latex_options=c('HOLD_position'))
+@
+
+Warto zauważyć, że wśród osób, które zrezygnowały z oferty sieci, odsetek tych, które przystąpiły do planu międynarodowego, jest znacznie większy niż odestek osób, które do niego nie przystąpiły.
+
+<<plan poczty głosowej, echo=FALSE, eval=TRUE>>=
+w2 <- by(data=important$Churn., INDICES=important$VMail.Plan, freq.table)
+tab2 <- rbind(w2$no, w2$yes)
+row.names(tab2) <- c("no", "yes")
+tab2 %>% kbl(caption="VMail.Plan", format="latex", digits=2) %>% kable_styling(latex_options=c('HOLD_position'))
+@
+
+W przypadku tej zmiennej także można zauważyć, że wśród osób, które zrezygnowały z oferty sieci, odsetek osób, które nie przystąpiły do planu poczty głosowej jest większy od tego dla tych, którzy do tego planu przystąpiła.
+
+\vspace{0.3cm}
+
+Wykonamy także wykresy rozrzutu, przedstawiające zależności między zmiennymi ilościowymi.
+
+<<Wykresy rozrzutu, echo=TRUE, message=FALSE, warning=FALSE>>=
+subset = subset(important, select=-c(Int.l.Plan, VMail.Plan))
+subset %>% ggpairs(.,
+mapping = ggplot2::aes(color=Churn.),
+columns=1:4, 
+lower=list(continuous=wrap("points", alpha=.4, size=.01)),
+upper=list(continuous="blank"),
+diag=list(continuous="blank"))
+@
+
+Dla powyższych zmiennych możemy zaobserwować formujące się klastry:
+\begin{description}
+\item[CustServ.Calls$\sim$Day.Mins]
+Zauważalne dwa klastry dla dużych wartości \verb|CustServ.Calls| oraz dla dużych wartości \verb|Day.Mins| i małych wartości \verb|CustServ.Calls|.
+\item[Day.Mins$\sim$Eve.Mins]
+Klaster dla dużych wartości \verb|Eve.Mins| oraz \verb|Day.Mins|.
+\item[VMail.Message$\sim$Day.Mins]
+Mniej istotny klaster dla dużych wartości \verb|Day.Mins| i małych wartości \verb|VMail.Message|.
+\end{description}
+
+\section{Podsumowanie}
+\subsection{Co wpływa na rezygnacje klientów?}
+Klienci
+\begin{itemize}
+  \item którzy mieli wykupiony plan międzynarodowy, odchodzili częściej od tych, którzy tego planu nie posiadali,
+  \item z planem poczty głosowej odchodzili rzadziej od tych, którzy tego planu nie wykupili,
+  \item którzy częściej dzwonili do biura obsługi klienta odchodzili częściej,
+  \item którzy zużywali dużo minut w ciągu dnia oraz wieczorem również częściej rezygnowali z usług,
+  \item którzy nie łączyli się często z biurem obsługi, ale wykorzystywali dużo minut w ciągu dnia również częściej odchodzili,
+  \item nieposiadający wiadomości w skrzynce głosowej i wykorzystujący dużo minut w ciągu dnia odchodzili częściej.
+\end{itemize}
+
+\subsection{Wnioski dla sieci telefonii}
+Należy
+\begin{enumerate}
+\item poprawić plan międzynarodowy,
+\item doprowadzić do jak najszerszego dostępu do planu poczty głosowej wśród klientów,
+\item poświęcać szczególną uwagę klientom, którzy wielokrotnie dzwonią do biura obsługi,
+\item zmniejszyć koszta rozmów w dzień i wieczorem.
+\end{enumerate}
+
+
+\end{document}
