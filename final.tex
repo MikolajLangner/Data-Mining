@@ -103,7 +103,7 @@ Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
 \end{knitrout}
 --- jest 21 zmiennych i 3333 obserwacji;
 
-\item sprawdźmy ich typ:
+\item sprawdźmy ich typy:
 \begin{table}[!h]
 
 \caption{\label{tab:tabela_1}Typy zmiennych}
@@ -131,13 +131,12 @@ Typ zmiennej & integer & numeric & numeric & integer & numeric & numeric & integ
 \end{table}
 
 
-Zmienna `Churn.` mówi o tym, czy dany klient zrezygnował z oferty.
 
 \item sprawdźmy czy pojawiają się wartości brakujące:
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{sum}\hlstd{(}\hlkwd{sapply}\hlstd{(df,} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{)} \hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x))))}
+\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(df))}
 \end{alltt}
 \begin{verbatim}
 ## [1] 0
@@ -157,6 +156,9 @@ Zmienna `Churn.` mówi o tym, czy dany klient zrezygnował z oferty.
 \end{itemize}
 
 \section{Analiza zmiennych, szkanie zależności}
+
+\subsection{Wskaźniki sumaryczne}
+
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -358,7 +360,7 @@ Skupmy się jedynie na wybranych zmiennych:
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{important} \hlkwb{<-} \hlkwd{subset}\hlstd{(df,} \hlkwc{select}\hlstd{=}\hlkwd{c}\hlstd{(CustServ.Calls, Day.Mins, Eve.Mins, Int.l.Plan,}
-                                 \hlstd{VMail.Plan, Churn.))}
+                                 \hlstd{VMail.Plan, VMail.Message, Churn.))}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -370,9 +372,11 @@ Wyznaczmy dla nich wskaźniki sumaryczne.
 \begin{alltt}
 \hlstd{my_summary} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{) \{}
   \hlstd{statistics} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlkwd{mean}\hlstd{(x),} \hlkwd{quantile}\hlstd{(x,} \hlnum{0.25}\hlstd{),} \hlkwd{median}\hlstd{(x),} \hlkwd{quantile}\hlstd{(x,} \hlnum{0.75}\hlstd{),}
-                  \hlkwd{IQR}\hlstd{(x),} \hlkwd{min}\hlstd{(x),} \hlkwd{max}\hlstd{(x),} \hlkwd{var}\hlstd{(x),} \hlkwd{sd}\hlstd{(x),} \hlkwd{kurtosis}\hlstd{(x),} \hlkwd{skewness}\hlstd{(x))}
+                  \hlkwd{IQR}\hlstd{(x),} \hlkwd{min}\hlstd{(x),} \hlkwd{max}\hlstd{(x),} \hlkwd{var}\hlstd{(x),} \hlkwd{sd}\hlstd{(x),} \hlkwd{sd}\hlstd{(x)} \hlopt{/} \hlkwd{mean}\hlstd{(x),}
+                  \hlkwd{kurtosis}\hlstd{(x),} \hlkwd{skewness}\hlstd{(x))}
   \hlkwd{names}\hlstd{(statistics)} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"Srednia"}\hlstd{,} \hlstr{"Q1"}\hlstd{,} \hlstr{"Mediana"}\hlstd{,} \hlstr{"Q3"}\hlstd{,} \hlstr{"IQR"}\hlstd{,} \hlstr{"Min"}\hlstd{,} \hlstr{"Max"}\hlstd{,}
-                         \hlstr{"Wariancja"}\hlstd{,} \hlstr{"Odchylenie standardowe"}\hlstd{,} \hlstr{"Kurtoza"}\hlstd{,} \hlstr{"Skosnosc"}\hlstd{)}
+                         \hlstr{"Wariancja"}\hlstd{,} \hlstr{"Odchylenie standardowe"}\hlstd{,} \hlstr{"Wspolczynnik zmiennosci"}\hlstd{,}
+                         \hlstr{"Kurtoza"}\hlstd{,} \hlstr{"Skosnosc"}\hlstd{)}
   \hlkwd{return}\hlstd{(statistics)}
 \hlstd{\}}
 \end{alltt}
@@ -384,19 +388,251 @@ Wyznaczmy dla nich wskaźniki sumaryczne.
 \caption{\label{tab:tabela_2}Wskazniki sumaryczne dla wybranych zmiennych}
 \centering
 \resizebox{\linewidth}{!}{
-\begin{tabular}[t]{l|r|r|r|r|r|r|r|r|r|r|r}
+\begin{tabular}[t]{l|r|r|r|r|r|r|r|r|r|r|r|r}
 \hline
-  & Srednia & Q1 & Mediana & Q3 & IQR & Min & Max & Wariancja & Odchylenie standardowe & Kurtoza & Skosnosc\\
+  & Srednia & Q1 & Mediana & Q3 & IQR & Min & Max & Wariancja & Odchylenie standardowe & Wspolczynnik zmiennosci & Kurtoza & Skosnosc\\
 \hline
-CustServ.Calls & 1.562856 & 1.0 & 1.0 & 2.0 & 1.0 & 0 & 9.0 & 1.730517 & 1.315491 & 4.726519 & 1.0908683\\
+CustServ.Calls & 1.562856 & 1.0 & 1.0 & 2.0 & 1.0 & 0 & 9.0 & 1.730517 & 1.315491 & 0.8417223 & 4.726519 & 1.0908683\\
 \hline
-Day.Mins & 179.775097 & 143.7 & 179.4 & 216.4 & 72.7 & 0 & 350.8 & 2966.696486 & 54.467389 & 2.978290 & -0.0290640\\
+Day.Mins & 179.775097 & 143.7 & 179.4 & 216.4 & 72.7 & 0 & 350.8 & 2966.696486 & 54.467389 & 0.3029752 & 2.978290 & -0.0290640\\
 \hline
-Eve.Mins & 200.980348 & 166.6 & 201.4 & 235.3 & 68.7 & 0 & 363.7 & 2571.894016 & 50.713844 & 3.023792 & -0.0238667\\
+Eve.Mins & 200.980348 & 166.6 & 201.4 & 235.3 & 68.7 & 0 & 363.7 & 2571.894016 & 50.713844 & 0.2523324 & 3.023792 & -0.0238667\\
+\hline
+VMail.Message & 8.099010 & 0.0 & 0.0 & 20.0 & 20.0 & 0 & 51.0 & 187.371347 & 13.688365 & 1.6901282 & 2.947148 & 1.2642543\\
 \hline
 \end{tabular}}
 \end{table}
 
+
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{subset} \hlkwb{=} \hlkwd{subset}\hlstd{(important,} \hlkwc{select}\hlstd{=}\hlopt{-}\hlkwd{c}\hlstd{(Churn., Int.l.Plan, VMail.Plan))}
+\hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(subset,} \hlstr{'key'}\hlstd{,} \hlstr{'value'}\hlstd{),} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=value))} \hlopt{+}
+  \hlkwd{geom_histogram}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..),} \hlkwc{position}\hlstd{=}\hlstr{"identity"}\hlstd{,} \hlkwc{color}\hlstd{=}\hlstr{"orange"}\hlstd{)} \hlopt{+}
+  \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/histograms-1} 
+
+}
+
+
+
+\end{knitrout}
+
+
+\verb|Day.Mins| i \verb|Eve.Mins| mają rozkład symetryczny, natomiast pozostałe \verb|CustServ.Calls| i \verb|VMail.Message| mają rozkład prawostronnie skośny. Dodatkowo charakteryzują się one dużą zmiennością.
+
+Teraz przyjrzyjmy się bliżej wybranym zmiennym jakościowym.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{table}[!h]
+\centering
+\begin{tabular}[t]{l|r}
+\hline
+Churn & Count\\
+\hline
+False. & 2850\\
+\hline
+True. & 483\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[!h]
+\centering
+\begin{tabular}[t]{l|r}
+\hline
+Int.l.Plan & Count\\
+\hline
+no & 3010\\
+\hline
+yes & 323\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[!h]
+\centering
+\begin{tabular}[t]{l|r}
+\hline
+VMail.Plan & Count\\
+\hline
+no & 2411\\
+\hline
+yes & 922\\
+\hline
+\end{tabular}
+\end{table}
+
+
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(important,} \hlstr{"key"}\hlstd{,} \hlstr{"value"}\hlstd{,} \hlopt{-}\hlkwd{c}\hlstd{(CustServ.Calls, Day.Mins, Eve.Mins, VMail.Message)),} \hlkwd{aes}\hlstd{(value))} \hlopt{+}
+  \hlkwd{geom_bar}\hlstd{(}\hlkwc{position}\hlstd{=}\hlstr{"dodge"}\hlstd{,} \hlkwc{color}\hlstd{=}\hlstr{'orange'}\hlstd{)} \hlopt{+}
+  \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/slupkowe_dla_wybranych-1} 
+
+}
+
+
+
+\end{knitrout}
+Łatwo stwierdzić, że większośc klientów była lojalna ( \%), nie miała wykupionego planu międzynarodowego ( \%) oraz nie miało dostępu do planu poczty głosowej (\%).  
+
+\subsection{Analiza wybranych zmiennych z podziałem na grupy}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{table}[!h]
+
+\caption{\label{tab:sumaryczne dla grup}Day.Mins}
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tabular}[t]{l|r|r|r|r|r|r|r|r|r|r|r|r}
+\hline
+  & Srednia & Q1 & Mediana & Q3 & IQR & Min & Max & Wariancja & Odchylenie standardowe & Wspolczynnik zmiennosci & Kurtoza & Skosnosc\\
+\hline
+False. & 175.18 & 142.83 & 177.2 & 210.30 & 67.47 & 0 & 315.6 & 2518.2 & 50.18 & 0.29 & 2.99 & -0.23\\
+\hline
+True. & 206.91 & 153.25 & 217.6 & 265.95 & 112.70 & 0 & 350.8 & 4760.7 & 69.00 & 0.33 & 2.19 & -0.20\\
+\hline
+\end{tabular}}
+\end{table}
+
+\begin{table}[!h]
+
+\caption{\label{tab:sumaryczne dla grup}Eve.Mins}
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tabular}[t]{r|r|r|r|r|r|r|r|r|r|r|r}
+\hline
+Srednia & Q1 & Mediana & Q3 & IQR & Min & Max & Wariancja & Odchylenie standardowe & Wspolczynnik zmiennosci & Kurtoza & Skosnosc\\
+\hline
+199.04 & 164.5 & 199.6 & 233.20 & 68.70 & 0.0 & 361.8 & 2529.30 & 50.29 & 0.25 & 3.03 & -0.04\\
+\hline
+212.41 & 177.1 & 211.3 & 249.45 & 72.35 & 70.9 & 363.7 & 2675.88 & 51.73 & 0.24 & 2.90 & 0.03\\
+\hline
+\end{tabular}}
+\end{table}
+
+\begin{table}[!h]
+
+\caption{\label{tab:sumaryczne dla grup}CustServ.Calls}
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tabular}[t]{r|r|r|r|r|r|r|r|r|r|r|r}
+\hline
+Srednia & Q1 & Mediana & Q3 & IQR & Min & Max & Wariancja & Odchylenie standardowe & Wspolczynnik zmiennosci & Kurtoza & Skosnosc\\
+\hline
+1.45 & 1 & 1 & 2 & 1 & 0 & 8 & 1.35 & 1.16 & 0.80 & 4.21 & 0.89\\
+\hline
+2.23 & 1 & 2 & 4 & 3 & 0 & 9 & 3.43 & 1.85 & 0.83 & 2.89 & 0.70\\
+\hline
+\end{tabular}}
+\end{table}
+
+\begin{table}[!h]
+
+\caption{\label{tab:sumaryczne dla grup}VMail.Message}
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tabular}[t]{r|r|r|r|r|r|r|r|r|r|r|r}
+\hline
+Srednia & Q1 & Mediana & Q3 & IQR & Min & Max & Wariancja & Odchylenie standardowe & Wspolczynnik zmiennosci & Kurtoza & Skosnosc\\
+\hline
+8.60 & 0 & 0 & 22 & 22 & 0 & 51 & 193.58 & 13.91 & 1.62 & 2.71 & 1.17\\
+\hline
+5.12 & 0 & 0 & 0 & 0 & 0 & 48 & 140.66 & 11.86 & 2.32 & 5.52 & 2.03\\
+\hline
+\end{tabular}}
+\end{table}
+
+
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{subset} \hlkwb{=} \hlkwd{subset}\hlstd{(important,} \hlkwc{select}\hlstd{=}\hlopt{-}\hlkwd{c}\hlstd{(Int.l.Plan, VMail.Plan))}
+\hlkwd{ggplot}\hlstd{(}\hlkwd{gather}\hlstd{(subset,} \hlstr{'key'}\hlstd{,} \hlstr{'value'}\hlstd{,} \hlopt{-}\hlstd{Churn.),} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=value,} \hlkwc{color}\hlstd{=Churn.))} \hlopt{+}
+  \hlkwd{geom_histogram}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..),} \hlkwc{position}\hlstd{=}\hlstr{"identity"}\hlstd{)} \hlopt{+}
+  \hlkwd{facet_wrap}\hlstd{(}\hlopt{~}\hlstd{key,} \hlkwc{scales}\hlstd{=}\hlstr{'free'}\hlstd{)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/histogramy_dla_grup-1} 
+
+}
+
+
+
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{table}[!h]
+
+\caption{\label{tab:ilosciowe dla grup}Int.l.Plan}
+\centering
+\begin{tabular}[t]{l|r|r}
+\hline
+  & False. & True.\\
+\hline
+no & 0.89 & 0.11\\
+\hline
+yes & 0.58 & 0.42\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[!h]
+
+\caption{\label{tab:ilosciowe dla grup}VMail.Plan}
+\centering
+\begin{tabular}[t]{l|r|r}
+\hline
+  & False. & True.\\
+\hline
+no & 0.83 & 0.17\\
+\hline
+yes & 0.91 & 0.09\\
+\hline
+\end{tabular}
+\end{table}
+
+
+\end{knitrout}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{subset} \hlkwb{=} \hlkwd{subset}\hlstd{(important,} \hlkwc{select}\hlstd{=}\hlopt{-}\hlkwd{c}\hlstd{(Int.l.Plan, VMail.Plan))}
+\hlstd{subset} \hlopt{%>%} \hlkwd{ggpairs}\hlstd{(.,}
+\hlkwc{mapping} \hlstd{= ggplot2}\hlopt{::}\hlkwd{aes}\hlstd{(}\hlkwc{color}\hlstd{=Churn.),}
+\hlkwc{columns}\hlstd{=}\hlnum{1}\hlopt{:}\hlnum{4}\hlstd{,}
+\hlkwc{lower}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{continuous}\hlstd{=}\hlkwd{wrap}\hlstd{(}\hlstr{"points"}\hlstd{,} \hlkwc{alpha}\hlstd{=}\hlnum{.4}\hlstd{,} \hlkwc{size}\hlstd{=}\hlnum{.01}\hlstd{)),}
+\hlkwc{upper}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{continuous}\hlstd{=}\hlstr{"blank"}\hlstd{),}
+\hlkwc{diag}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{continuous}\hlstd{=}\hlstr{"blank"}\hlstd{))}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/scatterplot-1} 
+
+}
+
+
+
+\end{knitrout}
 
 
 \section{Podsumowanie}

@@ -15,7 +15,7 @@
 <<Globals, echo=FALSE, warning=FALSE>>=
 library(knitr)
 library(kableExtra)
-opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='h',fig.width=6, fig.height=5)
+opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='h', fig.width=6, fig.height=5)
 @
 
 \title{Lista 1}
@@ -46,7 +46,7 @@ dim(df)
 @
 --- jest 21 zmiennych i 3333 obserwacji;
 
-\item sprawdźmy ich typ:
+\item sprawdźmy ich typy:
 <<tabela_1, echo=FALSE, eval=TRUE, results='asis'>>=
 table1 <- data.frame(sapply(df[, 1:11], class))
 colnames(table1) <- c("Typ zmiennej")
@@ -56,11 +56,10 @@ table2 <- data.frame(sapply(df[, -1:-11], class))
 colnames(table2) <- c("Typ zmiennej")
 t(table2) %>% kable(format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
 @
-Zmienna `Churn.` mówi o tym, czy dany klient zrezygnował z oferty.
 
 \item sprawdźmy czy pojawiają się wartości brakujące:
 <<brakujące dane>>=
-sum(sapply(df, function(x) sum(is.na(x))))
+sum(is.na(df))
 @
 --- nie ma więc brakujących obserwacji;
 \item usuńmy dane pełniące rolę indentyfikatora (numer telefonu):
@@ -71,6 +70,9 @@ df <- subset(df, select=-Phone)
 \end{itemize}
 
 \section{Analiza zmiennych, szkanie zależności}
+
+\subsection{Wskaźniki sumaryczne}
+
 
 <<Import libraries, warning=FALSE, message=FALSE>>=
 # wczytanie potrzebnych bibliotek
@@ -189,7 +191,7 @@ Po dogłębnym przeanalizowaniu wykresów i wyników testów Kołmogorova-Smirno
 Skupmy się jedynie na wybranych zmiennych:
 <<nowy podzbiór danych, warning=FALSE>>=
 important <- subset(df, select=c(CustServ.Calls, Day.Mins, Eve.Mins, Int.l.Plan,
-                                 VMail.Plan, Churn.))
+                                 VMail.Plan, VMail.Message, Churn.))
 @
 
 Wyznaczmy dla nich wskaźniki sumaryczne.
@@ -197,24 +199,128 @@ Wyznaczmy dla nich wskaźniki sumaryczne.
 <<funkcja do wyznaczania statystyk opisowych>>=
 my_summary <- function(x) {
   statistics <- c(mean(x), quantile(x, 0.25), median(x), quantile(x, 0.75), 
-                  IQR(x), min(x), max(x), var(x), sd(x), kurtosis(x), skewness(x))
+                  IQR(x), min(x), max(x), var(x), sd(x), sd(x) / mean(x), 
+                  kurtosis(x), skewness(x))
   names(statistics) <- c("Srednia", "Q1", "Mediana", "Q3", "IQR", "Min", "Max", 
-                         "Wariancja", "Odchylenie standardowe", "Kurtoza", "Skosnosc")
+                         "Wariancja", "Odchylenie standardowe", "Wspolczynnik zmiennosci",
+                         "Kurtoza", "Skosnosc")
   return(statistics)
 }
 @
 
 <<tabela_2, echo=FALSE, eval=TRUE, results='asis'>>=
 nazwy.wskaznikow <- names(my_summary(df$Day.Mins))
-nazwy.zmiennych <- c("CustServ.Calls", "Day.Mins", "Eve.Mins")
+nazwy.zmiennych <- c("CustServ.Calls", "Day.Mins", "Eve.Mins", "VMail.Message")
 CustServ.Calls.summary <- as.vector(my_summary(df$CustServ.Calls))
 Day.Mins.summary <- as.vector(my_summary(df$Day.Mins))
 Eve.Mins.summary <- as.vector(my_summary(df$Eve.Mins))
-summary.matrix <- rbind(CustServ.Calls.summary, Day.Mins.summary, Eve.Mins.summary)
+VMail.Message.summary <- as.vector(my_summary(df$VMail.Message))
+summary.matrix <- rbind(CustServ.Calls.summary, Day.Mins.summary, Eve.Mins.summary, VMail.Message.summary)
 row.names(summary.matrix) <- nazwy.zmiennych
 colnames(summary.matrix) <- nazwy.wskaznikow
 summary.matrix %>% kbl(caption="Wskazniki sumaryczne dla wybranych zmiennych", format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
 @
+
+
+<<histograms, warning=FALSE, message=FALSE>>=
+subset = subset(important, select=-c(Churn., Int.l.Plan, VMail.Plan))
+ggplot(gather(subset, 'key', 'value'), aes(x=value)) +
+  geom_histogram(aes(y=..density..), position="identity", color="orange") +
+  facet_wrap(~key, scales='free')
+@
+
+
+\verb|Day.Mins| i \verb|Eve.Mins| mają rozkład symetryczny, natomiast pozostałe \verb|CustServ.Calls| i \verb|VMail.Message| mają rozkład prawostronnie skośny. Dodatkowo charakteryzują się one dużą zmiennością.
+
+Teraz przyjrzyjmy się bliżej wybranym zmiennym jakościowym.
+
+<<ilosciowe, eval=TRUE, echo=FALSE, warning=FALSE>>=
+tab1 <- data.frame(table(df$Churn.))
+tab2 <- data.frame(table(df$Int.l.Plan))
+tab3 <- data.frame(table(df$VMail.Plan))
+tab1 <- tab1 %>% rename(Churn=Var1, Count=Freq) 
+tab2 <- tab2 %>% rename(Int.l.Plan=Var1, Count=Freq) 
+tab3 <- tab3 %>% rename(VMail.Plan=Var1, Count=Freq) 
+tab1 %>% kbl(format="latex") %>% kable_styling(latex_options=c('hold_position'))
+tab2 %>% kbl(format="latex") %>% kable_styling(latex_options=c('hold_position'))
+tab3 %>% kbl(format="latex") %>% kable_styling(latex_options=c('hold_position'))
+@
+
+<<slupkowe dla wybranych, echo=TRUE, warning=FALSE, fig.height=3.5, fig.width=6>>=
+ggplot(gather(important, "key", "value", -c(CustServ.Calls, Day.Mins, Eve.Mins, VMail.Message)), aes(value)) +
+  geom_bar(position="dodge", color='orange') +
+  facet_wrap(~key, scales='free')
+@
+Łatwo stwierdzić, że większośc klientów była lojalna ( \%), nie miała wykupionego planu międzynarodowego ( \%) oraz nie miało dostępu do planu poczty głosowej (\%).  
+
+\subsection{Analiza wybranych zmiennych z podziałem na grupy}
+
+<<sumaryczne dla grup, echo=FALSE, eval=TRUE>>=
+# for (i in list(list(important$Day.Mins, "Day.Mins"), 
+#                list(important$Eve.Mins, "Eve.Mins"),
+#                list(important$CustServ.Calls, "CustServ.Calls"), 
+#                list(important$VMail.Message, "VMail.Message"))) {
+#   w <- by(data=i[1], INDICES=important$Churn., my_summary)
+#   tab <- rbind(w$False., w$True.)
+#   row.names(tab) <- c("False.", "True.")
+#   tab %>% kbl(format="latex", digits=2, caption=i[2]) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+# }
+
+w1 <- by(data=important$Day.Mins, INDICES=important$Churn., my_summary)
+w2 <- by(data=important$Eve.Mins, INDICES=important$Churn., my_summary)
+w3 <- by(data=important$CustServ.Calls, INDICES=important$Churn., my_summary)
+w4 <- by(data=important$VMail.Message, INDICES=important$Churn., my_summary)
+
+tabela1 <- rbind(w1$False., w1$True.) 
+row.names(tabela1) <- c("False.", "True.")
+tabela1 %>% kbl(format="latex", digits=2, caption="Day.Mins"  ) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+ 
+tabela2 <- rbind(w2$False., w2$True.) 
+row.names(tabela1) <- c("False.", "True.")
+tabela2 %>% kbl(format="latex", digits=2, caption="Eve.Mins"  ) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+ 
+tabela3 <- rbind(w3$False., w3$True.) 
+row.names(tabela1) <- c("False.", "True.")
+tabela3 %>% kbl(format = "latex", digits=2, caption="CustServ.Calls"  ) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+
+tabela4 <- rbind(w4$False., w4$True.) 
+row.names(tabela1) <- c("False.", "True.")
+tabela4 %>% kbl(format="latex", digits=2, caption="VMail.Message"  ) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+@
+
+<<histogramy dla grup, warning=FALSE, message=FALSE>>=
+subset = subset(important, select=-c(Int.l.Plan, VMail.Plan))
+ggplot(gather(subset, 'key', 'value', -Churn.), aes(x=value, color=Churn.)) +
+  geom_histogram(aes(y=..density..), position="identity") +
+  facet_wrap(~key, scales='free')
+@
+
+<<ilosciowe dla grup, echo=FALSE, eval=TRUE>>=
+freq.table <- function(x) {
+  return(table(x) / length(x))
+}
+w1 <- by(data=important$Churn., INDICES=important$Int.l.Plan, freq.table)
+w2 <- by(data=important$Churn., INDICES=important$VMail.Plan, freq.table)
+
+tab1 <- rbind(w1$no, w1$yes)
+row.names(tab1) <- c("no", "yes")
+tab2 <- rbind(w2$no, w2$yes)
+row.names(tab2) <- c("no", "yes")
+tab1 %>% kbl(caption="Int.l.Plan", format="latex", digits=2) %>% kable_styling(latex_options=c('hold_position'))
+tab2 %>% kbl(caption="VMail.Plan", format="latex", digits=2) %>% kable_styling(latex_options=c('hold_position'))
+@
+
+
+<<scatterplot, echo=TRUE, message=FALSE, warning=FALSE>>=
+subset = subset(important, select=-c(Int.l.Plan, VMail.Plan))
+subset %>% ggpairs(.,
+mapping = ggplot2::aes(color=Churn.),
+columns=1:4, 
+lower=list(continuous=wrap("points", alpha=.4, size=.01)),
+upper=list(continuous="blank"),
+diag=list(continuous="blank"))
+@
+
 
 \section{Podsumowanie}
 Najważniesze wnioski z naszej analizy to:
