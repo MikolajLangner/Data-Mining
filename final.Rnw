@@ -221,6 +221,7 @@ colnames(summary.matrix) <- nazwy.wskaznikow
 summary.matrix %>% kbl(caption="Wskazniki sumaryczne dla wybranych zmiennych", format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
 @
 
+Przedstawimy również wartości tych zmiennych na histogramach.
 
 <<histograms, warning=FALSE, message=FALSE>>=
 subset = subset(important, select=-c(Churn., Int.l.Plan, VMail.Plan))
@@ -230,8 +231,8 @@ ggplot(gather(subset, 'key', 'value'), aes(x=value)) +
 @
 
 
-\verb|Day.Mins| i \verb|Eve.Mins| mają rozkład symetryczny, natomiast pozostałe \verb|CustServ.Calls| i \verb|VMail.Message| mają rozkład prawostronnie skośny. Dodatkowo charakteryzują się one dużą zmiennością.
-
+\verb|Day.Mins| i \verb|Eve.Mins| mają rozkład symetryczny, natomiast pozostałe \verb|CustServ.Calls| i \verb|VMail.Message| mają rozkład prawostronnie skośny. Dodatkowo, te dwie zmiene charakteryzują się one dużą zmiennością.\newline
+\vspace{0.3cm}
 Teraz przyjrzyjmy się bliżej wybranym zmiennym jakościowym.
 
 <<ilosciowe, eval=TRUE, echo=FALSE, warning=FALSE>>=
@@ -246,6 +247,7 @@ tab2 %>% kbl(format="latex") %>% kable_styling(latex_options=c('hold_position'))
 tab3 %>% kbl(format="latex") %>% kable_styling(latex_options=c('hold_position'))
 @
 
+Stworzymy dla tych zmiennych wykresy słupkowe.
 <<slupkowe dla wybranych, echo=TRUE, warning=FALSE, fig.height=3.5, fig.width=6>>=
 ggplot(gather(important, "key", "value", -c(CustServ.Calls, Day.Mins, Eve.Mins, VMail.Message)), aes(value)) +
   geom_bar(position="dodge", color='orange') +
@@ -257,16 +259,6 @@ ggplot(gather(important, "key", "value", -c(CustServ.Calls, Day.Mins, Eve.Mins, 
 
 Poniższe tabele zawierają informacje o wartościach wskaźników sumarycznych dla zmiennych ilosciowych, tym razem uwzględniają one podział klientów na grupy.
 <<sumaryczne dla grup, echo=FALSE, eval=TRUE>>=
-# for (i in list(list(important$Day.Mins, "Day.Mins"), 
-#                list(important$Eve.Mins, "Eve.Mins"),
-#                list(important$CustServ.Calls, "CustServ.Calls"), 
-#                list(important$VMail.Message, "VMail.Message"))) {
-#   w <- by(data=i[1], INDICES=important$Churn., my_summary)
-#   tab <- rbind(w$False., w$True.)
-#   row.names(tab) <- c("False.", "True.")
-#   tab %>% kbl(format="latex", digits=2, caption=i[2]) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
-# }
-
 w1 <- by(data=important$Day.Mins, INDICES=important$Churn., my_summary)
 w2 <- by(data=important$Eve.Mins, INDICES=important$Churn., my_summary)
 w3 <- by(data=important$CustServ.Calls, INDICES=important$Churn., my_summary)
@@ -277,17 +269,19 @@ row.names(tabela1) <- c("False.", "True.")
 tabela1 %>% kbl(format="latex", digits=2, caption="Day.Mins"  ) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
  
 tabela2 <- rbind(w2$False., w2$True.) 
-row.names(tabela1) <- c("False.", "True.")
+row.names(tabela2) <- c("False.", "True.")
 tabela2 %>% kbl(format="latex", digits=2, caption="Eve.Mins"  ) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
  
 tabela3 <- rbind(w3$False., w3$True.) 
-row.names(tabela1) <- c("False.", "True.")
+row.names(tabela3) <- c("False.", "True.")
 tabela3 %>% kbl(format = "latex", digits=2, caption="CustServ.Calls"  ) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
 
 tabela4 <- rbind(w4$False., w4$True.) 
-row.names(tabela1) <- c("False.", "True.")
+row.names(tabela4) <- c("False.", "True.")
 tabela4 %>% kbl(format="latex", digits=2, caption="VMail.Message"  ) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
 @
+
+Podobnie jak powyżej, przedstawimy wartości zmiennych, korzystając z histogramów. Tym razem uwzględniamy podział na grupy.
 
 <<histogramy dla grup, warning=FALSE, message=FALSE>>=
 subset = subset(important, select=-c(Int.l.Plan, VMail.Plan))
@@ -295,6 +289,12 @@ ggplot(gather(subset, 'key', 'value', -Churn.), aes(x=value, color=Churn.)) +
   geom_histogram(aes(y=..density..), position="identity") +
   facet_wrap(~key, scales='free')
 @
+
+Zauważamy, że 
+
+\vspace{0.3cm}
+
+Przyjrzymy się teraz zmiennym jakościowym po podziale na grupy.
 
 <<ilosciowe dla grup, echo=FALSE, eval=TRUE>>=
 freq.table <- function(x) {
@@ -311,6 +311,7 @@ tab1 %>% kbl(caption="Int.l.Plan", format="latex", digits=2) %>% kable_styling(l
 tab2 %>% kbl(caption="VMail.Plan", format="latex", digits=2) %>% kable_styling(latex_options=c('hold_position'))
 @
 
+Wykonamy także wykresy rozrzutu, przedstawiające zależności między zmiennymi ilościowymi.
 
 <<scatterplot, echo=TRUE, message=FALSE, warning=FALSE>>=
 subset = subset(important, select=-c(Int.l.Plan, VMail.Plan))
