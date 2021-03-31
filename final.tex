@@ -74,7 +74,7 @@
 
 \section{Wstęp}
 W niniejszym sprawozdaniu będziemy się zajmować danymi dotyczącymi klientów pewnej sieci telefonii komórkowej.
-Naszym zadaniem będzie odkrycie zależności między zmiennymi, które mogą mieć wpływna rezygnację klientów z oferty (churn analysis).
+Naszym zadaniem będzie odkrycie zależności między zmiennymi, które mogą mieć wpływ na rezygnację klientów z oferty (churn analysis).
 
 \section{Wczytanie i identyfikacja danych}
 Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
@@ -135,7 +135,7 @@ Zmienna \verb|Area.Code| powinna być interpretowana jako zmienna jakościowa.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{df}\hlopt{$}\hlstd{Area.Code} \hlkwb{=} \hlkwd{as.factor}\hlstd{(df}\hlopt{$}\hlstd{Area.Code)}
+\hlstd{df}\hlopt{$}\hlstd{Area.Code} \hlkwb{<-} \hlkwd{as.factor}\hlstd{(df}\hlopt{$}\hlstd{Area.Code)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -181,7 +181,7 @@ Zmienna \verb|Area.Code| powinna być interpretowana jako zmienna jakościowa.
 \end{kframe}
 \end{knitrout}
 
-Teraz podzielimy zmienne ze względu na ich typ (jakościowe --- \verb|factors|, ilościowe --- \verb|numerics|) oraz wykonamy kilka wykresów, które pomogą w zauważeniu zależności i wyborze najistotniejszych pod względem naszej analizy atrybutów.
+Teraz podzielimy zmienne ze względu na ich typ (jakościowe --- \verb|factors|, ilościowe --- \verb|numerics|) oraz wykonamy kilka wykresów, które pomogą nam zauważyć zależności i wyborać najistotniejsze pod względem naszej analizy atrybuty.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -192,16 +192,7 @@ Teraz podzielimy zmienne ze względu na ich typ (jakościowe --- \verb|factors|,
 \end{knitrout}
 
 Sprawdźmy zależności pomiędzy zmiennymi ciągłymi.
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
 
-{\centering \includegraphics[width=\maxwidth]{figure/Wykresy_dla_zmiennych_calkowitych-1} 
-
-}
-
-
-
-\end{knitrout}
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -274,7 +265,7 @@ Poniżej znajdują się wykresy empirycznych gęstości.
 
 
 \end{knitrout}
-Widoczne gołym okiem różnice są zauważalne w przypadku zmiennych: \verb|Day.Mins|, \verb|Customer.Service.Calls|, \verb|Eve.Mins|.
+Gołym okiem są widoczne różnice dla zmiennych: \verb|Day.Mins|, \verb|Customer.Service.Calls|, \verb|Eve.Mins|.
 
 Poniżej generujemy wykresy pudełkowe. 
 \begin{knitrout}
@@ -314,18 +305,8 @@ Stworzymy również wykresy empirycznych dystrybuant.
 \end{knitrout}
 Coś tam, coś tam \ldots
 
-By wykryć, dla których zmiennych następują najważniejsze różnice pomiędzy klientami lojalnymi, a tymi którzy zrezygnowali z usług, posłużymy się również testem Kołmogorova-Smirnova. Poniżej znajduje się funkcja, która wyznacza wyniki tego testu dla naszych zmiennych. 
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{churn.kstest} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{feature}\hlstd{) \{}
-  \hlstd{yes} \hlkwb{<-} \hlkwd{subset}\hlstd{(numerics,} \hlkwc{subset}\hlstd{=Churn.}\hlopt{==}\hlstr{"True."}\hlstd{)}
-  \hlstd{no} \hlkwb{<-} \hlkwd{subset}\hlstd{(numerics,} \hlkwc{subset}\hlstd{=Churn.}\hlopt{==}\hlstr{"False."}\hlstd{)}
-  \hlkwd{return}\hlstd{(}\hlkwd{c}\hlstd{(}\hlkwd{ks.test}\hlstd{(yes[[feature]], no[[feature]])[}\hlkwd{c}\hlstd{(}\hlstr{"statistic"}\hlstd{,} \hlstr{"p.value"}\hlstd{)]))}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
+By wykryć, dla których zmiennych następują najważniejsze różnice pomiędzy klientami lojalnymi, a tymi którzy zrezygnowali z usług, posłużymy się również testem Kołmogorova-Smirnova.
+
 
 Tabela poniżej zbiera wyniki przeprowadzonych testów statystycznych.
 \begin{table}[!h]
@@ -359,8 +340,7 @@ Po dogłębnym przeanalizowaniu wykresów i wyników testów Kołmogorova-Smirno
   \item jakościowych
     \begin{itemize}
     \item Int.l.Plan,
-    \item VMail.Plan,
-    \item Churn.
+    \item VMail.Plan
     \end{itemize}
 \end{itemize}
 
@@ -500,7 +480,7 @@ Stworzymy dla tych zmiennych wykresy słupkowe.
 
 
 \end{knitrout}
-Łatwo stwierdzić, że większośc klientów była lojalna ( $\approx 86$\%), nie miała wykupionego planu międzynarodowego ($\approx 90$ \%) oraz nie miało dostępu do planu poczty głosowej ($\approx 72$\%).  
+Łatwo stwierdzić, że większość klientów była lojalna ( $\approx 86$\%), nie miała wykupionego planu międzynarodowego ($\approx 90$ \%) oraz nie miała dostępu do planu poczty głosowej ($\approx 72$\%).  
 
 \subsection{Analiza wybranych zmiennych z podziałem na grupy}
 

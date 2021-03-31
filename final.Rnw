@@ -28,7 +28,7 @@ opts_chunk$set(fig.path='figure/', fig.align='center', fig.pos='h', fig.width=6,
 
 \section{Wstęp}
 W niniejszym sprawozdaniu będziemy się zajmować danymi dotyczącymi klientów pewnej sieci telefonii komórkowej.
-Naszym zadaniem będzie odkrycie zależności między zmiennymi, które mogą mieć wpływna rezygnację klientów z oferty (churn analysis).
+Naszym zadaniem będzie odkrycie zależności między zmiennymi, które mogą mieć wpływ na rezygnację klientów z oferty (churn analysis).
 
 \section{Wczytanie i identyfikacja danych}
 Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
@@ -58,7 +58,7 @@ t(table2) %>% kable(format="latex") %>% kable_styling(latex_options=c('hold_posi
 
 Zmienna \verb|Area.Code| powinna być interpretowana jako zmienna jakościowa.
 <<Odpowiednie typowanie>>=
-df$Area.Code = as.factor(df$Area.Code)
+df$Area.Code <- as.factor(df$Area.Code)
 @
 
 \item Sprawdźmy czy pojawiają się wartości brakujące:
@@ -87,14 +87,14 @@ library(EnvStats)
 library(DescTools)
 @
 
-Teraz podzielimy zmienne ze względu na ich typ (jakościowe --- \verb|factors|, ilościowe --- \verb|numerics|) oraz wykonamy kilka wykresów, które pomogą w zauważeniu zależności i wyborze najistotniejszych pod względem naszej analizy atrybutów.
+Teraz podzielimy zmienne ze względu na ich typ (jakościowe --- \verb|factors|, ilościowe --- \verb|numerics|) oraz wykonamy kilka wykresów, które pomogą nam zauważyć zależności i wyborać najistotniejsze pod względem naszej analizy atrybuty.
 <<Podział danych na typy>>=
 factors <- subset(df, select=sapply(df, is.factor))
 numerics <- subset(df, select=sapply(df, function(x) !is.factor(x)))
 @
 
 Sprawdźmy zależności pomiędzy zmiennymi ciągłymi.
-<<Wykresy dla zmiennych całkowitych, warning=FALSE, message=FALSE, echo=FALSE>>=
+<<Wykresy dla zmiennych całkowitych, warning=FALSE, message=FALSE, echo=FALSE, eval=FALSE>>=
 integers <- subset(numerics, select=sapply(numerics, function(x) is.integer(x)))
 ggpairs(integers,
         lower=list(continuous=wrap("points", alpha=.4, size=.01)))
@@ -136,7 +136,7 @@ ggplot(gather(numerics, "key", "value", -Churn.), aes(x=value, color=Churn.)) +
   geom_freqpoly(aes(y=..density..), position="identity") +
   facet_wrap(~key, scales='free')
 @
-Widoczne gołym okiem różnice są zauważalne w przypadku zmiennych: \verb|Day.Mins|, \verb|Customer.Service.Calls|, \verb|Eve.Mins|.
+Gołym okiem są widoczne różnice dla zmiennych: \verb|Day.Mins|, \verb|Customer.Service.Calls|, \verb|Eve.Mins|.
 
 Poniżej generujemy wykresy pudełkowe. 
 <<Wykresy pudełkowe, warning=FALSE, message=FALSE>>=
@@ -154,8 +154,8 @@ ggplot(gather(numerics, "key", "value", -Churn.), aes(value, color=Churn.)) +
 @
 Coś tam, coś tam \ldots
 
-By wykryć, dla których zmiennych następują najważniejsze różnice pomiędzy klientami lojalnymi, a tymi którzy zrezygnowali z usług, posłużymy się również testem Kołmogorova-Smirnova. Poniżej znajduje się funkcja, która wyznacza wyniki tego testu dla naszych zmiennych. 
-<<kstest, warning=FALSE>>=
+By wykryć, dla których zmiennych następują najważniejsze różnice pomiędzy klientami lojalnymi, a tymi którzy zrezygnowali z usług, posłużymy się również testem Kołmogorova-Smirnova.
+<<kstest, warning=FALSE, echo=FALSE>>=
 churn.kstest <- function(feature) {
   yes <- subset(numerics, subset=Churn.=="True.")
   no <- subset(numerics, subset=Churn.=="False.")
@@ -189,8 +189,7 @@ Po dogłębnym przeanalizowaniu wykresów i wyników testów Kołmogorova-Smirno
   \item jakościowych
     \begin{itemize}
     \item Int.l.Plan,
-    \item VMail.Plan,
-    \item Churn.
+    \item VMail.Plan
     \end{itemize}
 \end{itemize}
 
@@ -260,7 +259,7 @@ ggplot(gather(important, "key", "value", -c(CustServ.Calls, Day.Mins, Eve.Mins, 
   geom_bar(position="dodge", color='orange') +
   facet_wrap(~key, scales='free')
 @
-Łatwo stwierdzić, że większośc klientów była lojalna ( $\approx 86$\%), nie miała wykupionego planu międzynarodowego ($\approx 90$ \%) oraz nie miało dostępu do planu poczty głosowej ($\approx 72$\%).  
+Łatwo stwierdzić, że większość klientów była lojalna ( $\approx 86$\%), nie miała wykupionego planu międzynarodowego ($\approx 90$ \%) oraz nie miała dostępu do planu poczty głosowej ($\approx 72$\%).  
 
 \subsection{Analiza wybranych zmiennych z podziałem na grupy}
 
