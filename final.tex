@@ -73,8 +73,8 @@
 \maketitle
 
 \section{Wstęp}
-W niniejszym sprawozdaniu zajmować się będziemy danymi dotyczącymi klientów pewnej sieci telefonii komórkowej.
-Naszym zadaniem będzie odkrycie zależności między zmiennymi, które określą przyczyny rezygnacji klientów z oferty (churn analysis).
+W niniejszym sprawozdaniu będziemy się zajmować danymi dotyczącymi klientów pewnej sieci telefonii komórkowej.
+Naszym zadaniem będzie odkrycie zależności między zmiennymi, które mogą mieć wpływna rezygnację klientów z oferty (churn analysis).
 
 \section{Wczytanie i identyfikacja danych}
 Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
@@ -83,14 +83,13 @@ Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{df} \hlkwb{<-} \hlkwd{read.csv}\hlstd{(}\hlstr{'churn.txt'}\hlstd{,} \hlkwc{stringsAsFactors} \hlstd{=} \hlnum{TRUE}\hlstd{)}
-\hlstd{df}\hlopt{$}\hlstd{Area.Code} \hlkwb{=} \hlkwd{as.factor}\hlstd{(df}\hlopt{$}\hlstd{Area.Code)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
 
 \begin{itemize}
 
-\item poznajmy rozmiar naszych danych:
+\item Poznajmy rozmiar naszych danych:
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -103,17 +102,17 @@ Wczytajmy dane z pliku i przeprowadźmy ich wstępną analizę i obróbkę:
 \end{knitrout}
 --- jest 21 zmiennych i 3333 obserwacji;
 
-\item sprawdźmy ich typy:
+\item Sprawdźmy typy zmiennych:
 \begin{table}[!h]
 
-\caption{\label{tab:tabela_1}Typy zmiennych}
+\caption{\label{tab:Tabele z typami}Typy zmiennych}
 \centering
 \resizebox{\linewidth}{!}{
 \begin{tabular}[t]{l|l|l|l|l|l|l|l|l|l|l|l}
 \hline
   & State & Account.Length & Area.Code & Phone & Int.l.Plan & VMail.Plan & VMail.Message & Day.Mins & Day.Calls & Day.Charge & Eve.Mins\\
 \hline
-Typ zmiennej & factor & integer & factor & factor & factor & factor & integer & numeric & integer & numeric & numeric\\
+Typ zmiennej & factor & integer & integer & factor & factor & factor & integer & numeric & integer & numeric & numeric\\
 \hline
 \end{tabular}}
 \end{table}
@@ -132,7 +131,16 @@ Typ zmiennej & integer & numeric & numeric & integer & numeric & numeric & integ
 
 
 
-\item sprawdźmy czy pojawiają się wartości brakujące:
+Zmienna \verb|Area.Code| powinna być interpretowana jako zmienna jakościowa.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{df}\hlopt{$}\hlstd{Area.Code} \hlkwb{=} \hlkwd{as.factor}\hlstd{(df}\hlopt{$}\hlstd{Area.Code)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\item Sprawdźmy czy pojawiają się wartości brakujące:
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -143,8 +151,8 @@ Typ zmiennej & integer & numeric & numeric & integer & numeric & numeric & integ
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
---- nie ma więc brakujących obserwacji;
-\item usuńmy dane pełniące rolę indentyfikatora (numer telefonu):
+--- nie ma takich obserwacji.
+\item Usuńmy teraz kolumnę pełniącą rolę indentyfikatora (numer telefonu):
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -155,7 +163,7 @@ Typ zmiennej & integer & numeric & numeric & integer & numeric & numeric & integ
 
 \end{itemize}
 
-\section{Analiza zmiennych, szkanie zależności}
+\section{Wstępna analiza zmiennych i szukanie zależności}
 
 \subsection{Wskaźniki sumaryczne}
 
@@ -163,20 +171,17 @@ Typ zmiennej & integer & numeric & numeric & integer & numeric & numeric & integ
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{# wczytanie potrzebnych bibliotek}
 \hlkwd{library}\hlstd{(ggplot2)}
-\hlkwd{library}\hlstd{(ggmosaic)}
 \hlkwd{library}\hlstd{(GGally)}
 \hlkwd{library}\hlstd{(tidyr)}
 \hlkwd{library}\hlstd{(dplyr)}
 \hlkwd{library}\hlstd{(EnvStats)}
 \hlkwd{library}\hlstd{(DescTools)}
-\hlkwd{library}\hlstd{(moments)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
 
-Teraz podzielimy zmienne ze względu na ich typ (jakościowe --- \verb|factors|, ilościowe --- \verb|numerics|) oraz wykonamy kilka wykresów, które pomogą w zauważeniu pewnych zależności i wyborze najistotniejszych pod względem naszej analizy atrybutów.
+Teraz podzielimy zmienne ze względu na ich typ (jakościowe --- \verb|factors|, ilościowe --- \verb|numerics|) oraz wykonamy kilka wykresów, które pomogą w zauważeniu zależności i wyborze najistotniejszych pod względem naszej analizy atrybutów.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -188,6 +193,17 @@ Teraz podzielimy zmienne ze względu na ich typ (jakościowe --- \verb|factors|,
 
 Sprawdźmy zależności pomiędzy zmiennymi ciągłymi.
 \begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+
+{\centering \includegraphics[width=\maxwidth]{figure/Wykresy_dla_zmiennych_calkowitych-1} 
+
+}
+
+
+
+\end{knitrout}
+
+\begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{continuous} \hlkwb{<-} \hlkwd{subset}\hlstd{(numerics,} \hlkwc{select}\hlstd{=}\hlkwd{sapply}\hlstd{(numerics,} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{)} \hlopt{!}\hlkwd{is.integer}\hlstd{(x)))}
@@ -196,14 +212,14 @@ Sprawdźmy zależności pomiędzy zmiennymi ciągłymi.
 \end{alltt}
 \end{kframe}
 
-{\centering \includegraphics[width=\maxwidth]{figure/Pair_plot_for_continuous_variables-1} 
+{\centering \includegraphics[width=\maxwidth]{figure/Wykresy_dla_zmiennych_ciaglych-1} 
 
 }
 
 
 
 \end{knitrout}
-Możemy zauważyć, że zmienne z przyrostkami `.Mins` oraz `.Charge` są ze sobą idealnie skorelowane. Odrzućmy zatem od razu dane z przyrostkiem `.Charge` dla ułatwienia dalszej analizy. Nie ma natomiast korelacji pomiędzy pozostałymi atrybutami.
+Możemy zauważyć, że zmienne z przyrostkami \verb|.Mins| oraz \verb|.Charge| są ze sobą idealnie skorelowane. Odrzućmy zatem od razu np. kolumny z \verb|.Charge| dla ułatwienia dalszej analizy. Nie ma natomiast korelacji pomiędzy pozostałymi atrybutami.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -218,15 +234,9 @@ Wykonamy teraz wykresy zmiennych ilościowych, dzieląc klientów na dwie grupy:
   \item tych, którzy zrezygnowali --- \verb|Churn. == TRUE |,
   \item tych, którzy pozostali lojalni --- \verb|Churn. == FALSE|.
 \end{itemize}
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{numerics} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(numerics,} \hlkwc{Churn.} \hlstd{= df}\hlopt{$}\hlstd{Churn.)}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
 
-Poniżej wykresy słupkowe dla danych jakościowych.
+
+Poniżej znajdują się wykresy słupkowe dla danych jakościowych.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -236,7 +246,7 @@ Poniżej wykresy słupkowe dla danych jakościowych.
 \end{alltt}
 \end{kframe}
 
-{\centering \includegraphics[width=\maxwidth]{figure/Bar_plots-1} 
+{\centering \includegraphics[width=\maxwidth]{figure/Wykresy_slupkowe_dla_wszystkich_zmiennych-1} 
 
 }
 
@@ -244,7 +254,7 @@ Poniżej wykresy słupkowe dla danych jakościowych.
 
 \end{knitrout}
 
-Możemy zauważyć, że osoby, które posiadały plan międzynarodowy, jak i te, które nie posiadały planu skrzyki głosowej częściej rezygnowały z usług. Zmienne \verb|Area.Code| i \verb|State| nie pokazują żadnych istotnych różnic pomiędzy tymi dwoma grupami.
+Możemy zauważyć, że osoby, które posiadały plan międzynarodowy, jak i te, które nie posiadały planu skrzynki głosowej, częściej rezygnowały z usług. Zmienne \verb|Area.Code| i \verb|State| nie wykazują żadnych istotnych różnic pomiędzy tymi grupami.
 
 
 Poniżej znajdują się wykresy empirycznych gęstości.
@@ -257,14 +267,14 @@ Poniżej znajdują się wykresy empirycznych gęstości.
 \end{alltt}
 \end{kframe}
 
-{\centering \includegraphics[width=\maxwidth]{figure/Densities-1} 
+{\centering \includegraphics[width=\maxwidth]{figure/Wykresy_gestosci-1} 
 
 }
 
 
 
 \end{knitrout}
-Widoczne gołym okiem różnice są zauważalne w przypadku zmiennych: \verb|Day.Mins|, \verb|Customer.Service.Calls|, \verb|Eve.Calls|.
+Widoczne gołym okiem różnice są zauważalne w przypadku zmiennych: \verb|Day.Mins|, \verb|Customer.Service.Calls|, \verb|Eve.Mins|.
 
 Poniżej generujemy wykresy pudełkowe. 
 \begin{knitrout}
@@ -276,14 +286,14 @@ Poniżej generujemy wykresy pudełkowe.
 \end{alltt}
 \end{kframe}
 
-{\centering \includegraphics[width=\maxwidth]{figure/Boxplot-1} 
+{\centering \includegraphics[width=\maxwidth]{figure/Wykresy_pudelkowe-1} 
 
 }
 
 
 
 \end{knitrout}
-Ponownie, duże różnice uwidaczniają się dla zmiennych: \verb|Day.Mins|, \verb|Customer.Service.Calls|, \verb|Eve.Calls|.
+Ponownie, duże różnice uwidaczniają się dla zmiennych: \verb|Day.Mins|, \verb|Customer.Service.Calls|, \verb|Eve.Mins|.
 
 Stworzymy również wykresy empirycznych dystrybuant.
 \begin{knitrout}
@@ -295,7 +305,7 @@ Stworzymy również wykresy empirycznych dystrybuant.
 \end{alltt}
 \end{kframe}
 
-{\centering \includegraphics[width=\maxwidth]{figure/Ecdf-1} 
+{\centering \includegraphics[width=\maxwidth]{figure/Dystrybuanty_empiryczne-1} 
 
 }
 
@@ -304,7 +314,7 @@ Stworzymy również wykresy empirycznych dystrybuant.
 \end{knitrout}
 Coś tam, coś tam \ldots
 
-By wykryć, dla których zmiennych następuja najważniejsza różnica pomiędzy klientami lojalnymi, a tymi którzy zrezygnowali z usług, posłużymy się również testem Kołmogorova-Smirnova. Poniżej znajduje się funkcja, która wyznacza wyniki tego testu dla naszych zmiennych. 
+By wykryć, dla których zmiennych następują najważniejsze różnice pomiędzy klientami lojalnymi, a tymi którzy zrezygnowali z usług, posłużymy się również testem Kołmogorova-Smirnova. Poniżej znajduje się funkcja, która wyznacza wyniki tego testu dla naszych zmiennych. 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -320,7 +330,7 @@ By wykryć, dla których zmiennych następuja najważniejsza różnica pomiędzy
 Tabela poniżej zbiera wyniki przeprowadzonych testów statystycznych.
 \begin{table}[!h]
 
-\caption{\label{tab:tabela_3}Wyniki testu Kolmogorova-Smirnova}
+\caption{\label{tab:Tabela z testami statystycznymi}Wyniki testu Kolmogorova-Smirnova}
 \centering
 \resizebox{\linewidth}{!}{
 \begin{tabular}[t]{l|r|r|r|r|r|r|r|r|r|r|r}
@@ -335,10 +345,10 @@ pvalue & 0.5581609 & 0.0000018 & 0.0000000 & 0.1550801 & 0.0000264 & 0.9980118 &
 \end{table}
 
 
-Możemy zauważyć, że testy na największe różnice (duża wartość zmiennej \verb|statistic|, mała zmiennej \verb|pvalue|) wskazują w przypadku zmiennych: CustServ.Calls, Day.Mins, Eve.Mins, 
+Możemy zauważyć, że testy wykazują największe różnice (duża wartość zmiennej \verb|statistic|, małe \verb|pvalue|) w przypadku zmiennych: \verb|CustServ.Calls|, \verb|Day.Mins|, \verb|Eve.Mins|.
 
 
-Po dogłębnym przeanalizowaniu wykresów i wyników testów Kołmogorova-Smirnova, zauważmy, że istotne dla naszej analizy to następujące zmienne:
+Po dogłębnym przeanalizowaniu wykresów i wyników testów Kołmogorova-Smirnova, zauważamy, że istotne dla naszej analizy są zmienne:
 \begin{itemize}
   \item ilościowych:
     \begin{itemize}
@@ -385,20 +395,20 @@ Wyznaczmy dla nich wskaźniki sumaryczne.
 
 \begin{table}[!h]
 
-\caption{\label{tab:tabela_2}Wskazniki sumaryczne dla wybranych zmiennych}
+\caption{\label{tab:Tabela ze statystykami}Wskazniki sumaryczne dla wybranych zmiennych}
 \centering
 \resizebox{\linewidth}{!}{
 \begin{tabular}[t]{l|r|r|r|r|r|r|r|r|r|r|r|r}
 \hline
   & Srednia & Q1 & Mediana & Q3 & IQR & Min & Max & Wariancja & Odchylenie standardowe & Wspolczynnik zmiennosci & Kurtoza & Skosnosc\\
 \hline
-CustServ.Calls & 1.562856 & 1.0 & 1.0 & 2.0 & 1.0 & 0 & 9.0 & 1.730517 & 1.315491 & 0.8417223 & 4.726519 & 1.0908683\\
+CustServ.Calls & 1.562856 & 1.0 & 1.0 & 2.0 & 1.0 & 0 & 9.0 & 1.730517 & 1.315491 & 0.8417223 & 1.7309137 & 1.0913595\\
 \hline
-Day.Mins & 179.775097 & 143.7 & 179.4 & 216.4 & 72.7 & 0 & 350.8 & 2966.696486 & 54.467389 & 0.3029752 & 2.978290 & -0.0290640\\
+Day.Mins & 179.775097 & 143.7 & 179.4 & 216.4 & 72.7 & 0 & 350.8 & 2966.696486 & 54.467389 & 0.3029752 & -0.0199404 & -0.0290771\\
 \hline
-Eve.Mins & 200.980348 & 166.6 & 201.4 & 235.3 & 68.7 & 0 & 363.7 & 2571.894016 & 50.713844 & 0.2523324 & 3.023792 & -0.0238667\\
+Eve.Mins & 200.980348 & 166.6 & 201.4 & 235.3 & 68.7 & 0 & 363.7 & 2571.894016 & 50.713844 & 0.2523324 & 0.0256298 & -0.0238775\\
 \hline
-VMail.Message & 8.099010 & 0.0 & 0.0 & 20.0 & 20.0 & 0 & 51.0 & 187.371347 & 13.688365 & 1.6901282 & 2.947148 & 1.2642543\\
+VMail.Message & 8.099010 & 0.0 & 0.0 & 20.0 & 20.0 & 0 & 51.0 & 187.371347 & 13.688365 & 1.6901282 & -0.0511285 & 1.2648236\\
 \hline
 \end{tabular}}
 \end{table}
@@ -417,7 +427,7 @@ Przedstawimy również wartości tych zmiennych na histogramach.
 \end{alltt}
 \end{kframe}
 
-{\centering \includegraphics[width=\maxwidth]{figure/histograms-1} 
+{\centering \includegraphics[width=\maxwidth]{figure/Histogramy-1} 
 
 }
 
@@ -483,7 +493,7 @@ Stworzymy dla tych zmiennych wykresy słupkowe.
 \end{alltt}
 \end{kframe}
 
-{\centering \includegraphics[width=\maxwidth]{figure/slupkowe_dla_wybranych-1} 
+{\centering \includegraphics[width=\maxwidth]{figure/Wykresy_slupkowe_dla_wybranych_zmiennych-1} 
 
 }
 
@@ -498,64 +508,64 @@ Poniższe tabele zawierają informacje o wartościach wskaźników sumarycznych 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{table}[!h]
 
-\caption{\label{tab:sumaryczne dla grup}Day.Mins}
+\caption{\label{tab:Statystyki sumaryczne z podzialem na grupy}Day.Mins}
 \centering
 \resizebox{\linewidth}{!}{
 \begin{tabular}[t]{l|r|r|r|r|r|r|r|r|r|r|r|r}
 \hline
   & Srednia & Q1 & Mediana & Q3 & IQR & Min & Max & Wariancja & Odchylenie standardowe & Wspolczynnik zmiennosci & Kurtoza & Skosnosc\\
 \hline
-False. & 175.18 & 142.83 & 177.2 & 210.30 & 67.47 & 0 & 315.6 & 2518.2 & 50.18 & 0.29 & 2.99 & -0.23\\
+False. & 175.18 & 142.83 & 177.2 & 210.30 & 67.47 & 0 & 315.6 & 2518.2 & 50.18 & 0.29 & 0.00 & -0.23\\
 \hline
-True. & 206.91 & 153.25 & 217.6 & 265.95 & 112.70 & 0 & 350.8 & 4760.7 & 69.00 & 0.33 & 2.19 & -0.20\\
+True. & 206.91 & 153.25 & 217.6 & 265.95 & 112.70 & 0 & 350.8 & 4760.7 & 69.00 & 0.33 & -0.81 & -0.20\\
 \hline
 \end{tabular}}
 \end{table}
 
 \begin{table}[!h]
 
-\caption{\label{tab:sumaryczne dla grup}Eve.Mins}
+\caption{\label{tab:Statystyki sumaryczne z podzialem na grupy}Eve.Mins}
 \centering
 \resizebox{\linewidth}{!}{
 \begin{tabular}[t]{l|r|r|r|r|r|r|r|r|r|r|r|r}
 \hline
   & Srednia & Q1 & Mediana & Q3 & IQR & Min & Max & Wariancja & Odchylenie standardowe & Wspolczynnik zmiennosci & Kurtoza & Skosnosc\\
 \hline
-False. & 199.04 & 164.5 & 199.6 & 233.20 & 68.70 & 0.0 & 361.8 & 2529.30 & 50.29 & 0.25 & 3.03 & -0.04\\
+False. & 199.04 & 164.5 & 199.6 & 233.20 & 68.70 & 0.0 & 361.8 & 2529.30 & 50.29 & 0.25 & 0.03 & -0.04\\
 \hline
-True. & 212.41 & 177.1 & 211.3 & 249.45 & 72.35 & 70.9 & 363.7 & 2675.88 & 51.73 & 0.24 & 2.90 & 0.03\\
+True. & 212.41 & 177.1 & 211.3 & 249.45 & 72.35 & 70.9 & 363.7 & 2675.88 & 51.73 & 0.24 & -0.09 & 0.03\\
 \hline
 \end{tabular}}
 \end{table}
 
 \begin{table}[!h]
 
-\caption{\label{tab:sumaryczne dla grup}CustServ.Calls}
+\caption{\label{tab:Statystyki sumaryczne z podzialem na grupy}CustServ.Calls}
 \centering
 \resizebox{\linewidth}{!}{
 \begin{tabular}[t]{l|r|r|r|r|r|r|r|r|r|r|r|r}
 \hline
   & Srednia & Q1 & Mediana & Q3 & IQR & Min & Max & Wariancja & Odchylenie standardowe & Wspolczynnik zmiennosci & Kurtoza & Skosnosc\\
 \hline
-False. & 1.45 & 1 & 1 & 2 & 1 & 0 & 8 & 1.35 & 1.16 & 0.80 & 4.21 & 0.89\\
+False. & 1.45 & 1 & 1 & 2 & 1 & 0 & 8 & 1.35 & 1.16 & 0.80 & 1.21 & 0.89\\
 \hline
-True. & 2.23 & 1 & 2 & 4 & 3 & 0 & 9 & 3.43 & 1.85 & 0.83 & 2.89 & 0.70\\
+True. & 2.23 & 1 & 2 & 4 & 3 & 0 & 9 & 3.43 & 1.85 & 0.83 & -0.10 & 0.70\\
 \hline
 \end{tabular}}
 \end{table}
 
 \begin{table}[!h]
 
-\caption{\label{tab:sumaryczne dla grup}VMail.Message}
+\caption{\label{tab:Statystyki sumaryczne z podzialem na grupy}VMail.Message}
 \centering
 \resizebox{\linewidth}{!}{
 \begin{tabular}[t]{l|r|r|r|r|r|r|r|r|r|r|r|r}
 \hline
   & Srednia & Q1 & Mediana & Q3 & IQR & Min & Max & Wariancja & Odchylenie standardowe & Wspolczynnik zmiennosci & Kurtoza & Skosnosc\\
 \hline
-False. & 8.60 & 0 & 0 & 22 & 22 & 0 & 51 & 193.58 & 13.91 & 1.62 & 2.71 & 1.17\\
+False. & 8.60 & 0 & 0 & 22 & 22 & 0 & 51 & 193.58 & 13.91 & 1.62 & -0.29 & 1.17\\
 \hline
-True. & 5.12 & 0 & 0 & 0 & 0 & 0 & 48 & 140.66 & 11.86 & 2.32 & 5.52 & 2.03\\
+True. & 5.12 & 0 & 0 & 0 & 0 & 0 & 48 & 140.66 & 11.86 & 2.32 & 2.56 & 2.04\\
 \hline
 \end{tabular}}
 \end{table}
@@ -575,7 +585,7 @@ Podobnie jak powyżej, przedstawimy wartości zmiennych, korzystając z histogra
 \end{alltt}
 \end{kframe}
 
-{\centering \includegraphics[width=\maxwidth]{figure/histogramy_dla_grup-1} 
+{\centering \includegraphics[width=\maxwidth]{figure/Histogramy_z_podzialem_na_grupy-1} 
 
 }
 
@@ -592,7 +602,7 @@ Przyjrzymy się teraz zmiennym jakościowym po podziale na grupy.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{table}[!h]
 
-\caption{\label{tab:ilosciowe dla grup}Int.l.Plan}
+\caption{\label{tab:Ilosciowe z podzialem na grupy}Int.l.Plan}
 \centering
 \begin{tabular}[t]{l|r|r}
 \hline
@@ -607,7 +617,7 @@ yes & 0.58 & 0.42\\
 
 \begin{table}[!h]
 
-\caption{\label{tab:ilosciowe dla grup}VMail.Plan}
+\caption{\label{tab:Ilosciowe z podzialem na grupy}VMail.Plan}
 \centering
 \begin{tabular}[t]{l|r|r}
 \hline
@@ -638,7 +648,7 @@ Wykonamy także wykresy rozrzutu, przedstawiające zależności między zmiennym
 \end{alltt}
 \end{kframe}
 
-{\centering \includegraphics[width=\maxwidth]{figure/scatterplot-1} 
+{\centering \includegraphics[width=\maxwidth]{figure/Wykresy_rozrzutu-1} 
 
 }
 
