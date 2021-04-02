@@ -1,0 +1,121 @@
+---
+title: "lista 2."
+author: "Mikołaj Langner, Marcin Kostrzewa"
+date: "25.04.2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(datasets)
+library(DataExplorer)
+library(ggbeeswarm)
+library(ggplot2)
+library(wesanderson)
+library(EnvStats)
+library(arules)
+library(e1071)
+```
+
+## ZADANIE 1.
+
+
+```{r}
+data(iris)
+```
+
+```{r include=FALSE}
+str(iris)
+plot_boxplot(iris, by="Species")
+aggregate(. ~ Species, iris, cv)
+```
+
+```{r message=FALSE}
+intervals <- c(min(iris$Petal.Length), 2, 5, max(iris$Petal.Length))
+for (method in c("interval", "frequency", "cluster", "fixed")) {
+  petal.length.discretized <- if (method != "fixed") 
+    discretize(iris$Petal.Length, method=method) else 
+    discretize(iris$Petal.Length, method=method, breaks=intervals)
+  print(ggplot(iris, aes(Petal.Length)) +
+          geom_histogram() +
+          geom_vline(xintercept=attributes(petal.length.discretized)$"discretized:breaks") +
+          ggtitle(method))
+  print(ggplot(iris, aes(Species, Petal.Length)) +
+    geom_quasirandom(aes(col=Species)) +
+    scale_color_manual(values=wes_palette("GrandBudapest1", 3)) +
+    geom_hline(yintercept=attributes(petal.length.discretized)$"discretized:breaks") +
+    ggtitle(method))
+  discretized.table <- table(petal.length.discretized, iris$Species)
+  matchClasses(discretized.table)
+}
+```
+
+```{r message=FALSE}
+intervals <- c(min(iris$Sepal.Width), 2.5, 3, max(iris$Sepal.Width))
+for (method in c("interval", "frequency", "cluster", "fixed")) {
+  sepal.width.discretized <- if (method != "fixed") 
+    discretize(iris$Sepal.Width, method=method) else 
+    discretize(iris$Sepal.Width, method=method, breaks=intervals)
+  print(ggplot(iris, aes(Sepal.Width)) +
+          geom_histogram() +
+          geom_vline(xintercept=attributes(sepal.width.discretized)$"discretized:breaks") +
+          ggtitle(method))
+  print(ggplot(iris, aes(Species, Sepal.Width)) +
+    geom_quasirandom(aes(col=Species)) +
+    scale_color_manual(values=wes_palette("GrandBudapest1", 3)) +
+    geom_hline(yintercept=attributes(sepal.width.discretized)$"discretized:breaks") +
+    ggtitle(method))
+  discretized.table <- table(sepal.width.discretized, iris$Species)
+  matchClasses(discretized.table)
+}
+```
+
+```{r include=FALSE}
+str(iris)
+plot_boxplot(iris, by="Species")
+aggregate(. ~ Species, iris, cv)
+```
+
+```{r message=FALSE}
+iris$Petal.Length[which.min(iris$Petal.Length)] <- min(iris$Petal.Length) - IQR(iris$Petal.Length)
+iris$Petal.Length[which.max(iris$Petal.Length)] <- max(iris$Petal.Length) + IQR(iris$Petal.Length)
+intervals <- c(min(iris$Petal.Length), 2, 5, max(iris$Petal.Length))
+for (method in c("interval", "frequency", "cluster", "fixed")) {
+  petal.length.discretized <- if (method != "fixed") 
+    discretize(iris$Petal.Length, method=method) else 
+    discretize(iris$Petal.Length, method=method, breaks=intervals)
+  print(ggplot(iris, aes(Petal.Length)) +
+          geom_histogram() +
+          geom_vline(xintercept=attributes(petal.length.discretized)$"discretized:breaks") +
+          ggtitle(method))
+  print(ggplot(iris, aes(Species, Petal.Length)) +
+    geom_quasirandom(aes(col=Species)) +
+    scale_color_manual(values=wes_palette("GrandBudapest1", 3)) +
+    geom_hline(yintercept=attributes(petal.length.discretized)$"discretized:breaks") +
+    ggtitle(method))
+  discretized.table <- table(petal.length.discretized, iris$Species)
+  matchClasses(discretized.table)
+}
+```
+
+```{r message=FALSE}
+iris$Sepal.Width[which.min(iris$Sepal.Width)] <- min(iris$Sepal.Width) - IQR(iris$Sepal.Width)
+iris$Sepal.Width[which.max(iris$Sepal.Width)] <- max(iris$Sepal.Width) + IQR(iris$Sepal.Width)
+intervals <- c(min(iris$Sepal.Width), 2.5, 3, max(iris$Sepal.Width))
+for (method in c("interval", "frequency", "cluster", "fixed")) {
+  sepal.width.discretized <- if (method != "fixed") 
+    discretize(iris$Sepal.Width, method=method) else 
+    discretize(iris$Sepal.Width, method=method, breaks=intervals)
+  print(ggplot(iris, aes(Sepal.Width)) +
+          geom_histogram() +
+          geom_vline(xintercept=attributes(sepal.width.discretized)$"discretized:breaks") +
+          ggtitle(method))
+  print(ggplot(iris, aes(Species, Sepal.Width)) +
+    geom_quasirandom(aes(col=Species)) +
+    scale_color_manual(values=wes_palette("GrandBudapest1", 3)) +
+    geom_hline(yintercept=attributes(sepal.width.discretized)$"discretized:breaks") +
+    ggtitle(method))
+  discretized.table <- table(sepal.width.discretized, iris$Species)
+  matchClasses(discretized.table)
+}
+```
