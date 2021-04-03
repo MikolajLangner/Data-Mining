@@ -26,6 +26,7 @@ data(iris)
 
 ```{r include=FALSE}
 str(iris)
+plot_intro(iris)
 plot_boxplot(iris, by="Species")
 aggregate(. ~ Species, iris, cv)
 ```
@@ -118,4 +119,40 @@ for (method in c("interval", "frequency", "cluster", "fixed")) {
   discretized.table <- table(sepal.width.discretized, iris$Species)
   matchClasses(discretized.table)
 }
+```
+
+## ZADANIE 2.
+
+```{r}
+data(state)
+state <- as.data.frame(state.x77)
+```
+
+```{r include=FALSE}
+str(state)
+plot_intro(state)
+```
+
+```{r}
+plot_boxplot(data.frame(state, all="all"), by="all")
+```
+
+```{r}
+sapply(state, function(X) c(sd=sd(X), cv=cv(X)))
+```
+
+```{r fig.show='hide'}
+p <- plot_prcomp(state, prcomp_args=list(scale=TRUE, center=TRUE), variance_cap=0.8)[2]
+```
+
+```{r results='hide'}
+print(p)
+```
+
+```{r fig.show='hide'}
+p <- plot_prcomp(state, prcomp_args=list(scale=TRUE, center=TRUE), variance_cap=1)[1]
+```
+
+```{r results='hide'}
+print(p)
 ```
