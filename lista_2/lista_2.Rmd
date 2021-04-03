@@ -6,10 +6,11 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4)
 library(datasets)
 library(DataExplorer)
 library(ggbeeswarm)
+library(ggfortify)
 library(ggplot2)
 library(wesanderson)
 library(EnvStats)
@@ -156,3 +157,7 @@ p <- plot_prcomp(state, prcomp_args=list(scale=TRUE, center=TRUE), variance_cap=
 ```{r results='hide'}
 print(p)
 ```
+
+```{r}
+pca <- prcomp(state, center=TRUE, scale=TRUE)
+autoplot(pca, shape=FALSE)
