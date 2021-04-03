@@ -9,9 +9,12 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4)
 library(datasets)
 library(DataExplorer)
+library(ggplot2)
 library(ggbeeswarm)
 library(ggfortify)
-library(ggplot2)
+library(ggbiplot)
+library(ggcorrplot)
+library(rgl)
 library(wesanderson)
 library(EnvStats)
 library(arules)
@@ -160,4 +163,30 @@ print(p)
 
 ```{r}
 pca <- prcomp(state, center=TRUE, scale=TRUE)
-autoplot(pca, shape=FALSE)
+autoplot(pca, shape=FALSE, label.size=2)
+```
+
+```{r fig.height=10}
+ggbiplot(pca, labels=rownames(state), label.size=2)
+```
+
+```{r warning=FALSE}
+pca <- princomp(state, center=TRUE, scale=TRUE, scores=TRUE, cor=TRUE)
+text3d(pca$scores, texts=rownames(state), cex=.5)
+rglwidget()
+```
+
+```{r warning=FALSE}
+text3d(pca$scores, texts=rownames(iris), cex=.5)
+text3d(pca$loadings, texts=rownames(pca$loadings), col="red", cex=.5)
+coords <- NULL
+for (i in 1:nrow(pca$loadings)) {
+  coords <- rbind(coords, rbind(c(0,0,0),pca$loadings[i,]))
+}
+lines3d(coords, col="red", lwd=1)
+rglwidget()
+```
+
+```{r}
+ggcorrplot(cor(state))
+```
