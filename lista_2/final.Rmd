@@ -1,0 +1,26 @@
+---
+title: "Raport 2"
+subtitle: "Eksploracja danych"
+author: "MIkołaj Langner, Marcin Kostrzewa, </br> albumy: 255716, 255749"
+date: "2021-04-19"
+output: 
+  pdf_document:
+    toc: true
+    fig_caption: yes
+    fig_width: 5 
+    fig_height: 4 
+    number_sections: true
+    includes:
+      in_header: "preambula.tex" 
+fontsize: 12pt 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Zadanie 1
+
+# Zadanie 2
+
+# Zadanie 3
