@@ -1,7 +1,9 @@
 ---
 title: "Raport 2"
 subtitle: "Eksploracja danych"
-author: "MIkołaj Langner, Marcin Kostrzewa, </br> albumy: 255716, 255749"
+author:   |
+          |    Mikołaj Langner, Marcin Kostrzewa
+          |    nr albumów: 255716, 255749
 date: "2021-04-19"
 output: 
   pdf_document:
@@ -16,11 +18,105 @@ fontsize: 12pt
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4)
+library(datasets)
+library(dplyr)
+library(DataExplorer)
+library(ggplot2)
+library(ggbeeswarm)
+library(ggfortify)
+library(ggbiplot)
+library(ggcorrplot)
+library(wesanderson)
+library(EnvStats)
+library(arules)
+library(e1071)
+library(kableExtra)
 ```
+
+# Wstęp
+<!--  można napisać trochę więcej -->
+
+Sprawozdanie zawiera rozwiązanie zadań z listy 2. Dotyczą one zagadnień dyskretyzacji i redukcji wymiaru.
 
 # Zadanie 1
 
+W pierwszym zadaniu mamy zbadać
+```{r}
+data(iris)
+```
+
+```{r include=FALSE}
+str(iris)
+plot_intro(iris)
+plot_boxplot(iris, by="Species")
+aggregate(. ~ Species, iris, cv)
+```
+
+```{r message=FALSE}
+intervals <- c(min(iris$Petal.Length), 2, 5, max(iris$Petal.Length))
+for (method in c("interval", "frequency", "cluster", "fixed")) {
+  petal.length.discretized <- if (method != "fixed") 
+    discretize(iris$Petal.Length, method=method) else 
+    discretize(iris$Petal.Length, method=method, breaks=intervals)
+  print(ggplot(iris, aes(Petal.Length)) +
+          geom_histogram() +
+          geom_vline(xintercept=attributes(petal.length.discretized)$"discretized:breaks") +
+          ggtitle(method))
+  print(ggplot(iris, aes(Species, Petal.Length)) +
+    geom_quasirandom(aes(col=Species)) +
+    scale_color_manual(values=wes_palette("GrandBudapest1", 3)) +
+    geom_hline(yintercept=attributes(petal.length.discretized)$"discretized:breaks") +
+    ggtitle(method))
+  discretized.table <- table(petal.length.discretized, iris$Species)
+  matchClasses(discretized.table)
+}
+```
+
 # Zadanie 2
+
+## Wczytanie i przygotowanie danych
+
+Teraz naszym zadaniem jest \ldots
+
+Wczytajmy dane i uzupełnijmy je o informacje geograficzne o wszytkich stanach.
+
+```{r}
+data(state)
+state <- as.data.frame(state.x77)
+state_ <- state
+state_$region <- state.region
+state_$division <- state.division
+```
+
+By rozstrzygnąć, czy potrzebna jest normalizacja danych, przeanalizujemy wykresy pudełkowe oraz wyznaczymy odchylenia standardowe i współczynniki zmienności.
+
+
+```{r}
+plot_boxplot(data.frame(state, all="all"), by="all")
+```
+
+```{r tabela_1, echo=FALSE, eval=TRUE, results='asis'}
+var <- sapply(state, function(X) c(sd(X), cv(X)))
+summary.matrix <- as.matrix(var)
+row.names(summary.matrix) <- c("Odchylenie standardowe", "Wspolczynnik zmiennosci")
+summary.matrix %>% kbl(caption="Odchylenie standardowe i wspolczynnik zmiennosci dla zmienych", format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+```
+
+```{r fig.show='hide'}
+p <- plot_prcomp(state, prcomp_args=list(scale=TRUE, center=TRUE), variance_cap=0.8)[2]
+```
+
+```{r results='hide'}
+print(p)
+```
+
+```{r fig.show='hide'}
+p <- plot_prcomp(state, prcomp_args=list(scale=TRUE, center=TRUE), variance_cap=1)[1]
+```
+
+```{r results='hide'}
+print(p)
+```
 
 # Zadanie 3
