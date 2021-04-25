@@ -41,10 +41,13 @@ Sprawozdanie zawiera rozwiązanie zadań z listy 2. Dotyczą one zagadnień dysk
 
 # Zadanie 1
 
-W pierwszym zadaniu mamy zbadać
+W pierwszym zadaniu mamy dokonać dyskretyzacji cech ciągłych ze zbioru `iris` i ocenić jej jakość.
+
 ```{r}
 data(iris)
 ```
+
+Wybierzmy zmienne o najlepszej i najgorszej zdolności dyskryminacyjnej. W tym celu &hellip;
 
 ```{r include=FALSE}
 str(iris)
@@ -52,6 +55,13 @@ plot_intro(iris)
 plot_boxplot(iris, by="Species")
 aggregate(. ~ Species, iris, cv)
 ```
+
+Porównamy ze sobą cztery metody dyskretyzacji nienadzorowanej:
+
+ - equal width,
+ - equal frequency,
+ - k-means clustering,
+ - dyskretyzację dla przedziałów zadanych przez użytkownika.
 
 ```{r message=FALSE}
 intervals <- c(min(iris$Petal.Length), 2, 5, max(iris$Petal.Length))
@@ -77,7 +87,7 @@ for (method in c("interval", "frequency", "cluster", "fixed")) {
 
 ## Wczytanie i przygotowanie danych
 
-Teraz naszym zadaniem jest \ldots
+Teraz naszym zadaniem jest dokonanie analizy składów głównych (PCA) dla zbioru `state.x77`, który zbiera &hellip;
 
 Wczytajmy dane i uzupełnijmy je o informacje geograficzne o wszytkich stanach.
 
@@ -100,23 +110,31 @@ plot_boxplot(data.frame(state, all="all"), by="all")
 var <- sapply(state, function(X) c(sd(X), cv(X)))
 summary.matrix <- as.matrix(var)
 row.names(summary.matrix) <- c("Odchylenie standardowe", "Wspolczynnik zmiennosci")
-summary.matrix %>% kbl(caption="Odchylenie standardowe i wspolczynnik zmiennosci dla zmienych", format="latex") %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+summary.matrix %>% kbl(caption="Odchylenie standardowe i wspolczynnik zmiennosci dla zmienych", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+```
+
+Widać, że zmienne wymagają standaryzacji.
+
+Wyznaczymy teraz składowe główne i przedstawimy ich rozrzut wykorzystując wykresy budełkowe.
+
+```{r fig.show='hide'}
+p1 <- plot_prcomp(state, prcomp_args=list(scale=TRUE, center=TRUE), 
+                 variance_cap=1)[1]
 ```
 
 ```{r fig.show='hide'}
-p <- plot_prcomp(state, prcomp_args=list(scale=TRUE, center=TRUE), variance_cap=0.8)[2]
+p2 <- plot_prcomp(state, prcomp_args=list(scale=TRUE, center=TRUE),
+                 variance_cap=0.8)[2]
 ```
 
 ```{r results='hide'}
-print(p)
+print(p2)
 ```
 
-```{r fig.show='hide'}
-p <- plot_prcomp(state, prcomp_args=list(scale=TRUE, center=TRUE), variance_cap=1)[1]
-```
+
 
 ```{r results='hide'}
-print(p)
+print(p1)
 ```
 
 # Zadanie 3
