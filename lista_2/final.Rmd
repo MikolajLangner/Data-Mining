@@ -49,14 +49,19 @@ W pierwszym zadaniu mamy dokonać dyskretyzacji cech ciągłych ze zbioru `iris`
 data(iris)
 ```
 
-Wybierzmy zmienne o najlepszej i najgorszej zdolności dyskryminacyjnej. W tym celu &hellip;
+Wybierzmy zmienne o najlepszej i najgorszej zdolności dyskryminacyjnej. W tym celu narysujemy wykresy pudełkowe oraz wyliczymy współczynniki zmienności każdej ze zmiennych z podziałem na poszczególne gatunki irysów i porównamy ich rozkłady.
 
 ```{r include=FALSE}
 str(iris)
 plot_intro(iris)
+```
+
+```{r}
 plot_boxplot(iris, by="Species")
 aggregate(. ~ Species, iris, cv)
 ```
+
+Możemy zauważyć, że zmienna Petal.Length najefektywniej rozdziela poszczególne gatunki, natomiast zmienna Sepal.Width radzi sobie z tym najgorzej.
 
 Porównamy ze sobą cztery metody dyskretyzacji nienadzorowanej:
 
@@ -65,6 +70,7 @@ Porównamy ze sobą cztery metody dyskretyzacji nienadzorowanej:
  - k-means clustering,
  - dyskretyzację dla przedziałów zadanych przez użytkownika.
 
+Zacznijmy od zmiennej Petal.Length, która najlepiej rozdziela poszczególne gatunki irysów.
 ```{r message=FALSE}
 intervals <- c(min(iris$Petal.Length), 2, 5, max(iris$Petal.Length))
 for (method in c("interval", "frequency", "cluster", "fixed")) {
@@ -81,6 +87,73 @@ for (method in c("interval", "frequency", "cluster", "fixed")) {
     geom_hline(yintercept=attributes(petal.length.discretized)$"discretized:breaks") +
     ggtitle(method))
   discretized.table <- table(petal.length.discretized, iris$Species)
+  matchClasses(discretized.table)
+}
+```
+
+Możemy zobaczyć teraz jak poszczególne metody działają dla zmiennej Sepal.Width, która najgorzej radzi sobie z rozdzielaniem gatunków.
+```{r message=FALSE}
+intervals <- c(min(iris$Sepal.Width), 2.5, 3, max(iris$Sepal.Width))
+for (method in c("interval", "frequency", "cluster", "fixed")) {
+  sepal.width.discretized <- if (method != "fixed") 
+    discretize(iris$Sepal.Width, method=method) else 
+    discretize(iris$Sepal.Width, method=method, breaks=intervals)
+  print(ggplot(iris, aes(Sepal.Width)) +
+          geom_histogram() +
+          geom_vline(xintercept=attributes(sepal.width.discretized)$"discretized:breaks") +
+          ggtitle(method))
+  print(ggplot(iris, aes(Species, Sepal.Width)) +
+    geom_quasirandom(aes(col=Species)) +
+    scale_color_manual(values=wes_palette("GrandBudapest1", 3)) +
+    geom_hline(yintercept=attributes(sepal.width.discretized)$"discretized:breaks") +
+    ggtitle(method))
+  discretized.table <- table(sepal.width.discretized, iris$Species)
+  matchClasses(discretized.table)
+}
+```
+
+Rozpatrzmy znowu dyskretyzację obu zmiennych przy dodaniu sztucznie wartości odstających. Przeprowadźmy najpierw dyskretyzację dla zmiennej Petal.Length.
+```{r message=FALSE}
+iris$Petal.Length[which.min(iris$Petal.Length)] <- min(iris$Petal.Length) - IQR(iris$Petal.Length)
+iris$Petal.Length[which.max(iris$Petal.Length)] <- max(iris$Petal.Length) + IQR(iris$Petal.Length)
+intervals <- c(min(iris$Petal.Length), 2, 5, max(iris$Petal.Length))
+for (method in c("interval", "frequency", "cluster", "fixed")) {
+  petal.length.discretized <- if (method != "fixed") 
+    discretize(iris$Petal.Length, method=method) else 
+    discretize(iris$Petal.Length, method=method, breaks=intervals)
+  print(ggplot(iris, aes(Petal.Length)) +
+          geom_histogram() +
+          geom_vline(xintercept=attributes(petal.length.discretized)$"discretized:breaks") +
+          ggtitle(method))
+  print(ggplot(iris, aes(Species, Petal.Length)) +
+    geom_quasirandom(aes(col=Species)) +
+    scale_color_manual(values=wes_palette("GrandBudapest1", 3)) +
+    geom_hline(yintercept=attributes(petal.length.discretized)$"discretized:breaks") +
+    ggtitle(method))
+  discretized.table <- table(petal.length.discretized, iris$Species)
+  matchClasses(discretized.table)
+}
+```
+
+Dla zmiennej Sepal.Width po dodaniu wartości odstających dyskretyzacja wygląda następująco:
+```{r message=FALSE}
+iris$Sepal.Width[which.min(iris$Sepal.Width)] <- min(iris$Sepal.Width) - IQR(iris$Sepal.Width)
+iris$Sepal.Width[which.max(iris$Sepal.Width)] <- max(iris$Sepal.Width) + IQR(iris$Sepal.Width)
+intervals <- c(min(iris$Sepal.Width), 2.5, 3, max(iris$Sepal.Width))
+for (method in c("interval", "frequency", "cluster", "fixed")) {
+  sepal.width.discretized <- if (method != "fixed") 
+    discretize(iris$Sepal.Width, method=method) else 
+    discretize(iris$Sepal.Width, method=method, breaks=intervals)
+  print(ggplot(iris, aes(Sepal.Width)) +
+          geom_histogram() +
+          geom_vline(xintercept=attributes(sepal.width.discretized)$"discretized:breaks") +
+          ggtitle(method))
+  print(ggplot(iris, aes(Species, Sepal.Width)) +
+    geom_quasirandom(aes(col=Species)) +
+    scale_color_manual(values=wes_palette("GrandBudapest1", 3)) +
+    geom_hline(yintercept=attributes(sepal.width.discretized)$"discretized:breaks") +
+    ggtitle(method))
+  discretized.table <- table(sepal.width.discretized, iris$Species)
   matchClasses(discretized.table)
 }
 ```
