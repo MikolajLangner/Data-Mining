@@ -39,6 +39,12 @@ library(reshape2)
 # Wstęp
 <!--  można napisać trochę więcej -->
 
+```{r, results='asis', echo=FALSE}
+mycat <- function(text){
+  cat(gsub(pattern = "\n", replacement = "  \n", x = text))
+}
+```
+
 Sprawozdanie zawiera rozwiązanie zadań z listy 2. Dotyczą one zagadnień dyskretyzacji i redukcji wymiaru.
 
 # Zadanie 1
@@ -59,12 +65,17 @@ plot_intro(iris)
 
 ```{r}
 plot_boxplot(iris, by="Species")
-aggregate(. ~ Species, iris, cv)
+```
+
+```{r, echo=FALSE}
+table <- aggregate(. ~ Species, iris, cv)
+table %>% kbl(caption="Jakis label", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
 ```
 
 Możemy zauważyć, że zmienna Petal.Length najefektywniej rozdziela poszczególne gatunki, natomiast zmienna Sepal.Width radzi sobie z tym najgorzej.
 
 ## Metody dyskretyzacji
+
 Porównamy ze sobą cztery metody dyskretyzacji nienadzorowanej:
 
  - equal width,
@@ -73,29 +84,38 @@ Porównamy ze sobą cztery metody dyskretyzacji nienadzorowanej:
  - dyskretyzację dla przedziałów zadanych przez użytkownika.
 
 ### Najlepiej separująca zmienna
+
 Zacznijmy od zmiennej Petal.Length, która najlepiej rozdziela poszczególne gatunki irysów.
-```{r message=FALSE, fig.height=3, fig.width=3.25, echo=FALSE}
+
+
+```{r message=FALSE, fig.height=3, fig.width=6, echo=FALSE, fig.cap=c("1", "2", '3', '4')}
 intervals <- c(min(iris$Petal.Length), 2, 5, max(iris$Petal.Length))
 for (method in c("interval", "frequency", "cluster", "fixed")) {
   petal.length.discretized <- if (method != "fixed") 
     discretize(iris$Petal.Length, method=method) else 
     discretize(iris$Petal.Length, method=method, breaks=intervals)
-  print(ggplot(iris, aes(Petal.Length)) +
+  print(plot_grid(
+    ggplot(iris, aes(Petal.Length)) +
           geom_histogram() +
           geom_vline(xintercept=attributes(petal.length.discretized)$"discretized:breaks") +
-          ggtitle(method))
-  print(ggplot(iris, aes(Species, Petal.Length)) +
-    geom_quasirandom(aes(col=Species)) +
-    scale_color_manual(values=wes_palette("GrandBudapest1", 3)) +
-    geom_hline(yintercept=attributes(petal.length.discretized)$"discretized:breaks") +
-    theme(legend.position = "none"))
+          ggtitle(method),
+    ggplot(iris, aes(Species, Petal.Length)) +
+      geom_quasirandom(aes(col=Species)) +
+      scale_color_manual(values=wes_palette("GrandBudapest1", 3)) +
+      geom_hline(yintercept=attributes(petal.length.discretized)$"discretized:breaks") +
+      theme(legend.position = "none")))
   discretized.table <- table(petal.length.discretized, iris$Species)
   matchClasses(discretized.table)
+  # discretized.table <- table(petal.length.discretized, iris$Species)
+  # percentage <- round(100 * sum(diag(discretized.table)) / sum(discretized.table), 2)
+  # mycat(paste0("\n Poprawnie sklasyfikowane obserwacje: ", percentage, "%. \n"))
 }
 ```
 
 ### Najgorzej separująca zmienna
+
 Możemy zobaczyć teraz jak poszczególne metody działają dla zmiennej Sepal.Width, która najgorzej radzi sobie z rozdzielaniem gatunków.
+
 ```{r message=FALSE, fig.height=3, fig.width=3.25, echo=FALSE}
 intervals <- c(min(iris$Sepal.Width), 2.5, 3, max(iris$Sepal.Width))
 for (method in c("interval", "frequency", "cluster", "fixed")) {
@@ -118,10 +138,15 @@ for (method in c("interval", "frequency", "cluster", "fixed")) {
 
 Dla obu zmiennych każda z metod wypada równie dobrze, przy czym, najlepsze wyniki produkują metody równej częstości oraz k-średnich.
 
+
 ## Metody dyskretyzacji z wartościami odstającymi
+
 Rozpatrzmy teraz dyskretyzację przy dodaniu sztucznie wartości odstających.
+
 ### Zmienna Petal.Length
+
 Zacznijmy znowu od zmiennej Petal.Length.
+
 ```{r message=FALSE, fig.height=3, fig.width=3.25, echo=FALSE}
 iris$Petal.Length[which.min(iris$Petal.Length)] <- min(iris$Petal.Length) - IQR(iris$Petal.Length)
 iris$Petal.Length[which.max(iris$Petal.Length)] <- max(iris$Petal.Length) + IQR(iris$Petal.Length)
@@ -145,7 +170,9 @@ for (method in c("interval", "frequency", "cluster", "fixed")) {
 ```
 
 ### Zmienna Sepal.Width
+
 Dla zmiennej Sepal.Width po dodaniu wartości odstających dyskretyzacja wygląda następująco:
+
 ```{r message=FALSE, fig.height=3, fig.width=3.25, echo=FALSE}
 iris$Sepal.Width[which.min(iris$Sepal.Width)] <- min(iris$Sepal.Width) - IQR(iris$Sepal.Width)
 iris$Sepal.Width[which.max(iris$Sepal.Width)] <- max(iris$Sepal.Width) + IQR(iris$Sepal.Width)
@@ -162,11 +189,12 @@ for (method in c("interval", "frequency", "cluster", "fixed")) {
     geom_quasirandom(aes(col=Species)) +
     scale_color_manual(values=wes_palette("GrandBudapest1", 3)) +
     geom_hline(yintercept=attributes(sepal.width.discretized)$"discretized:breaks") +
-    theme(legend.position = "none"))
+    theme(legend.position = "none"), caption="test")
   discretized.table <- table(sepal.width.discretized, iris$Species)
   matchClasses(discretized.table)
 }
 ```
+
 Nie powinien dziwić fakt, że największa zmiana w poprawności predykcji dotknęła metodę przedziałów równej długości, gdyż pojedyncza obserwacja całkowicie zmienia dobór miejsc partycji przedziału.
 
 # Zadanie 2
