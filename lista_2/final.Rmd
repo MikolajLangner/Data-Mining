@@ -71,7 +71,7 @@ plot_boxplot(iris, by="Species")
 
 ```{r, echo=FALSE}
 table <- aggregate(. ~ Species, iris, cv)
-table %>% kbl(caption="Jakis label", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+table %>% kbl(caption="Wspolczynniki zmiennosci dla poszczegolnych zmiennych", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
 ```
 
 Możemy zauważyć, że zmienna Petal.Length najefektywniej rozdziela poszczególne gatunki, natomiast zmienna Sepal.Width radzi sobie z tym najgorzej.
@@ -90,8 +90,9 @@ Porównamy ze sobą cztery metody dyskretyzacji nienadzorowanej:
 Zacznijmy od zmiennej Petal.Length, która najlepiej rozdziela poszczególne gatunki irysów.
 
 
-```{r message=FALSE, fig.height=3, fig.width=6, echo=FALSE, fig.cap=c("1", "2", '3', '4')}
+```{r message=FALSE, fig.height=3, fig.width=6, echo=FALSE}
 intervals <- c(min(iris$Petal.Length), 2, 5, max(iris$Petal.Length))
+
 for (method in c("interval", "frequency", "cluster", "fixed")) {
   petal.length.discretized <- if (method != "fixed") 
     discretize(iris$Petal.Length, method=method) else 
@@ -203,9 +204,9 @@ Nie powinien dziwić fakt, że największa zmiana w poprawności predykcji dotkn
 
 ## Wczytanie i przygotowanie danych
 
-Teraz naszym zadaniem jest dokonanie analizy składów głównych (PCA) dla zbioru `state.x77`, który zbiera &hellip;
+Teraz naszym zadaniem jest dokonanie analizy składów głównych (PCA) dla zbioru `state.x77`, który zawiera informacje o wskaźnikach terytorialno-społecznych.
 
-Wczytajmy dane i uzupełnijmy je o informacje geograficzne o wszytkich stanach.
+Najpierw wczytajmy dane i uzupełnijmy je o informacje geograficzne.
 
 ```{r state dataset}
 data(state)
@@ -228,7 +229,7 @@ row.names(summary.matrix) <- c("Odchylenie standardowe", "Wspolczynnik zmiennosc
 summary.matrix %>% kbl(caption="Odchylenie standardowe i wspolczynnik zmiennosci dla zmienych", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
 ```
 
-Widać, że zmienne wymagają standaryzacji --- ich wariancję zbyt mocno się różnią.
+Widać, że zmienne wymagają standaryzacji --- ich wariancje zbyt mocno się różnią.
 
 ## Składowe główne i ich analiza
 
@@ -250,12 +251,14 @@ matrix = as.matrix(after.pca$rotation[, c(1:3)])
 matrix %>% kbl(caption="Wektory ladunkow dla trzech pierwszych PC", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
 ```
 
-Wnioski --- jeszcze się napisze &hellip;
+- W przypadku pierwszej składowej głównej, największy wkład mają zmienne `Illiteracy`, `Murder`, `HS Grad` i `Life Exp`. Dwie pierwsze mają ten sam znak, możemy więc wnioskować, że są ze sobą powiązane. `HS Grad` i `Life Exp` mają znak przeciwny --- stąd te dwie pary są ze sobą negatywnie skorelowane. Jest to dość oczywisty rodzaj zależności między stopniem analfabetyzmu a procentem ilości mających ukończoną szkołę średnią i między ilością morderstw a średnią długością życia.
+
+- W przypadku drugiej składowej głównej, największą wagę mają zmienne `Area`, `Population` i `Income`. Zależność między `Area` a `Population` jest dość oczywista, natomiast zależność tych zmiennych od `Income` już niekoniecznie da się łatwo wytłumaczyć. 
 
 Zbadajmy teraz jaka część wyjaśnionej wariancji odpowiada kolejnym składowym głównym.
 
 
-```{r variance, echo=FALSE, fig.width=8, fig.cap="Wariancja wyjasniana przez poszczegolne skladowe glowne i wariancja skumulowana.", fig.pos="h"}
+```{r variance, echo=FALSE, fig.width=8, fig.cap="Wariancja wyjasniana przez poszczegolne skladowe glowne i wariancja skumulowana."}
 variance_proportion <- (after.pca$sdev ^2) / sum(after.pca$sdev^2)
 
 df <- data.frame(variance_proportion)
@@ -290,69 +293,72 @@ Zauważamy, że:
 
 ## Wizualizacja danych
 
-W tej części wygenerujemy wykresy rozrzutu 2d dla dwóch pierwszych składowych głównych.
+W tej części wygenerujemy wykresy rozrzutu 2d dla dwóch pierwszych składowych głównych. Skorzystamy z danych dotyczących lokalizacji poszczególnych stanów, by być w stanie wyciągnąc pewne interesujące wnioski.
 
 
-```{r 2d plot region, echo=FALSE, fig.width=10, fig.height=3.5, fig.cap="Wykresy rozrzutu", fig.pos="h"}
-p1 <- ggplot(dat = data.frame(after.pca$x), aes(x=PC1, y=PC2)) + geom_point(aes(color = state$region))
+```{r 2d plot region, echo=FALSE, fig.width=10, fig.height=3.5, fig.cap="Wykresy rozrzutu"}
+p1 <- ggplot(data = data.frame(after.pca$x), aes(x=PC1, y=PC2)) + 
+        geom_text(aes(color = state$region, label = rownames(state)), size = 2, nudge_y = 0.2) + 
+        geom_point(aes(color= state$region))
 
-p2 <- ggplot(dat = data.frame(after.pca$x), aes(x=PC1, y=PC2)) + geom_point(aes(color = state$division))
+p2 <- ggplot(data = data.frame(after.pca$x), aes(x=PC1, y=PC2)) + 
+        geom_text(aes(color = state$division, label = rownames(state)), size = 2, nudge_y = 0.2) + 
+        geom_point(aes(color = state$division))
 
 plot_grid(p1, p2, nrow = 1, ncol = 2)
 ```
 
 
-Przygotowaliśmy także wykresy 3d --- kod umieściliśmy w dodatkowych skrypcie.
+Obserwacje:
 
+- Stany zlokalizaowane w południowych częściach USA są stosunkowo blisko względem siebie położone --- możemy więc wnioskować o ich dużym podobieństwie. Są one też często dość oddalone od pozostałych obserwacji. 
+
+
+```{r Alaska and California stats, echo=FALSE, results='hide'}
+rownames(state)[which.max(state$Population)]
+rownames(state)[which.max(state$Income)]
+rownames(state)[which.max(state$Area)]
+```
+
+- Są dwie obseracje, które znacząco różnią się od pozostałych. Są to Alaska i Kalifornia. Alaska jest stanem o największej powierzchni oraz dochód na jednego mieszkańca jest tam również najwyższy. Natomiast w Kalifornii mieszka najwięcej ludzi (stan ten charakteryzuje się także dużą powierzchnią).
+
+
+Przygotowaliśmy także wykresy 3d --- kod umieściliśmy w dodatkowym skrypcie. 
 
 ## Korelacja zmiennych
-Wygenerujmy teraz dwuwykres.
 
-```{r biplot, echo=FALSE}
+Zbadamy teraz korelację między zmiennymi. Najpierw skorzystamy z dwuwykresu.
+
+```{r biplot, echo=FALSE, fig.cap="Dwuwykres dla danych state.x77", fig.width=6, fig.height=3}
 ggbiplot(after.pca, obs.scale = 2, var.scale = 2, varname.size = 3.7, ellipse = TRUE, 
          groups = state$region)
 ```
 
+Możemy zaobserwować, że zmienne `Murder` i `Illiteracy` są ze dodatnią skorelowane. Podobnie zachowują się zmienne `Income` i `HS Grad`. Ujemna korelacja jest możliwa do zaobserwowania pomiędzy zmiennymi `Life Exp` i `Murder`, `HS Grad` i `Illiteracy`. Zmienna `Frost` jest ujemnie skorelowane z `Illiteracy` i `Murder`.
 
-```{r correlation matrix, echo=FALSE}
+Te wnioski potwierdzają, jeżeli popatrzymy na mapę ciepła korelacji.
+
+```{r, echo=FALSE, fig.cap="Mapa ciepla korelacji zmiennych"}
 cor.matrix <- cor(state.subset)
-cor.matrix %>% kbl(caption="Wartosci macierzy korelacji zmiennych", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+ggcorrplot(cor.matrix, lab = TRUE)
 ```
-
-
-```{r, echo=FALSE}
-ggcorrplot(cor.matrix, method = "circle")
-```
-
 
 ## Wnioski do zadania 2
+
+Dzięki zastosowaniu metody analizy składowych głównych udało się nam otrzymać ciekawe wnioski dotyczące stanów USA.
+
+Przede wszystkim, stany zlokalizowane na południu kraju są bardzo do siebie podobne. Charakteryzują się największym stopniem analfabetyzmu, największą ilością morderstw (co potwierdzała ujemna korelacja tych zmiennych ze zmienną `Frost`), najniższym stopniem wykształcenia. 
+
 
 # Zadanie 3
 
 Wybranym przez nas zbiorem danych jest &hellip;
 
 Wczytajmy dane i przygotujmy je do do skalowania wielowymiarowego.
-```{r data for mds, warning=FALSE}
-data <- read.csv("mds_data.csv")
-data.for.mds <- as.matrix(daisy(data[-data$class], stand=T))
-mds.k <- isoMDS(data.for.mds, k = 2, trace = FALSE)
-after.sammon <- mds.k$points
-ggplot(data = data.frame(after.sammon), aes(x= X1, y=X2)) + geom_point(color = data$class)
-```
+
 
 Porównamy teraz jakoś odwzorowania MDS w zależności od wielkości wymiaru $d$ przestrzeni docelowej. Przedstawimy na wykresie wartości funkcji STRESS, jak i wykonamy diagramy Sheparda.
 
-```{r STRESS, warning=FALSE, results='asis'}
-d.max <- 16
-stress.values <- numeric(d.max)
 
-for (d in 1:d.max) {
-  mds.k <- isoMDS(data.for.mds, k = d, trace = FALSE)
-  stress.values[d] <- mds.k$stress;
-}
-
-stress.values <- data.frame(stress.values)
-ggplot(data = stress.values, aes(x=seq_along(stress.values), y=stress.values)) + geom_point() + geom_line()
-```
 
 
