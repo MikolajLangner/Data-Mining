@@ -22,6 +22,7 @@ fontsize: 12pt
 knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4, fig.pos='H')
 library(datasets)
 library(dplyr)
+library(MASS)
 library(cluster)
 library(DataExplorer)
 library(ggplot2)
@@ -399,7 +400,7 @@ ggplot(data=melt(subset(data.for.mds, select=-c(Color, Spectral_Class))), aes(x=
 
 ## Redukcja wymiaru na bazie MDS i analiza jej jakości
 
-Porównamy teraz jakoś odwzorowania MDS w zależności od wielkości wymiaru $d$ przestrzeni docelowej. Przedstawimy na wykresie wartości funkcji STRESS, jak i wykonamy diagramy Sheparda.
+Porównamy teraz jakoś odwzorowania MDS w zależności od wielkości wymiaru $d$ przestrzeni docelowej. Przedstawimy na wykresie wartości funkcji STRESS, jak i wykonamy diagramy Sheparda. Porównamy ze sobą skalowanie klasyczne (funkcja `cmdscale`) i niemetryczne --- wykorzystujące metrykę Sheparda (funkcja `isoMDS`).
 
 
 ```{r stress function and preparing data for shepard}
@@ -429,6 +430,56 @@ data.1 <- melt(data.for.shepard, id.vars = "original")
 ggplot(data = data.1, aes(x=original, y=value)) + geom_point() + geom_abline(slope = 1, color = "red")+ facet_wrap(~variable, scales = "free") + labs(x = "odleglosci w danej przestrzeni", y = "odleglosci w pierwotnej przestrzeni")
 ```
 
+```{r kruskal_shepard}
+kruskal.stress <- numeric(d.max)
+data.for.shepard.2 <- data.frame('original' = as.vector(dist.matrix))
+
+for (i in 1:d.max) {
+  mds.k <- isoMDS(dist.matrix, k = i, trace = FALSE)
+  new.dist.matrix <- as.matrix(dist(mds.k$points, method = "euclidean"))
+  
+  kruskal.stress[i] <- mds.k$stress
+  
+  data.for.shepard.2[paste0("d=", i)] = as.vector(new.dist.matrix)
+}
+```
+
+```{r sammon_shepard}
+sammon.stress <- numeric(d.max)
+data.for.shepard.3 <- data.frame('original' = as.vector(dist.matrix))
+
+for (i in 1:d.max) {
+  mds.k <- sammon(dist.matrix, k = i, trace = FALSE)
+  new.dist.matrix <- as.matrix(dist(mds.k$points, method = "euclidean"))
+  
+  sammon.stress[i] <- mds.k$stress
+  
+  data.for.shepard.3[paste0("d=", i)] = as.vector(new.dist.matrix)
+}
+```
+
+```{r STRESS_kruskal_plot, echo=FALSE, fig.height=4, fig.width=5, fig.cap="Wykres funkcji STRESS Kruskal"}
+ggplot(data = data.frame(kruskal.stress), aes(x=seq_along(kruskal.stress), y=kruskal.stress)) + 
+        geom_point(color = wes_palette("GrandBudapest1", 3)[2]) + 
+        geom_line(color = wes_palette("GrandBudapest1", 3)[3]) + labs(x = "wymiar", y = "Wartosci funkcji STRESS")
+```
+
+```{r STRESS_sammon_plot, echo=FALSE, fig.height=4, fig.width=5, fig.cap="Wykres funkcji STRESS sammon"}
+ggplot(data = data.frame(sammon.stress), aes(x=seq_along(sammon.stress), y=sammon.stress)) + 
+        geom_point(color = wes_palette("GrandBudapest1", 3)[2]) + 
+        geom_line(color = wes_palette("GrandBudapest1", 3)[3]) + labs(x = "wymiar", y = "Wartosci funkcji STRESS")
+```
+
+```{r shepard_kruskal_diagram, echo=FALSE, fig.cap="\\label{fig::shepard}Diagramy Sheparda dla kolejnych wymiarow Kruskal"}
+data.2 <- melt(data.for.shepard.2, id.vars = "original")
+ggplot(data = data.2, aes(x=original, y=value)) + geom_point() + geom_abline(slope = 1, color = "red")+ facet_wrap(~variable, scales = "free") + labs(x = "odleglosci w danej przestrzeni", y = "odleglosci w pierwotnej przestrzeni")
+```
+
+```{r sammon_diagram, echo=FALSE, fig.cap="\\label{fig::shepard}Diagramy Sheparda dla kolejnych wymiarow - Samon"}
+data.3 <- melt(data.for.shepard.3, id.vars = "original")
+ggplot(data = data.2, aes(x=original, y=value)) + geom_point() + geom_abline(slope = 1, color = "red")+ facet_wrap(~variable, scales = "free") + labs(x = "odleglosci w danej przestrzeni", y = "odleglosci w pierwotnej przestrzeni")
+```
+
 Przyglądając się diagramom Sheparda (\ref{fig::shepard}), możemy dojść do wniosku, że MDS nie działa dla naszych danych idealnie. Świadczy o tym również wartość funckji STRESS dla maksymalnego wymiaru $\text{d.max} = 6$ --- `r round(STRESS.values[6], 2)`. Na podstawie tych wykresów możemy też stwierdzić, że optymalnym wyborem wymiary byłoby $d = 4$, dla którego wartość funkcji stresu wynosi `r round(STRESS.values[4], 2)` --- niewiele mniej niż dla $d.max$.
 
 ## Wizualizacja danych
@@ -436,15 +487,8 @@ Przyglądając się diagramom Sheparda (\ref{fig::shepard}), możemy dojść do 
 Wykorzystamy teraz metodę skalowania wielowymiarowego do przedstawienia naszych danych w przestrzeni dwuwymiarowej
 (przygotowaliśmy także wykresy w przestrzeni trójwymiarowej --- znajdują się one w dołączonym do sprawozdania skrypcie).
 
-```{r 2d mds plot, echo=FALSE, fig.cap="Wykres rozrzutu w przestrzeni d = 2"}
-mds.2 <- cmdscale(dist.matrix, k = 2)
 
-data.2 <- data.frame(mds.2)
-ggplot(data = data.2, aes(x=X1, y=X2)) + geom_text(aes(color = stars$Type, label = rownames(stars)), size = 2, nudge_y = 0.2) +
-       geom_point(color = stars$Type)  + labs(x = "MD1", y = "MD2")
-```
-
-```{r 2d mds plot2, echo=FALSE, fig.cap="Wykres rozrzutu w przestrzeni d = 2"}
+```{r 2d mds plot2, echo=FALSE, fig.cap="Wykres rozrzutu w przestrzeni d = 2 klasyczne"}
 mds.2 <- cmdscale(dist.matrix, k = 2)
 
 data.2 <- data.frame(mds.2)
@@ -452,6 +496,21 @@ ggplot(data = data.2, aes(x=X1, y=X2)) +
        geom_point(aes(color = stars$Type))  + labs(x = "MD1", y = "MD2")
 ```
 
+```{r 2d_mds_kruskal, echo=FALSE, fig.cap="Wykres rozrzutu w przestrzeni d = 2 Kruskal"}
+mds.22 <- isoMDS(dist.matrix, k = 2, trace = FALSE)
+
+data.22 <- data.frame(mds.22$points)
+ggplot(data = data.22, aes(x=X1, y=X2)) + 
+       geom_point(aes(color = stars$Type))  + labs(x = "MD1", y = "MD2")
+```
+
+```{r 2d_sammon, echo=FALSE, fig.cap="Wykres rozrzutu w przestrzeni d = 2 Sammon"}
+mds.23 <- sammon(dist.matrix, k = 2, trace = FALSE)
+
+data.23 <- data.frame(mds.23$points)
+ggplot(data = data.23, aes(x=X1, y=X2)) + 
+       geom_point(aes(color = stars$Type))  + labs(x = "MD1", y = "MD2")
+```
 Możemy zauważyć, że obserwacje 
 
 ```{r Wykresy rozrzutu, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Wykresy rozrzutu dla zmiennych ciaglych"}
