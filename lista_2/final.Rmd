@@ -19,7 +19,7 @@ fontsize: 12pt
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4)
+knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4, fig.pos='H')
 library(datasets)
 library(dplyr)
 library(cluster)
@@ -222,7 +222,7 @@ state.subset <- subset(state, select=-c(region, division))
 By rozstrzygnąć, czy potrzebna jest normalizacja danych, przeanalizujemy wykresy pudełkowe oraz wyznaczymy odchylenia standardowe i współczynniki zmienności.
 
 ```{r data boxplot, message=FALSE, echo=FALSE, fig.height=2.8, fig.cap="Wykresy pudelkowe dla zmiennych ze zbioru state.x77", fig.pos='!H'}
-ggplot(data=melt(state.subset), aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable))
+ggplot(data=melt(state.subset), aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable)) + theme(legend.position = "none")
 ```
 
 ```{r tabela_1, echo=FALSE, eval=TRUE, results='asis'}
@@ -244,7 +244,8 @@ after.pca <- prcomp(state.subset, retx=T, center=T, scale.=T)
 
 ```{r pca boxplot, echo=FALSE, message=FALSE, fig.height=2.9, fig.cap="Wykresy pudelkowe dla skladowych glownych"}
 ggplot(data = melt(data.frame(after.pca$x)), 
-       aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable))
+       aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable)) + 
+      theme(legend.position = "none")
 ```
 
 Przypatrzmy się teraz wektorom ładunków dla trzech pierwszych składowych głównych.
@@ -273,9 +274,11 @@ df["PC"] = labels
 
 barplot1 <- ggplot(data=df,
                    aes(x=PC, y=variance_proportion, fill=PC)) + 
-                   geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2")
+                   geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") +
+                   theme(legend.position = "none")
 barplot2 <- ggplot(data=df, aes(x=PC, y=cumulative.variance, fill=PC)) + 
-                    geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2")
+                    geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") +
+                    theme(legend.position = "none")
 plot_grid(barplot1, barplot2, ncol=2, nrow=1)
 ```
 
@@ -390,7 +393,8 @@ dist.matrix <- as.matrix(daisy(data.for.mds, stand = T))
 Przy wyznaczaniu odległości między obserwacjami za pomocą funkcji `daisy` dane poddajemy standaryzacji. O konieczności tej operacji świadczą wykresy pudełkowe zmiennych ciągłych. 
 
 ```{r mds boxplot, message=FALSE, echo=FALSE, fig.height=2.3, fig.cap="Wykresy pudelkowe dla zmiennych ze zbioru Stars", fig.pos='!H'}
-ggplot(data=melt(subset(data.for.mds, select=-c(Color, Spectral_Class))), aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable))
+ggplot(data=melt(subset(data.for.mds, select=-c(Color, Spectral_Class))), aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable)) +
+                   theme(legend.position = "none")
 ```
 
 ## Redukcja wymiaru na bazie MDS i analiza jej jakości
@@ -445,7 +449,7 @@ mds.2 <- cmdscale(dist.matrix, k = 2)
 
 data.2 <- data.frame(mds.2)
 ggplot(data = data.2, aes(x=X1, y=X2)) + 
-       geom_point(color = stars$Type)  + labs(x = "MD1", y = "MD2")
+       geom_point(aes(color = stars$Type))  + labs(x = "MD1", y = "MD2")
 ```
 
 Możemy zauważyć, że obserwacje 
