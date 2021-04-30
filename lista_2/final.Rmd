@@ -389,6 +389,8 @@ stars[, c("Color", "Type", "Spectral_Class")] = lapply(stars[, c("Color", "Type"
 
 data.for.mds <- subset(stars, select=-Type)
 dist.matrix <- as.matrix(daisy(data.for.mds, stand = T))
+
+image(x = dist.matrix)
 ```
 
 Przy wyznaczaniu odległości między obserwacjami za pomocą funkcji `daisy` dane poddajemy standaryzacji. O konieczności tej operacji świadczą wykresy pudełkowe zmiennych ciągłych. 
