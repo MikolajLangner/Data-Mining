@@ -48,7 +48,7 @@ Zadanie pierwsze dotyczy pojęcia dyskretyzacji i badania jego jakości.
 
 Zadanie drugie i trzecie dotykają pojęcia metod redukcji wymiaru: 
 
-- w zadaniu ddrugim skorzystamy z metody składowych głównych,
+- w zadaniu drugim skorzystamy z metody składowych głównych,
 - w zadaniu trzecim z metody skalowania wielowymiarowego.
 
 \newpage
@@ -141,7 +141,7 @@ for (method in c("interval", "frequency", "cluster", "fixed")) {
 }
 ```
 
-Dla obu zmiennych każda z metod wypada równie dobrze, przy czym, najlepsze wyniki produkują metody równej częstości oraz k-średnich.
+Dla obu zmiennych każda z metod wypada równie dobrze, przy czym, najlepsze wyniki dają metody równej częstości oraz k-średnich.
 
 
 ## Metody dyskretyzacji z wartościami odstającymi
@@ -223,7 +223,8 @@ state.subset <- subset(state, select=-c(region, division))
 By rozstrzygnąć, czy potrzebna jest normalizacja danych, przeanalizujemy wykresy pudełkowe oraz wyznaczymy odchylenia standardowe i współczynniki zmienności.
 
 ```{r data boxplot, message=FALSE, echo=FALSE, fig.height=2.8, fig.cap="Wykresy pudelkowe dla zmiennych ze zbioru state.x77", fig.pos='!H'}
-ggplot(data=melt(state.subset), aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable)) + theme(legend.position = "none")
+ggplot(data=melt(state.subset), aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable)) + theme(legend.position = "none") + 
+  labs(x = "Zmienne", y = "Wartosc")
 ```
 
 ```{r tabela_1, echo=FALSE, eval=TRUE, results='asis'}
@@ -240,13 +241,13 @@ Widać, że zmienne wymagają standaryzacji --- ich wariancje zbyt mocno się r�
 Wyznaczymy teraz składowe główne i przedstawimy ich rozrzut, wykorzystując wykresy pudełkowe.
 
 ```{r pca}
-after.pca <- prcomp(state.subset, retx=T, center=T, scale.=T)
+after.pca <- prcomp(state.subset, retx = T, center = T, scale. = T)
 ```
 
 ```{r pca boxplot, echo=FALSE, message=FALSE, fig.height=2.9, fig.cap="Wykresy pudelkowe dla skladowych glownych"}
 ggplot(data = melt(data.frame(after.pca$x)), 
        aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable)) + 
-      theme(legend.position = "none")
+      theme(legend.position = "none") + labs(x = "Skladowe glowne", y = 'Wartosc')
 ```
 
 Przypatrzmy się teraz wektorom ładunków dla trzech pierwszych składowych głównych.
@@ -288,7 +289,7 @@ plot_grid(barplot1, barplot2, ncol=2, nrow=1)
 variance.matrix <- t(df[1:5, 1:2])
 colnames(variance.matrix) <- paste0("PC", 1:5)
 rownames(variance.matrix) <- c("Proporcja wariancji", "Skumulowana wariancja")
-variance.matrix %>% kbl(caption="Odchylenie standardowe i wspolczynnik zmiennosci dla zmienych", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
+variance.matrix %>% kbl(caption="Procent wyjasnianej wariancji i skumulowana wariancja", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
 ```
 
 
@@ -303,7 +304,7 @@ Zauważamy, że:
 W tej części wygenerujemy dwuwymiarowe wykresy rozrzutu (\ref{fig:2d_scatterplot}) dla dwóch pierwszych składowych głównych. Skorzystamy z danych dotyczących lokalizacji poszczególnych stanów, by być w stanie wyciągnąc interesujące wnioski.
 
 
-```{r 2d_scatterplot, echo=FALSE, fig.width=10, fig.cap="\\label{fig:2d_scatterplot}Wykresy rozrzutu"}
+```{r 2d_scatterplot, echo=FALSE, fig.width=10, fig.height=4, fig.cap="\\label{fig:2d_scatterplot}Wykresy rozrzutu"}
 p1 <- ggplot(data = data.frame(after.pca$x), aes(x=PC1, y=PC2)) + 
         geom_text(aes(color = state$region, label = rownames(state)), size = 2, nudge_y = 0.2) + 
         geom_point(aes(color= state$region))
@@ -327,7 +328,7 @@ rownames(state)[which.max(state$Income)]
 rownames(state)[which.max(state$Area)]
 ```
 
-- Są dwie obseracje, które znacząco różnią się od pozostałych. Są to Alaska i Kalifornia. Alaska jest stanem o największej powierzchni oraz dochód na jednego mieszkańca jest tam również najwyższy. Natomiast w Kalifornii mieszka najwięcej ludzi (stan ten charakteryzuje się także dużą powierzchnią).
+- Są dwie obseracje, które znacząco różnią się od pozostałych. Są to Alaska i Kalifornia. Alaska jest stanem o największej powierzchni, dochód na jednego mieszkańca jest tam również najwyższy. Natomiast w Kalifornii mieszka najwięcej ludzi (stan ten charakteryzuje się także dużą powierzchnią).
 
 
 Przygotowaliśmy także wykresy 3d --- kod umieściliśmy w dodatkowym skrypcie. 
@@ -341,9 +342,9 @@ ggbiplot(after.pca, obs.scale = 2, var.scale = 2, varname.size = 3.7, ellipse = 
          groups = state$region)
 ```
 
-Możemy zaobserwować, że zmienne `Murder` i `Illiteracy` są ze dodatnią skorelowane. Podobnie zachowują się zmienne `Income` i `HS Grad`. Ujemna korelacja jest możliwa do zaobserwowania pomiędzy zmiennymi `Life Exp` i `Murder`, `HS Grad` i `Illiteracy`. Zmienna `Frost` jest ujemnie skorelowane z `Illiteracy` i `Murder`.
+Możemy zaobserwować, że zmienne `Murder` i `Illiteracy` są ze dodatnio i silnie skorelowane. Podobnie zachowują się zmienne `Income` i `HS Grad`. Ujemna korelacja jest możliwa do zaobserwowania pomiędzy zmiennymi `Life Exp` i `Murder`, `HS Grad` i `Illiteracy`. Zmienna `Frost` jest ujemnie skorelowane z `Illiteracy` i `Murder`.
 
-Te wnioski potwierdzają, jeżeli popatrzymy na mapę ciepła korelacji.
+Te wnioski potwierdzają się, jeżeli popatrzymy na mapę ciepła korelacji zmiennych.
 
 ```{r, echo=FALSE, fig.cap="Mapa ciepla korelacji zmiennych"}
 cor.matrix <- cor(state.subset)
@@ -354,7 +355,9 @@ ggcorrplot(cor.matrix, lab = TRUE)
 
 Dzięki zastosowaniu metody analizy składowych głównych udało się nam otrzymać ciekawe wnioski dotyczące stanów USA.
 
-Przede wszystkim, stany zlokalizowane na południu kraju są bardzo do siebie podobne. Charakteryzują się największym stopniem analfabetyzmu, największą ilością morderstw (co potwierdzała ujemna korelacja tych zmiennych ze zmienną `Frost`), najniższym stopniem wykształcenia. 
+Przede wszystkim, stany zlokalizowane na południu kraju są bardzo do siebie podobne. Charakteryzują się największym stopniem analfabetyzmu, największą ilością morderstw, najniższym stopniem wykształcenia. Są to też na ogół cieplejsze stany, co tłumaczy ujemną korelację pomiędzy zmiennymi `Murder`, `Illiteracy` a `Frost`.
+
+Inne stany (poza dwoma wyjątkami --- Alaską i Kalifornią) znajdowały się dość blisko siebie. Stąd trudno o ogólne wnioski na temat znaczących różnic pomiędzy nimi.
 
 \newpage
 
@@ -364,45 +367,55 @@ Przede wszystkim, stany zlokalizowane na południu kraju są bardzo do siebie po
 
 Wybranym przez nas zbiorem danych jest `Stars`, który dostępny jest na Kaggle'u ([link](https://www.kaggle.com/brsdincer/star-type-classification)). Zawiera on 240 obserwacji i 7 następujących zmiennych:
 
-- `Temperature` --- temperatura gwiazdy (w Kelwinach),
+- `Temperature` --- temperatura gwiazdy wyrażona w Kelwinach (ilościowa),
 
-- `L` --- stosunek jasności gwiazdy i jasności Słońca (ciągła),
+- `L` --- stosunek jasności gwiazdy i jasności Słońca (ilościowa),
 
-- `R` --- stosunek promienia gwiazdy do promienia Słońca (ciągła),
+- `R` --- stosunek promienia gwiazdy do promienia Słońca (ilościowa),
 
-- `A_M` --- absolutna wielkość gwiazdowa (ciągła),
+- `A_M` --- absolutna wielkość gwiazdowa (ilościowa),
 
-- `Color` --- kolor gwiazdy (nominalna),
+- `Color` --- kolor gwiazdy (jakościowa),
 
-- `Spectral_Class` --- typ spektralny gwiazdy (nominalna),
+- `Spectral_Class` --- typ spektralny gwiazdy (jakościowa),
 
-- `Type` --- typ gwiazdy --- jedno z: czerwony, biały, brązowy karzeł, gwiazda ciągu głównego, nadolbrzym, hiperolbrzym (nominalna).
+- `Type` --- typ gwiazdy --- jedno z: czerwony, biały, brązowy karzeł, gwiazda ciągu głównego, nadolbrzym, hiperolbrzym (jakościowa).
 
 Zmienną `Type` będziemy traktować jako zmienną grupującą.
 
 Wczytamy teraz dane (z całego zbioru wybieramy losowo 100 obserwacji), przygotujemy je do do skalowania wielowymiarowego i wyznaczymy macierz niepodobieństwa.
 
-```{r mds data}
+```{r stats_dataset}
 set.seed(42)
 stars <- sample_n(read.csv("Stars.csv"), 100)
-stars[, c("Color", "Type", "Spectral_Class")] = lapply(stars[, c("Color", "Type", "Spectral_Class")], as.factor)
+```
 
+```{r mds data, echo=FALSE}
+stars[, c("Color", "Type", "Spectral_Class")] = 
+  lapply(stars[, c("Color", "Type", "Spectral_Class")], as.factor)
+levels(stars$Type) <- list("Red Dwarf" = '0', 'Brown Dwarf' = '1', 
+                           'White Dwarf' = '2', 'Main Sequence' = '3',
+                           'Super Giants' = '4', 'Hyper Giants' = '5')
 data.for.mds <- subset(stars, select=-Type)
 dist.matrix <- as.matrix(daisy(data.for.mds, stand = T))
-
-image(x = dist.matrix)
 ```
 
 Przy wyznaczaniu odległości między obserwacjami za pomocą funkcji `daisy` dane poddajemy standaryzacji. O konieczności tej operacji świadczą wykresy pudełkowe zmiennych ciągłych. 
 
-```{r mds boxplot, message=FALSE, echo=FALSE, fig.height=2.3, fig.cap="Wykresy pudelkowe dla zmiennych ze zbioru Stars", fig.pos='!H'}
+```{r mds boxplot, message=FALSE, echo=FALSE, fig.height=3, fig.cap="Wykresy pudelkowe dla zmiennych ciaglych ze zbioru Stars", fig.pos='!H'}
 ggplot(data=melt(subset(data.for.mds, select=-c(Color, Spectral_Class))), aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable)) +
-                   theme(legend.position = "none")
+                   theme(legend.position = "none") + labs(x = "Zmienne", y = "Wartosc")
+```
+
+Poniżej także wygenerowaliśmy mapę ciepła macierzy niepodobieństwa. 
+
+```{r heatmap, echo=FALSE, fig.height=4, fig.width=4, fig.cap="\\label{fig::heatmap}Mapa ciepla macierzy niepodobienstwa"}
+image(x = dist.matrix, axes = FALSE)
 ```
 
 ## Redukcja wymiaru na bazie MDS i analiza jej jakości
 
-Porównamy teraz jakoś odwzorowania MDS w zależności od wielkości wymiaru $d$ przestrzeni docelowej. Przedstawimy na wykresie wartości funkcji STRESS, jak i wykonamy diagramy Sheparda. Porównamy ze sobą skalowanie klasyczne (funkcja `cmdscale`) i niemetryczne --- wykorzystujące metrykę Sheparda (funkcja `isoMDS`).
+Porównamy teraz jakoś odwzorowania MDS w zależności od wielkości wymiaru $d$ przestrzeni docelowej. Przedstawimy na wykresie wartości funkcji STRESS, jak i wykonamy diagramy Sheparda. Porównamy ze sobą skalowanie klasyczne (funkcja `cmdscale`) i niemetryczne --- wykorzystujące metrykę Kruskala-Sheparda (funkcja `isoMDS`).
 
 
 ```{r stress function and preparing data for shepard}
@@ -421,7 +434,10 @@ for (i in 1:d.max) {
 }
 ```
 
-```{r STRESS function plot, echo=FALSE, fig.height=4, fig.width=5, fig.cap="Wykres funkcji STRESS"}
+
+Poniżej znajduje się wykres funkcji STRESS dla skalowania klasycznego i odpowiadające mu diagramy Sheparda (\ref{fig::shepard}).
+
+```{r STRESS function plot, echo=FALSE, fig.height=4, fig.width=5, fig.cap="Wykres funkcji STRESS dla skalowania klasycznego"}
 ggplot(data = data.frame(STRESS.values), aes(x=seq_along(STRESS.values), y=STRESS.values)) + 
         geom_point(color = wes_palette("GrandBudapest1", 3)[2]) + 
         geom_line(color = wes_palette("GrandBudapest1", 3)[3]) + labs(x = "wymiar", y = "Wartosci funkcji STRESS")
@@ -431,6 +447,12 @@ ggplot(data = data.frame(STRESS.values), aes(x=seq_along(STRESS.values), y=STRES
 data.1 <- melt(data.for.shepard, id.vars = "original")
 ggplot(data = data.1, aes(x=original, y=value)) + geom_point() + geom_abline(slope = 1, color = "red")+ facet_wrap(~variable, scales = "free") + labs(x = "odleglosci w danej przestrzeni", y = "odleglosci w pierwotnej przestrzeni")
 ```
+
+
+Przyglądając się diagramom Sheparda, możemy dojść do wniosku, że klasyczne MDS nie działa dla naszych danych idealnie. Świadczy o tym również wartość funkcji STRESS dla maksymalnego wymiaru $\text{d.max} = 6$ --- `r round(STRESS.values[6], 2)`. Na podstawie tych wykresów możemy też stwierdzić, że optymalnym wyborem wymiaru byłoby $d = 4$, dla którego wartość funkcji stresu wynosi `r round(STRESS.values[4], 2)` --- niewiele mniej niż dla $d.max$.
+
+
+Teraz powtórzymy te czynności dla skalowania Kruskala-Sheparda --- będą to wykresy (\ref{fig::k_stress}) i (\ref{fig::shep_krus}).
 
 ```{r kruskal_shepard}
 kruskal.stress <- numeric(d.max)
@@ -446,43 +468,22 @@ for (i in 1:d.max) {
 }
 ```
 
-```{r sammon_shepard}
-sammon.stress <- numeric(d.max)
-data.for.shepard.3 <- data.frame('original' = as.vector(dist.matrix))
 
-for (i in 1:d.max) {
-  mds.k <- sammon(dist.matrix, k = i, trace = FALSE)
-  new.dist.matrix <- as.matrix(dist(mds.k$points, method = "euclidean"))
-  
-  sammon.stress[i] <- mds.k$stress
-  
-  data.for.shepard.3[paste0("d=", i)] = as.vector(new.dist.matrix)
-}
-```
 
-```{r STRESS_kruskal_plot, echo=FALSE, fig.height=4, fig.width=5, fig.cap="Wykres funkcji STRESS Kruskal"}
+```{r STRESS_kruskal_plot, echo=FALSE, fig.height=4, fig.width=5, fig.cap="\\label{fig::k_stress}Wykres funkcji STRESS dla skalowania Kruskala"}
 ggplot(data = data.frame(kruskal.stress), aes(x=seq_along(kruskal.stress), y=kruskal.stress)) + 
         geom_point(color = wes_palette("GrandBudapest1", 3)[2]) + 
         geom_line(color = wes_palette("GrandBudapest1", 3)[3]) + labs(x = "wymiar", y = "Wartosci funkcji STRESS")
 ```
 
-```{r STRESS_sammon_plot, echo=FALSE, fig.height=4, fig.width=5, fig.cap="Wykres funkcji STRESS sammon"}
-ggplot(data = data.frame(sammon.stress), aes(x=seq_along(sammon.stress), y=sammon.stress)) + 
-        geom_point(color = wes_palette("GrandBudapest1", 3)[2]) + 
-        geom_line(color = wes_palette("GrandBudapest1", 3)[3]) + labs(x = "wymiar", y = "Wartosci funkcji STRESS")
-```
 
-```{r shepard_kruskal_diagram, echo=FALSE, fig.cap="\\label{fig::shepard}Diagramy Sheparda dla kolejnych wymiarow Kruskal"}
+
+```{r shepard_kruskal_diagram, echo=FALSE, fig.cap="\\label{fig::shep_krus}Diagramy Sheparda dla kolejnych wymiarow dla skalowania Kruskala"}
 data.2 <- melt(data.for.shepard.2, id.vars = "original")
 ggplot(data = data.2, aes(x=original, y=value)) + geom_point() + geom_abline(slope = 1, color = "red")+ facet_wrap(~variable, scales = "free") + labs(x = "odleglosci w danej przestrzeni", y = "odleglosci w pierwotnej przestrzeni")
 ```
 
-```{r sammon_diagram, echo=FALSE, fig.cap="\\label{fig::shepard}Diagramy Sheparda dla kolejnych wymiarow - Samon"}
-data.3 <- melt(data.for.shepard.3, id.vars = "original")
-ggplot(data = data.2, aes(x=original, y=value)) + geom_point() + geom_abline(slope = 1, color = "red")+ facet_wrap(~variable, scales = "free") + labs(x = "odleglosci w danej przestrzeni", y = "odleglosci w pierwotnej przestrzeni")
-```
-
-Przyglądając się diagramom Sheparda (\ref{fig::shepard}), możemy dojść do wniosku, że MDS nie działa dla naszych danych idealnie. Świadczy o tym również wartość funckji STRESS dla maksymalnego wymiaru $\text{d.max} = 6$ --- `r round(STRESS.values[6], 2)`. Na podstawie tych wykresów możemy też stwierdzić, że optymalnym wyborem wymiary byłoby $d = 4$, dla którego wartość funkcji stresu wynosi `r round(STRESS.values[4], 2)` --- niewiele mniej niż dla $d.max$.
+Możemy zauważyć, że funkcja STRESS przyjmuje mniejsze wartości dla tego rodzaju skalowania. Jednak zmiany tej funkcji dla skalowania Kruskala są bardziej gładkie --- optymalnym wymiarem docelowym również byłoby $d = 4$.
 
 ## Wizualizacja danych
 
@@ -490,7 +491,7 @@ Wykorzystamy teraz metodę skalowania wielowymiarowego do przedstawienia naszych
 (przygotowaliśmy także wykresy w przestrzeni trójwymiarowej --- znajdują się one w dołączonym do sprawozdania skrypcie).
 
 
-```{r 2d mds plot2, echo=FALSE, fig.cap="Wykres rozrzutu w przestrzeni d = 2 klasyczne"}
+```{r 2d mds plot2, echo=FALSE, fig.cap="Wykres rozrzutu w przestrzeni dwuwymiarowej --- skalowanie klasyczne"}
 mds.2 <- cmdscale(dist.matrix, k = 2)
 
 data.2 <- data.frame(mds.2)
@@ -498,7 +499,7 @@ ggplot(data = data.2, aes(x=X1, y=X2)) +
        geom_point(aes(color = stars$Type))  + labs(x = "MD1", y = "MD2")
 ```
 
-```{r 2d_mds_kruskal, echo=FALSE, fig.cap="Wykres rozrzutu w przestrzeni d = 2 Kruskal"}
+```{r 2d_mds_kruskal, echo=FALSE, fig.cap="Wykres rozrzutu w przestrzeni dwuwymiarowej --- skalowanie Kruskala"}
 mds.22 <- isoMDS(dist.matrix, k = 2, trace = FALSE)
 
 data.22 <- data.frame(mds.22$points)
@@ -506,18 +507,16 @@ ggplot(data = data.22, aes(x=X1, y=X2)) +
        geom_point(aes(color = stars$Type))  + labs(x = "MD1", y = "MD2")
 ```
 
-```{r 2d_sammon, echo=FALSE, fig.cap="Wykres rozrzutu w przestrzeni d = 2 Sammon"}
-mds.23 <- sammon(dist.matrix, k = 2, trace = FALSE)
 
-data.23 <- data.frame(mds.23$points)
-ggplot(data = data.23, aes(x=X1, y=X2)) + 
-       geom_point(aes(color = stars$Type))  + labs(x = "MD1", y = "MD2")
-```
-Możemy zauważyć, że obserwacje 
+Dla obu metod widać wyraźny podział na klastry, które odpowiadają prawdziwym typom gwiazd. Podział jest tak wyraźny mimo naszych wczesniejszych wniosków dotyczących jakości skalowania klasycznego. Ciekawą obserwacją jest bardzo bliskie położenie czerwonych i brązowych karłów, które wręcz na siebie nachodzą. Odpowiada to rzeczzywistości --- brązowe i czerwone karły to obiekty o podobnych własnościach (np. niska temperatura).
 
-```{r Wykresy rozrzutu, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Wykresy rozrzutu dla zmiennych ciaglych"}
+
+Na obu wykresach rozrzutu można zauważyć obserwację odstającą --- jest to jedna z gwiazd z ciągu głównego. Znajduje się ona na wykresach w klastrze odpowiadającym nadolbrzymom.
+
+
+```{r Wykresy rozrzutu, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="\\label{fig::scatter_end}Wykresy rozrzutu dla zmiennych ciaglych"}
 subset <- subset(data.for.mds, select=-c(Color, Spectral_Class))
-subset %>% ggpairs(.,
+ggpairs(subset,
 mapping = ggplot2::aes(color = as.factor(stars$Type)),
 columns=1:3, 
 lower=list(continuous=wrap("points", alpha=.4, size=.01)),
@@ -525,5 +524,6 @@ upper=list(continuous="blank"),
 diag=list(continuous="blank"))
 ```
 
+Zastosowanie MDS umożliwiło nam znacznie wartościowszą analizę wybranych przez nas danych. Na wykresach rozrzutu (\ref{fig::scatter_end}) nie widać tak dobrego podziału na klastry jak przy zastosowaniu metody skalowania wielowymiarowego. 
 
 
