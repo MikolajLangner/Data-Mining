@@ -508,7 +508,7 @@ ggplot(data = data.22, aes(x=X1, y=X2)) +
 ```
 
 
-Dla obu metod widać wyraźny podział na klastry, które odpowiadają prawdziwym typom gwiazd. Podział jest tak wyraźny mimo naszych wczesniejszych wniosków dotyczących jakości skalowania klasycznego. Ciekawą obserwacją jest bardzo bliskie położenie czerwonych i brązowych karłów, które wręcz na siebie nachodzą. Odpowiada to rzeczzywistości --- brązowe i czerwone karły to obiekty o podobnych własnościach (np. niska temperatura).
+Dla obu metod widać wyraźny podział na klastry, które odpowiadają prawdziwym typom gwiazd. Podział jest tak wyraźny mimo naszych wczesniejszych wniosków dotyczących jakości skalowania klasycznego. Ciekawą obserwacją jest bardzo bliskie położenie czerwonych i brązowych karłów, które wręcz na siebie nachodzą. Odpowiada to rzeczywistości --- brązowe i czerwone karły to obiekty o podobnych własnościach (np. niska temperatura).
 
 
 Na obu wykresach rozrzutu można zauważyć obserwację odstającą --- jest to jedna z gwiazd z ciągu głównego. Znajduje się ona na wykresach w klastrze odpowiadającym nadolbrzymom.
