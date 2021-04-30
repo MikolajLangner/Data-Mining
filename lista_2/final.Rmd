@@ -17,14 +17,15 @@ output:
 fontsize: 12pt 
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4)
 library(datasets)
 library(dplyr)
-library(MASS)
 library(cluster)
 library(DataExplorer)
 library(ggplot2)
+library(GGally)
 library(ggbeeswarm)
 library(ggfortify)
 library(ggbiplot)
@@ -39,21 +40,24 @@ library(reshape2)
 ```
 
 # Wstęp
-<!--  można napisać trochę więcej -->
 
-```{r, results='asis', echo=FALSE}
-mycat <- function(text){
-  cat(gsub(pattern = "\n", replacement = "  \n", x = text))
-}
-```
+Sprawozdanie zawiera rozwiązanie zadań z listy 2. 
 
-Sprawozdanie zawiera rozwiązanie zadań z listy 2. Dotyczą one zagadnień dyskretyzacji i redukcji wymiaru.
+Zadanie pierwsze dotyczy pojęcia dyskretyzacji i badania jego jakości.
+
+Zadanie drugie i trzecie dotykają pojęcia metod redukcji wymiaru: 
+
+- w zadaniu ddrugim skorzystamy z metody składowych głównych,
+- w zadaniu trzecim z metody skalowania wielowymiarowego.
+
+\newpage
 
 # Zadanie 1
 
 W pierwszym zadaniu mamy dokonać dyskretyzacji cech ciągłych ze zbioru `iris` i ocenić jej jakość.
 
 ## Wczytanie danych i wstępna analiza
+
 ```{r}
 data(iris)
 ```
@@ -65,13 +69,13 @@ str(iris)
 plot_intro(iris)
 ```
 
-```{r}
+```{r iris boxplot, fig.cap="Wykresy pudelkowe dla zmiennych ze zbioru iris", fig.height=3, fig.width=5}
 plot_boxplot(iris, by="Species")
 ```
 
 ```{r, echo=FALSE}
 table <- aggregate(. ~ Species, iris, cv)
-table %>% kbl(caption="Wspolczynniki zmiennosci dla poszczegolnych zmiennych", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position', 'scale_down'))
+table %>% kbl(caption="Wspolczynniki zmiennosci dla poszczegolnych zmiennych", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
 ```
 
 Możemy zauważyć, że zmienna Petal.Length najefektywniej rozdziela poszczególne gatunki, natomiast zmienna Sepal.Width radzi sobie z tym najgorzej.
@@ -109,9 +113,6 @@ for (method in c("interval", "frequency", "cluster", "fixed")) {
       theme(legend.position = "none")))
   discretized.table <- table(petal.length.discretized, iris$Species)
   matchClasses(discretized.table)
-  # discretized.table <- table(petal.length.discretized, iris$Species)
-  # percentage <- round(100 * sum(diag(discretized.table)) / sum(discretized.table), 2)
-  # mycat(paste0("\n Poprawnie sklasyfikowane obserwacje: ", percentage, "%. \n"))
 }
 ```
 
@@ -200,11 +201,13 @@ for (method in c("interval", "frequency", "cluster", "fixed")) {
 
 Nie powinien dziwić fakt, że największa zmiana w poprawności predykcji dotknęła metodę przedziałów równej długości, gdyż pojedyncza obserwacja całkowicie zmienia dobór miejsc partycji przedziału.
 
+\newpage
+
 # Zadanie 2
 
 ## Wczytanie i przygotowanie danych
 
-Teraz naszym zadaniem jest dokonanie analizy składów głównych (PCA) dla zbioru `state.x77`, który zawiera informacje o wskaźnikach terytorialno-społecznych.
+Teraz naszym zadaniem jest dokonanie analizy składów głównych (PCA) dla zbioru `state.x77`, który zawiera informacje o wskaźnikach terytorialno-społecznych dla wszystkich amerykańskich stanów.
 
 Najpierw wczytajmy dane i uzupełnijmy je o informacje geograficzne.
 
@@ -218,7 +221,7 @@ state.subset <- subset(state, select=-c(region, division))
 
 By rozstrzygnąć, czy potrzebna jest normalizacja danych, przeanalizujemy wykresy pudełkowe oraz wyznaczymy odchylenia standardowe i współczynniki zmienności.
 
-```{r data boxplot, message=FALSE, echo=FALSE, fig.height=2.8, fig.cap="Wykresy pudelkowe dla zmiennych ze zbioru state.x77"}
+```{r data boxplot, message=FALSE, echo=FALSE, fig.height=2.8, fig.cap="Wykresy pudelkowe dla zmiennych ze zbioru state.x77", fig.pos='!H'}
 ggplot(data=melt(state.subset), aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable))
 ```
 
@@ -293,10 +296,10 @@ Zauważamy, że:
 
 ## Wizualizacja danych
 
-W tej części wygenerujemy wykresy rozrzutu 2d dla dwóch pierwszych składowych głównych. Skorzystamy z danych dotyczących lokalizacji poszczególnych stanów, by być w stanie wyciągnąc pewne interesujące wnioski.
+W tej części wygenerujemy dwuwymiarowe wykresy rozrzutu (\ref{fig:2d_scatterplot}) dla dwóch pierwszych składowych głównych. Skorzystamy z danych dotyczących lokalizacji poszczególnych stanów, by być w stanie wyciągnąc interesujące wnioski.
 
 
-```{r 2d plot region, echo=FALSE, fig.width=10, fig.height=3.5, fig.cap="Wykresy rozrzutu"}
+```{r 2d_scatterplot, echo=FALSE, fig.width=10, fig.cap="\\label{fig:2d_scatterplot}Wykresy rozrzutu"}
 p1 <- ggplot(data = data.frame(after.pca$x), aes(x=PC1, y=PC2)) + 
         geom_text(aes(color = state$region, label = rownames(state)), size = 2, nudge_y = 0.2) + 
         geom_point(aes(color= state$region))
@@ -349,16 +352,113 @@ Dzięki zastosowaniu metody analizy składowych głównych udało się nam otrzy
 
 Przede wszystkim, stany zlokalizowane na południu kraju są bardzo do siebie podobne. Charakteryzują się największym stopniem analfabetyzmu, największą ilością morderstw (co potwierdzała ujemna korelacja tych zmiennych ze zmienną `Frost`), najniższym stopniem wykształcenia. 
 
+\newpage
 
 # Zadanie 3
 
-Wybranym przez nas zbiorem danych jest &hellip;
+## Wybrany zbiór danych
 
-Wczytajmy dane i przygotujmy je do do skalowania wielowymiarowego.
+Wybranym przez nas zbiorem danych jest `Stars`, który dostępny jest na Kaggle'u ([link](https://www.kaggle.com/brsdincer/star-type-classification)). Zawiera on 240 obserwacji i 7 następujących zmiennych:
 
+- `Temperature` --- temperatura gwiazdy (w Kelwinach),
+
+- `L` --- stosunek jasności gwiazdy i jasności Słońca (ciągła),
+
+- `R` --- stosunek promienia gwiazdy do promienia Słońca (ciągła),
+
+- `A_M` --- absolutna wielkość gwiazdowa (ciągła),
+
+- `Color` --- kolor gwiazdy (nominalna),
+
+- `Spectral_Class` --- typ spektralny gwiazdy (nominalna),
+
+- `Type` --- typ gwiazdy --- jedno z: czerwony, biały, brązowy karzeł, gwiazda ciągu głównego, nadolbrzym, hiperolbrzym (nominalna).
+
+Zmienną `Type` będziemy traktować jako zmienną grupującą.
+
+Wczytamy teraz dane (z całego zbioru wybieramy losowo 100 obserwacji), przygotujemy je do do skalowania wielowymiarowego i wyznaczymy macierz niepodobieństwa.
+
+```{r mds data}
+set.seed(42)
+stars <- sample_n(read.csv("Stars.csv"), 100)
+stars[, c("Color", "Type", "Spectral_Class")] = lapply(stars[, c("Color", "Type", "Spectral_Class")], as.factor)
+
+data.for.mds <- subset(stars, select=-Type)
+dist.matrix <- as.matrix(daisy(data.for.mds, stand = T))
+```
+
+Przy wyznaczaniu odległości między obserwacjami za pomocą funkcji `daisy` dane poddajemy standaryzacji. O konieczności tej operacji świadczą wykresy pudełkowe zmiennych ciągłych. 
+
+```{r mds boxplot, message=FALSE, echo=FALSE, fig.height=2.3, fig.cap="Wykresy pudelkowe dla zmiennych ze zbioru Stars", fig.pos='!H'}
+ggplot(data=melt(subset(data.for.mds, select=-c(Color, Spectral_Class))), aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable))
+```
+
+## Redukcja wymiaru na bazie MDS i analiza jej jakości
 
 Porównamy teraz jakoś odwzorowania MDS w zależności od wielkości wymiaru $d$ przestrzeni docelowej. Przedstawimy na wykresie wartości funkcji STRESS, jak i wykonamy diagramy Sheparda.
 
+
+```{r stress function and preparing data for shepard}
+d.max <- 6
+
+data.for.shepard <- data.frame('original' = as.vector(dist.matrix))
+STRESS.values <- numeric(d.max)
+
+for (i in 1:d.max) {
+  mds.k <- as.matrix(cmdscale(dist.matrix, k = i))
+  new.dist.matrix <- as.matrix(dist(mds.k, method = "euclidean"))
+  
+  STRESS.values[i] <- sum((new.dist.matrix - dist.matrix)^2)
+  
+  data.for.shepard[paste0("d=", i)] = as.vector(new.dist.matrix)
+}
+```
+
+```{r STRESS function plot, echo=FALSE, fig.height=4, fig.width=5, fig.cap="Wykres funkcji STRESS"}
+ggplot(data = data.frame(STRESS.values), aes(x=seq_along(STRESS.values), y=STRESS.values)) + 
+        geom_point(color = wes_palette("GrandBudapest1", 3)[2]) + 
+        geom_line(color = wes_palette("GrandBudapest1", 3)[3]) + labs(x = "wymiar", y = "Wartosci funkcji STRESS")
+```
+
+```{r shepard diagram, echo=FALSE, fig.cap="\\label{fig::shepard}Diagramy Sheparda dla kolejnych wymiarow"}
+data.1 <- melt(data.for.shepard, id.vars = "original")
+ggplot(data = data.1, aes(x=original, y=value)) + geom_point() + geom_abline(slope = 1, color = "red")+ facet_wrap(~variable, scales = "free") + labs(x = "odleglosci w danej przestrzeni", y = "odleglosci w pierwotnej przestrzeni")
+```
+
+Przyglądając się diagramom Sheparda (\ref{fig::shepard}), możemy dojść do wniosku, że MDS nie działa dla naszych danych idealnie. Świadczy o tym również wartość funckji STRESS dla maksymalnego wymiaru $\text{d.max} = 6$ --- `r round(STRESS.values[6], 2)`. Na podstawie tych wykresów możemy też stwierdzić, że optymalnym wyborem wymiary byłoby $d = 4$, dla którego wartość funkcji stresu wynosi `r round(STRESS.values[4], 2)` --- niewiele mniej niż dla $d.max$.
+
+## Wizualizacja danych
+
+Wykorzystamy teraz metodę skalowania wielowymiarowego do przedstawienia naszych danych w przestrzeni dwuwymiarowej
+(przygotowaliśmy także wykresy w przestrzeni trójwymiarowej --- znajdują się one w dołączonym do sprawozdania skrypcie).
+
+```{r 2d mds plot, echo=FALSE, fig.cap="Wykres rozrzutu w przestrzeni d = 2"}
+mds.2 <- cmdscale(dist.matrix, k = 2)
+
+data.2 <- data.frame(mds.2)
+ggplot(data = data.2, aes(x=X1, y=X2)) + geom_text(aes(color = stars$Type, label = rownames(stars)), size = 2, nudge_y = 0.2) +
+       geom_point(color = stars$Type)  + labs(x = "MD1", y = "MD2")
+```
+
+```{r 2d mds plot2, echo=FALSE, fig.cap="Wykres rozrzutu w przestrzeni d = 2"}
+mds.2 <- cmdscale(dist.matrix, k = 2)
+
+data.2 <- data.frame(mds.2)
+ggplot(data = data.2, aes(x=X1, y=X2)) + 
+       geom_point(color = stars$Type)  + labs(x = "MD1", y = "MD2")
+```
+
+Możemy zauważyć, że obserwacje 
+
+```{r Wykresy rozrzutu, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Wykresy rozrzutu dla zmiennych ciaglych"}
+subset <- subset(data.for.mds, select=-c(Color, Spectral_Class))
+subset %>% ggpairs(.,
+mapping = ggplot2::aes(color = as.factor(stars$Type)),
+columns=1:3, 
+lower=list(continuous=wrap("points", alpha=.4, size=.01)),
+upper=list(continuous="blank"),
+diag=list(continuous="blank"))
+```
 
 
 
