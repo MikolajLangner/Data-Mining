@@ -1,0 +1,49 @@
+---
+title: "Raport 3"
+subtitle: "Eksploracja danych"
+author:   |
+          |    Mikołaj Langner, Marcin Kostrzewa
+          |    nr albumów: 255716, 255749
+date: "2021-04-19"
+output: 
+  pdf_document:
+    toc: true
+    fig_caption: yes
+    fig_width: 5 
+    fig_height: 4 
+    number_sections: true
+    includes:
+      in_header: "preambula.tex" 
+fontsize: 12pt 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4, fig.pos='H')
+library(datasets)
+library(dplyr)
+library(kableExtra)
+library(ggplot2)
+library(wesanderson)
+```
+
+# Wstęp
+
+## Wczytanie danych i podział na zbiór uczący i testowy
+
+<!--Tutaj jeszcze trochę napiszę o klasach irysów-->
+Wczytajmy dane o irysach i podzielmy je na zbiór uczący i testowy w proporcji $1:2$.
+
+```{r}
+data(iris)
+n <- dim(iris)[1]
+
+training.set.index <- sample(1:n, 2/3*n)
+training.set <- iris[learning.set.index,]
+test.set <- iris[-learning.set.index,]
+```
+
+
+# Zadanie 1
+
+# Zadanie 2
+
