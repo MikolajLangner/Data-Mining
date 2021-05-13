@@ -23,10 +23,15 @@ library(datasets)
 library(dplyr)
 library(kableExtra)
 library(ggplot2)
+library(reshape2)
 library(wesanderson)
+library(caret)
 ```
 
+
 # Wstęp
+
+# Zadanie 1
 
 ## Wczytanie danych i podział na zbiór uczący i testowy
 
@@ -37,13 +42,134 @@ Wczytajmy dane o irysach i podzielmy je na zbiór uczący i testowy w proporcji 
 data(iris)
 n <- dim(iris)[1]
 
-training.set.index <- sample(1:n, 2/3*n)
-training.set <- iris[learning.set.index,]
-test.set <- iris[-learning.set.index,]
+train.set.index <- sample(1:n, 2/3*n)
+train.set <- iris %>% slice(train.set.index) %>% arrange(Species)
+test.set <- iris %>% slice(-train.set.index) %>% arrange(Species)
 ```
 
+```{r}
+dummies <- dummyVars(" ~ .", data=iris)
 
-# Zadanie 1
+train.dummies <- predict(dummies, newdata = train.set)
+train.X <- as.matrix(cbind(rep(1, nrow(train.dummies)), train.dummies[, 1:4]))
+train.Y <- train.dummies[, 5:7]
+
+test.dummies <- predict(dummies, newdata = test.set) 
+test.X <- as.matrix(cbind(rep(1, nrow(test.dummies)), test.dummies[, 1:4]))
+test.Y <- test.dummies[, 5:7]
+```
+
+```{r}
+Y.hat <- solve(t(train.X) %*% train.X) %*% t(train.X) %*% train.Y
+```
+
+```{r}
+train.proba <- train.X %*% Y.hat
+train.prediction <- colnames(train.proba)[apply(train.proba, 1, which.max)]
+
+test.proba <- test.X %*% Y.hat
+test.prediction <- colnames(test.proba)[apply(test.proba, 1, which.max)]
+```
+
+```{r}
+train.confusion <- table(train.set$Species, train.prediction)
+train.confusion
+```
+
+```{r}
+sum(diag(train.confusion)) / length(train.prediction)
+```
+
+```{r}
+test.confusion <- table(test.set$Species, test.prediction)
+test.confusion
+```
+
+```{r}
+sum(diag(test.confusion)) / length(test.prediction)
+```
+
+```{r}
+train.plot <- melt(as.data.frame(train.proba))
+train.plot$id <- as.integer(rownames(train.proba))
+ggplot(train.plot, aes(x=id, y=value, color=variable)) +
+  geom_point()
+```
+
+```{r}
+test.plot <- melt(as.data.frame(test.proba))
+test.plot$id <- as.integer(rownames(test.proba))
+ggplot(test.plot, aes(x=id, y=value, color=variable)) +
+  geom_point()
+```
+
+```{r}
+iris.quad <- (iris %>% select(-Species))^2
+colnames(iris.quad) <- c("SL", "SW", "PL", "PW")
+iris <- cbind(iris, combn(iris %>% select(-Species), 2, FUN = Reduce, f = `*`), iris.quad)
+```
+
+```{r}
+train.set.index <- sample(1:n, 2/3*n)
+train.set <- iris %>% slice(train.set.index) %>% arrange(Species)
+test.set <- iris %>% slice(-train.set.index) %>% arrange(Species)
+```
+
+```{r}
+dummies <- dummyVars(" ~ .", data=iris)
+
+train.dummies <- predict(dummies, newdata = train.set)
+train.X <- as.matrix(cbind(rep(1, nrow(train.dummies)), train.dummies[, -c(5:7)]))
+train.Y <- train.dummies[, 5:7]
+
+test.dummies <- predict(dummies, newdata = test.set) 
+test.X <- as.matrix(cbind(rep(1, nrow(test.dummies)), test.dummies[, -c(5:7)]))
+test.Y <- test.dummies[, 5:7]
+```
+
+```{r}
+Y.hat <- solve(t(train.X) %*% train.X) %*% t(train.X) %*% train.Y
+```
+
+```{r}
+train.proba <- train.X %*% Y.hat
+train.prediction <- colnames(train.proba)[apply(train.proba, 1, which.max)]
+
+test.proba <- test.X %*% Y.hat
+test.prediction <- colnames(test.proba)[apply(test.proba, 1, which.max)]
+```
+
+```{r}
+train.confusion <- table(train.set$Species, train.prediction)
+train.confusion
+```
+
+```{r}
+sum(diag(train.confusion)) / length(train.prediction)
+```
+
+```{r}
+test.confusion <- table(test.set$Species, test.prediction)
+test.confusion
+```
+
+```{r}
+sum(diag(test.confusion)) / length(test.prediction)
+```
+
+```{r}
+train.plot <- melt(as.data.frame(train.proba))
+train.plot$id <- as.integer(rownames(train.proba))
+ggplot(train.plot, aes(x=id, y=value, color=variable)) +
+  geom_point()
+```
+
+```{r}
+test.plot <- melt(as.data.frame(test.proba))
+test.plot$id <- as.integer(rownames(test.proba))
+ggplot(test.plot, aes(x=id, y=value, color=variable)) +
+  geom_point()
+```
 
 # Zadanie 2
 
