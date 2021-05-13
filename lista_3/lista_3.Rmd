@@ -30,7 +30,7 @@ library(caret)
 library(mlbench)
 library(class)
 library(rpart)
-library(bnclassify)
+library(naivebayes)
 ```
 
 
@@ -226,7 +226,7 @@ sum(diag(confusion)) / nrow(test.data)
 ```
 
 ```{r}
-model <- train(Class ~ ., data = train.data, method = "nb", trControl = cv)
+model <- train(Class ~ ., data = train.data, method = "naive_bayes", trControl = cv)
 confusion <- table(test.data$Class, predict(model, test.data))
 confusion
 ```
