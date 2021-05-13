@@ -21,11 +21,16 @@ fontsize: 12pt
 knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4, fig.pos='H')
 library(datasets)
 library(dplyr)
+library(tidyr)
 library(kableExtra)
 library(ggplot2)
 library(reshape2)
 library(wesanderson)
 library(caret)
+library(mlbench)
+library(class)
+library(rpart)
+library(bnclassify)
 ```
 
 
@@ -173,3 +178,59 @@ ggplot(test.plot, aes(x=id, y=value, color=variable)) +
 
 # Zadanie 2
 
+```{r}
+data("BreastCancer")
+n <- dim(BreastCancer)[1]
+```
+
+```{r}
+BreastCancer <- BreastCancer %>% select(-Id)
+BreastCancer <- drop_na(BreastCancer)
+
+
+for (column in colnames(BreastCancer)) {
+  if (is.factor(BreastCancer[, column]) & column != "Class") {
+    BreastCancer[, column] <- ordered(BreastCancer[, column])
+  }
+}
+```
+
+```{r}
+train.index <- sample(n, n/7)
+train.data <- BreastCancer %>% slice(train.index)
+test.data <- BreastCancer %>% slice(-train.index)
+```
+
+```{r}
+cv <- trainControl(method="cv", number=6)
+```
+
+```{r}
+model <- train(Class ~ ., data = train.data, method = "knn", trControl = cv)
+confusion <- table(test.data$Class, predict(model, test.data))
+confusion
+```
+
+```{r}
+sum(diag(confusion)) / nrow(test.data)
+```
+
+```{r}
+model <- train(Class ~ ., data = train.data, method = "rpart", trControl = cv)
+confusion <- table(test.data$Class, predict(model, test.data))
+confusion
+```
+
+```{r}
+sum(diag(confusion)) / nrow(test.data)
+```
+
+```{r}
+model <- train(Class ~ ., data = train.data, method = "nb", trControl = cv)
+confusion <- table(test.data$Class, predict(model, test.data))
+confusion
+```
+
+```{r}
+sum(diag(confusion)) / nrow(test.data)
+```
