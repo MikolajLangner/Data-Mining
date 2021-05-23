@@ -202,6 +202,7 @@ test.confusion <- table(test.set$Species, test.prediction)
 test.matrix <- as.matrix(test.confusion)
 test.matrix %>% kbl(caption="Macierz pomylek dla zbioru testowego dla przypadku o rozszerzonej liczbie cech.", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
 ```
+
 Błąd klasyfikacji wynosi `r 1 - sum(diag(test.confusion)) / length(test.prediction)`.
 
 Wnioski i napomnienie o maskowaniu
@@ -214,6 +215,8 @@ Wnioski i napomnienie o maskowaniu
 ## Więcej treści na pierwszej stronie
 ## Więcej treści na pierwszej stronie
 ## Więcej treści na pierwszej stronie
+
+
 ```{r}
 data("BreastCancer")
 n <- dim(BreastCancer)[1]
@@ -270,3 +273,29 @@ confusion
 ```{r}
 sum(diag(confusion)) / nrow(test.data)
 ```
+
+
+```{r}
+my.predict  <- function(model, newdata) 
+{ predict(model, newdata=newdata) }
+
+
+cv <- trainControl(method="cv", number=5)
+
+
+my.naiveBayes <- function(formula, data) 
+{ train(formula, data = data, method = "naive_bayes", trControl = cv)} 
+
+
+my.tree <- function(formula, data)
+{ }
+
+
+my.knn <- function(formula, data)
+{ }
+
+
+blad.cv <- errorest(Class~., BreastCancer, model=my.naiveBayes, predict=my.predict, 
+            estimator="cv", est.para=control.errorest(k = 5))
+```
+
