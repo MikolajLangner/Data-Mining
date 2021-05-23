@@ -36,6 +36,20 @@ library(naivebayes)
 
 # Wstęp
 
+Raport zawiera rozwiązania listy $3$.
+
+W zadaniu pierwszym budujemy klasyfikator na bazie metody regresji liniowej i oceniamy jego skuteczność i dokładność.
+
+W zadaniu drugim \ldots.Porównamy ze sobą rezultaty zastosowania:
+
+\begin{itemize}
+  \item metoda k-najblizszych sasiadów (\textit{k-Nearest Neighbors}),
+  \item drzewa klasyfikacyjne (\textit{classification trees}),
+  \item naiwny klasyfikator bayesowski (\textit{na{\"\i}ve Bayes classifier}).
+\end{itemize}
+
+\newpage
+
 # Zadanie 1
 
 ## Wczytanie danych i podział na zbiór uczący i testowy
@@ -52,11 +66,17 @@ train.set <- iris %>% slice(train.set.index) %>% arrange(Species)
 test.set <- iris %>% slice(-train.set.index) %>% arrange(Species)
 ```
 
+
+## Konstrukcja klasyfikatora i wyznaczenie prognoz
+
+Stworzymy teraz macierze eksperymentu i wskaźnikową zarówno dla zbioru uczącego, jak i testowego. W tym celu wykorzystamy funckję `dummyVars` z pakietu Caret.
+
 ```{r}
 dummies <- dummyVars(" ~ .", data=iris)
 
 train.dummies <- predict(dummies, newdata = train.set)
-train.X <- as.matrix(cbind(rep(1, nrow(train.dummies)), train.dummies[, 1:4]))
+train.X <- as.matrix(cbind(rep(1, nrow(train.dummies)), 
+                           train.dummies[, 1:4]))
 train.Y <- train.dummies[, 5:7]
 
 test.dummies <- predict(dummies, newdata = test.set) 
@@ -64,120 +84,136 @@ test.X <- as.matrix(cbind(rep(1, nrow(test.dummies)), test.dummies[, 1:4]))
 test.Y <- test.dummies[, 5:7]
 ```
 
+Wykorzystując metodę najmniejszych kwadratów, wyznaczamy przewidywane prognozy klas dla obu zbiorów.
 ```{r}
 Y.hat <- solve(t(train.X) %*% train.X) %*% t(train.X) %*% train.Y
-```
 
-```{r}
 train.proba <- train.X %*% Y.hat
-train.prediction <- colnames(train.proba)[apply(train.proba, 1, which.max)]
-
 test.proba <- test.X %*% Y.hat
-test.prediction <- colnames(test.proba)[apply(test.proba, 1, which.max)]
 ```
 
-```{r}
-train.confusion <- table(train.set$Species, train.prediction)
-train.confusion
-```
+Przedstawmy prognozy klas na wykresach.
 
-```{r}
-sum(diag(train.confusion)) / length(train.prediction)
-```
-
-```{r}
-test.confusion <- table(test.set$Species, test.prediction)
-test.confusion
-```
-
-```{r}
-sum(diag(test.confusion)) / length(test.prediction)
-```
-
-```{r}
+```{r train_plot, echo=FALSE, message=FALSE, fig.height=3, fig.cap="Prognozy klas dla zbioru uczacego."}
 train.plot <- melt(as.data.frame(train.proba))
 train.plot$id <- as.integer(rownames(train.proba))
 ggplot(train.plot, aes(x=id, y=value, color=variable)) +
   geom_point()
 ```
 
-```{r}
+```{r test_plot, echo=FALSE, message=FALSE, fig.height=3, fig.cap="Prognozy klas dla zbioru testowego."}
+train.prediction <- colnames(train.proba)[apply(train.proba, 1, which.max)]
 test.plot <- melt(as.data.frame(test.proba))
 test.plot$id <- as.integer(rownames(test.proba))
 ggplot(test.plot, aes(x=id, y=value, color=variable)) +
   geom_point()
 ```
 
+\newpage
+
+## Ocena jakości klasyfikacji
+
+Wyznaczmy teraz macierz pomyłek dla zbioru uczącego.
+
+```{r training_confusion_matrix, echo=FALSE, eval=TRUE, results='asis'}
+train.confusion <- table(train.set$Species, train.prediction)
+train.matrix <- as.matrix(train.confusion)
+train.matrix %>% kbl(caption="Macierz pomylek dla zbioru uczacego.", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
+```
+
+Błąd klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(train.prediction)`.
+
+```{r testing_confusion_matrix, echo=FALSE, eval=TRUE, results='asis'}
+test.prediction <- colnames(test.proba)[apply(test.proba, 1, which.max)]
+test.confusion <- table(test.set$Species, test.prediction)
+test.matrix <- as.matrix(test.confusion)
+test.matrix %>% kbl(caption="Macierz pomylek dla zbioru testowego.", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
+```
+
+Błąd klasyfikacji wynosi `r  1 - sum(diag(test.confusion)) / length(test.prediction)`.
+
+Wnioski i napomnienie o maskowaniu
+
+
+## Zastosowanie regresji liniowej do modelu o rozszerzonej ilości cech
+
+Najpierw uzupełnijmy dane o irysach o składniki wielomianowe stopnia $2$.
+
 ```{r}
 iris.quad <- (iris %>% select(-Species))^2
-colnames(iris.quad) <- c("SL", "SW", "PL", "PW")
-iris <- cbind(iris, combn(iris %>% select(-Species), 2, FUN = Reduce, f = `*`), iris.quad)
+colnames(iris.quad) <- c("SL^2", "SW^2", "PL^2", "PW^2")
+iris <- cbind(iris, combn(iris %>% select(-Species), 2, 
+                          FUN = Reduce, f = `*`), 
+              iris.quad)
 ```
+
+Podobnie jak poprzednio podzielimy dane na zbiory: uczący i testowy, a następnie utworzymy macierze: eksperymentu i indykatorów.
 
 ```{r}
 train.set.index <- sample(1:n, 2/3*n)
 train.set <- iris %>% slice(train.set.index) %>% arrange(Species)
 test.set <- iris %>% slice(-train.set.index) %>% arrange(Species)
-```
 
-```{r}
 dummies <- dummyVars(" ~ .", data=iris)
-
 train.dummies <- predict(dummies, newdata = train.set)
 train.X <- as.matrix(cbind(rep(1, nrow(train.dummies)), train.dummies[, -c(5:7)]))
 train.Y <- train.dummies[, 5:7]
-
 test.dummies <- predict(dummies, newdata = test.set) 
 test.X <- as.matrix(cbind(rep(1, nrow(test.dummies)), test.dummies[, -c(5:7)]))
 test.Y <- test.dummies[, 5:7]
 ```
 
+Ponownie, wyznaczymy prognozy klas i zwizualizujemy to przypisanie na wykresach.
 ```{r}
 Y.hat <- solve(t(train.X) %*% train.X) %*% t(train.X) %*% train.Y
-```
 
-```{r}
 train.proba <- train.X %*% Y.hat
-train.prediction <- colnames(train.proba)[apply(train.proba, 1, which.max)]
-
 test.proba <- test.X %*% Y.hat
-test.prediction <- colnames(test.proba)[apply(test.proba, 1, which.max)]
 ```
 
-```{r}
-train.confusion <- table(train.set$Species, train.prediction)
-train.confusion
-```
-
-```{r}
-sum(diag(train.confusion)) / length(train.prediction)
-```
-
-```{r}
-test.confusion <- table(test.set$Species, test.prediction)
-test.confusion
-```
-
-```{r}
-sum(diag(test.confusion)) / length(test.prediction)
-```
-
-```{r}
+```{r train_plot_2, echo=FALSE, message=FALSE, fig.height=2.8, fig.cap="Prognozy klas dla zbioru uczacego o rozszerzonej liczbie cech."}
 train.plot <- melt(as.data.frame(train.proba))
 train.plot$id <- as.integer(rownames(train.proba))
 ggplot(train.plot, aes(x=id, y=value, color=variable)) +
   geom_point()
 ```
 
-```{r}
+```{r test_plot_2, echo=FALSE, message=FALSE, fig.height=2.8, fig.cap="Prognozy klas dla zbioru uczacego o rozszerzonej liczbie cech."}
 test.plot <- melt(as.data.frame(test.proba))
 test.plot$id <- as.integer(rownames(test.proba))
 ggplot(test.plot, aes(x=id, y=value, color=variable)) +
   geom_point()
 ```
 
+Wyznaczymy także macierze pomyłek i błędy klasyfikacji.
+
+```{r training_confusion_matrix_2, echo=FALSE, eval=TRUE, results='asis'}
+train.prediction <- colnames(train.proba)[apply(train.proba, 1, which.max)]
+train.confusion <- table(train.set$Species, train.prediction)
+train.matrix <- as.matrix(train.confusion)
+train.matrix %>% kbl(caption="Macierz pomylek dla zbioru uczacego dla przypadku o rozszerzonej liczbie cech.", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
+```
+Błąd klasyfkacji wynosi `r 1 - sum(diag(train.confusion)) / length(train.prediction)`. 
+
+
+```{r testing_confusion_matrix_2, echo=FALSE, eval=TRUE, results='asis'}
+test.prediction <- colnames(test.proba)[apply(test.proba, 1, which.max)]
+test.confusion <- table(test.set$Species, test.prediction)
+test.matrix <- as.matrix(test.confusion)
+test.matrix %>% kbl(caption="Macierz pomylek dla zbioru testowego dla przypadku o rozszerzonej liczbie cech.", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
+```
+Błąd klasyfikacji wynosi `r 1 - sum(diag(test.confusion)) / length(test.prediction)`.
+
+Wnioski i napomnienie o maskowaniu
+
+
 # Zadanie 2
 
+## Więcej treści na pierwszej stronie
+
+## Więcej treści na pierwszej stronie
+## Więcej treści na pierwszej stronie
+## Więcej treści na pierwszej stronie
 ```{r}
 data("BreastCancer")
 n <- dim(BreastCancer)[1]
