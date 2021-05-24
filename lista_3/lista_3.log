@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/W32TeX) (preloaded format=pdflatex 2020.3.12)  23 MAY 2021 16:46
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/W32TeX) (preloaded format=pdflatex 2020.3.12)  24 MAY 2021 21:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -353,68 +353,102 @@ Package: float 2001/11/08 v1.3d Float enhancements (AL)
 \float@box=\box48
 \@float@everytoks=\toks26
 \@floatcapt=\box49
+) (c:/texlive/2019/texmf-dist/tex/latex/subfig/subfig.sty
+Package: subfig 2005/06/28 ver: 1.3 subfig package
+(c:/texlive/2019/texmf-dist/tex/latex/caption/caption.sty
+Package: caption 2020/01/03 v3.4h Customizing captions (AR)
+(c:/texlive/2019/texmf-dist/tex/latex/caption/caption3.sty
+Package: caption3 2020/01/03 v1.8h caption3 kernel (AR)
+Package caption3 Info: TeX engine: e-TeX on input line 61.
+\captionmargin=\dimen163
+\captionmargin@=\dimen164
+\captionwidth=\dimen165
+\caption@tempdima=\dimen166
+\caption@indent=\dimen167
+\caption@parindent=\dimen168
+\caption@hangindent=\dimen169
+Package caption Info: Standard document class detected.
+)
+\c@caption@flags=\count275
+\c@continuedfloat=\count276
+Package caption Info: float package is loaded.
+Package caption Info: hyperref package is loaded.
+)
+\c@KVtest=\count277
+\sf@farskip=\skip55
+\sf@captopadj=\dimen170
+\sf@capskip=\skip56
+\sf@nearskip=\skip57
+\c@subfigure=\count278
+\c@subfigure@save=\count279
+\c@lofdepth=\count280
+\c@subtable=\count281
+\c@subtable@save=\count282
+\c@lotdepth=\count283
+\sf@top=\skip58
+\sf@bottom=\skip59
 ) (c:/texlive/2019/texmf-dist/tex/latex/booktabs/booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
-\heavyrulewidth=\dimen163
-\lightrulewidth=\dimen164
-\cmidrulewidth=\dimen165
-\belowrulesep=\dimen166
-\belowbottomsep=\dimen167
-\aboverulesep=\dimen168
-\abovetopsep=\dimen169
-\cmidrulesep=\dimen170
-\cmidrulekern=\dimen171
-\defaultaddspace=\dimen172
-\@cmidla=\count275
-\@cmidlb=\count276
-\@aboverulesep=\dimen173
-\@belowrulesep=\dimen174
-\@thisruleclass=\count277
-\@lastruleclass=\count278
-\@thisrulewidth=\dimen175
+\heavyrulewidth=\dimen171
+\lightrulewidth=\dimen172
+\cmidrulewidth=\dimen173
+\belowrulesep=\dimen174
+\belowbottomsep=\dimen175
+\aboverulesep=\dimen176
+\abovetopsep=\dimen177
+\cmidrulesep=\dimen178
+\cmidrulekern=\dimen179
+\defaultaddspace=\dimen180
+\@cmidla=\count284
+\@cmidlb=\count285
+\@aboverulesep=\dimen181
+\@belowrulesep=\dimen182
+\@thisruleclass=\count286
+\@lastruleclass=\count287
+\@thisrulewidth=\dimen183
 ) (c:/texlive/2019/texmf-dist/tex/latex/tools/longtable.sty
 Package: longtable 2020/01/07 v4.13 Multi-page Table package (DPC)
-\LTleft=\skip55
-\LTright=\skip56
-\LTpre=\skip57
-\LTpost=\skip58
-\LTchunksize=\count279
-\LTcapwidth=\dimen176
+\LTleft=\skip60
+\LTright=\skip61
+\LTpre=\skip62
+\LTpost=\skip63
+\LTchunksize=\count288
+\LTcapwidth=\dimen184
 \LT@head=\box50
 \LT@firsthead=\box51
 \LT@foot=\box52
 \LT@lastfoot=\box53
-\LT@cols=\count280
-\LT@rows=\count281
-\c@LT@tables=\count282
-\c@LT@chunks=\count283
+\LT@cols=\count289
+\LT@rows=\count290
+\c@LT@tables=\count291
+\c@LT@chunks=\count292
 \LT@p@ftn=\toks27
 ) (c:/texlive/2019/texmf-dist/tex/latex/tools/array.sty
 Package: array 2019/08/31 v2.4l Tabular extension package (FMi)
-\col@sep=\dimen177
+\col@sep=\dimen185
 \ar@mcellbox=\box54
-\extrarowheight=\dimen178
+\extrarowheight=\dimen186
 \NC@list=\toks28
-\extratabsurround=\skip59
-\backup@length=\skip60
+\extratabsurround=\skip64
+\backup@length=\skip65
 \ar@cellbox=\box55
 ) (c:/texlive/2019/texmf-dist/tex/latex/multirow/multirow.sty
 Package: multirow 2019/05/31 v2.5 Span multiple rows of a table
-\multirow@colwidth=\skip61
-\multirow@cntb=\count284
-\multirow@dima=\skip62
-\bigstrutjot=\dimen179
+\multirow@colwidth=\skip66
+\multirow@cntb=\count293
+\multirow@dima=\skip67
+\bigstrutjot=\dimen187
 ) (c:/texlive/2019/texmf-dist/tex/latex/wrapfig/wrapfig.sty
-\wrapoverhang=\dimen180
-\WF@size=\dimen181
-\c@WF@wrappedlines=\count285
+\wrapoverhang=\dimen188
+\WF@size=\dimen189
+\c@WF@wrappedlines=\count294
 \WF@box=\box56
 \WF@everypar=\toks29
 Package: wrapfig 2003/01/31  v 3.6
 ) (c:/texlive/2019/texmf-dist/tex/latex/colortbl/colortbl.sty
 Package: colortbl 2020/01/04 v1.0e Color table columns (DPC)
 \everycr=\toks30
-\minrowclearance=\skip63
+\minrowclearance=\skip68
 ) (c:/texlive/2019/texmf-dist/tex/latex/pdflscape/pdflscape.sty
 Package: pdflscape 2019/12/05 v0.12 Display of landscape pages in PDF (HO)
 (c:/texlive/2019/texmf-dist/tex/latex/graphics/lscape.sty
@@ -426,32 +460,32 @@ Package: tabu 2019/01/11 v2.9 - flexible LaTeX tabulars (FC+tabu-fixed)
 (c:/texlive/2019/texmf-dist/tex/latex/varwidth/varwidth.sty
 Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
 \@vwid@box=\box57
-\sift@deathcycles=\count286
-\@vwid@loff=\dimen182
-\@vwid@roff=\dimen183
+\sift@deathcycles=\count295
+\@vwid@loff=\dimen190
+\@vwid@roff=\dimen191
 )
-\c@taburow=\count287
-\tabu@nbcols=\count288
-\tabu@cnt=\count289
-\tabu@Xcol=\count290
-\tabu@alloc=\count291
-\tabu@nested=\count292
-\tabu@target=\dimen184
-\tabu@spreadtarget=\dimen185
-\tabu@naturalX=\dimen186
-\tabucolX=\dimen187
-\tabu@Xsum=\dimen188
-\extrarowdepth=\dimen189
-\abovetabulinesep=\dimen190
-\belowtabulinesep=\dimen191
-\tabustrutrule=\dimen192
+\c@taburow=\count296
+\tabu@nbcols=\count297
+\tabu@cnt=\count298
+\tabu@Xcol=\count299
+\tabu@alloc=\count300
+\tabu@nested=\count301
+\tabu@target=\dimen192
+\tabu@spreadtarget=\dimen193
+\tabu@naturalX=\dimen194
+\tabucolX=\dimen195
+\tabu@Xsum=\dimen196
+\extrarowdepth=\dimen197
+\abovetabulinesep=\dimen198
+\belowtabulinesep=\dimen199
+\tabustrutrule=\dimen256
 \tabu@thebody=\toks31
 \tabu@footnotes=\toks32
 \tabu@box=\box58
 \tabu@arstrutbox=\box59
 \tabu@hleads=\box60
 \tabu@vleads=\box61
-\tabu@cellskip=\skip64
+\tabu@cellskip=\skip69
 ) (c:/texlive/2019/texmf-dist/tex/latex/threeparttable/threeparttable.sty
 Package: threeparttable 2003/06/13  v 3.0
 \@tempboxb=\box62
@@ -462,68 +496,78 @@ Package: environ 2014/05/04 v0.3 A new way to define environments
 (c:/texlive/2019/texmf-dist/tex/latex/trimspaces/trimspaces.sty
 Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
 ))
-\TPTL@width=\skip65
+\TPTL@width=\skip70
 ) (c:/texlive/2019/texmf-dist/tex/generic/ulem/ulem.sty
 \UL@box=\box63
 \UL@hyphenbox=\box64
-\UL@skip=\skip66
+\UL@skip=\skip71
 \UL@hook=\toks33
-\UL@height=\dimen193
-\UL@pe=\count293
-\UL@pixel=\dimen194
+\UL@height=\dimen257
+\UL@pe=\count302
+\UL@pixel=\dimen258
 \ULC@box=\box65
 Package: ulem 2019/11/18
-\ULdepth=\dimen195
+\ULdepth=\dimen259
 ) (c:/texlive/2019/texmf-dist/tex/latex/makecell/makecell.sty
 Package: makecell 2009/08/03 V0.1e Managing of Tab Column Heads and Cells
-\rotheadsize=\dimen196
-\c@nlinenum=\count294
+\rotheadsize=\dimen260
+\c@nlinenum=\count303
 \TeXr@lab=\toks34
 ) (c:/texlive/2019/texmf-dist/tex/latex/l3backend/l3backend-pdfmode.def
 File: l3backend-pdfmode.def 2020-02-23 L3 backend support: PDF mode
-\l__kernel_color_stack_int=\count295
+\l__kernel_color_stack_int=\count304
 \l__pdf_internal_box=\box66
-) (./lista_3.aux)
+) (./lista_3.aux
+
+LaTeX Warning: Label `tab:unnamed-chunk-10' multiply defined.
+
+
+LaTeX Warning: Label `tab:unnamed-chunk-11' multiply defined.
+
+
+LaTeX Warning: Label `tab:unnamed-chunk-12' multiply defined.
+
+)
 \openout1 = `lista_3.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 137.
-LaTeX Font Info:    ... okay on input line 137.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 137.
-LaTeX Font Info:    ... okay on input line 137.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 137.
-LaTeX Font Info:    ... okay on input line 137.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 137.
-LaTeX Font Info:    ... okay on input line 137.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 137.
-LaTeX Font Info:    ... okay on input line 137.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 137.
-LaTeX Font Info:    ... okay on input line 137.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 137.
-LaTeX Font Info:    ... okay on input line 137.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 137.
-LaTeX Font Info:    ... okay on input line 137.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 137.
-LaTeX Font Info:    ... okay on input line 137.
-LaTeX Font Info:    Checking defaults for OT4/cmr/m/n on input line 137.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 138.
+LaTeX Font Info:    ... okay on input line 138.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 138.
+LaTeX Font Info:    ... okay on input line 138.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 138.
+LaTeX Font Info:    ... okay on input line 138.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 138.
+LaTeX Font Info:    ... okay on input line 138.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 138.
+LaTeX Font Info:    ... okay on input line 138.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 138.
+LaTeX Font Info:    ... okay on input line 138.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 138.
+LaTeX Font Info:    ... okay on input line 138.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 138.
+LaTeX Font Info:    ... okay on input line 138.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 138.
+LaTeX Font Info:    ... okay on input line 138.
+LaTeX Font Info:    Checking defaults for OT4/cmr/m/n on input line 138.
 LaTeX Font Info:    Trying to load font information for OT4+cmr on input line 1
-37.
+38.
 (c:/texlive/2019/texmf-dist/tex/latex/polski/ot4cmr.fd
 File: ot4cmr.fd 2008/02/24 v1.2.1 Font defs for fonts PL (MW)
 )
-LaTeX Font Info:    ... okay on input line 137.
+LaTeX Font Info:    ... okay on input line 138.
 LaTeX Font Info:    Trying to load font information for OT4+lmr on input line 1
-37.
+38.
 (c:/texlive/2019/texmf-dist/tex/latex/lm/ot4lmr.fd
 File: ot4lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Info: Redefining \microtypecontext on input line 137.
+LaTeX Info: Redefining \microtypecontext on input line 138.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using protrusion set `basicmath'.
 Package microtype Info: Automatic font expansion enabled (level 2),
 (microtype)             stretch: 20, shrink: 20, step: 1, non-selected.
 Package microtype Info: Using default expansion set `basictext'.
-LaTeX Info: Redefining \showhyphens on input line 137.
+LaTeX Info: Redefining \showhyphens on input line 138.
 Package microtype Info: No adjustment of tracking.
 Package microtype Info: No adjustment of interword spacing.
 Package microtype Info: No adjustment of character kerning.
@@ -532,16 +576,16 @@ File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman
 (RS)
 ) (c:/texlive/2019/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count296
-\scratchdimen=\dimen197
+\scratchcounter=\count305
+\scratchdimen=\dimen261
 \scratchbox=\box67
-\nofMPsegments=\count297
-\nofMParguments=\count298
+\nofMPsegments=\count306
+\nofMParguments=\count307
 \everyMPshowfont=\toks35
-\MPscratchCnt=\count299
-\MPscratchDim=\dimen198
-\MPnumerator=\count300
-\makeMPintoPDFobject=\count301
+\MPscratchCnt=\count308
+\MPscratchDim=\dimen262
+\MPnumerator=\count309
+\makeMPintoPDFobject=\count310
 \everyMPtoPDFconversion=\toks36
 ) (c:/texlive/2019/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
@@ -552,7 +596,7 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
 \AtBeginShipoutBox=\box68
-Package hyperref Info: Link coloring OFF on input line 137.
+Package hyperref Info: Link coloring OFF on input line 138.
 (c:/texlive/2019/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2019/09/16 v2.46 Cross-referencing by name of section
 (c:/texlive/2019/texmf-dist/tex/latex/refcount/refcount.sty
@@ -560,11 +604,11 @@ Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
 ) (c:/texlive/2019/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
 Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
-\c@section@level=\count302
+\c@section@level=\count311
 )
-LaTeX Info: Redefining \ref on input line 137.
-LaTeX Info: Redefining \pageref on input line 137.
-LaTeX Info: Redefining \nameref on input line 137.
+LaTeX Info: Redefining \ref on input line 138.
+LaTeX Info: Redefining \pageref on input line 138.
+LaTeX Info: Redefining \nameref on input line 138.
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
 *geometry* verbose mode - [ preamble ] result:
@@ -599,40 +643,49 @@ LaTeX Info: Redefining \nameref on input line 137.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: subfig package v1.3 is loaded.
+Package caption Info: longtable package is loaded.
+(c:/texlive/2019/texmf-dist/tex/latex/caption/ltcaption.sty
+Package: ltcaption 2018/08/26 v1.4a longtable captions (AR)
+)
+Package caption Info: threeparttable package is loaded.
+Package caption Info: wrapfig package is loaded.
+Package caption Info: End \AtBeginDocument code.
 LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 1
-39.
+40.
 (c:/texlive/2019/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OML+lmm on input line 1
-39.
+40.
 (c:/texlive/2019/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 
-139.
+140.
 (c:/texlive/2019/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 
-139.
+140.
 (c:/texlive/2019/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <14.4> on input line 139.
+(Font)              <14.4> on input line 140.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 139.
+(Font)              <10> on input line 140.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 139.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 139
+(Font)              <7> on input line 140.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 140
 .
 (c:/texlive/2019/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (c:/texlive/2019/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 139
+LaTeX Font Info:    Trying to load font information for U+msb on input line 140
 .
 (c:/texlive/2019/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -650,151 +703,141 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 \openout4 = `lista_3.toc'.
 
 LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 1
-55.
+56.
 (c:/texlive/2019/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 ) [1
 
 {c:/texlive/2019/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    Trying to load font information for OT4+lmtt on input line 
-173.
+174.
 (c:/texlive/2019/texmf-dist/tex/latex/lm/ot4lmtt.fd
 File: ot4lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OML+lmtt on input line 
-175.
-LaTeX Font Info:    No file OMLlmtt.fd. on input line 175.
+176.
+LaTeX Font Info:    No file OMLlmtt.fd. on input line 176.
 
 LaTeX Font Warning: Font shape `OML/lmtt/m/n' undefined
 (Font)              using `OML/cmm/m/it' instead
-(Font)              for symbol `textless' on input line 175.
+(Font)              for symbol `textless' on input line 176.
 
 <lista_3_files/figure-latex/train_plot-1.pdf, id=38, 433.62pt x 216.81pt>
 File: lista_3_files/figure-latex/train_plot-1.pdf Graphic file (type pdf)
 <use lista_3_files/figure-latex/train_plot-1.pdf>
 Package pdftex.def Info: lista_3_files/figure-latex/train_plot-1.pdf  used on i
-nput line 222.
+nput line 223.
 (pdftex.def)             Requested size: 433.63878pt x 216.81938pt.
 <lista_3_files/figure-latex/test_plot-1.pdf, id=39, 433.62pt x 216.81pt>
 File: lista_3_files/figure-latex/test_plot-1.pdf Graphic file (type pdf)
 <use lista_3_files/figure-latex/test_plot-1.pdf>
 Package pdftex.def Info: lista_3_files/figure-latex/test_plot-1.pdf  used on in
-put line 228.
+put line 229.
 (pdftex.def)             Requested size: 433.63878pt x 216.81938pt.
-[2] [3pdfTeX warning (ext4): destination with the same identifier (name{figure.
-1}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.232 \newpage
-              pdfTeX warning (ext4): destination with the same identifier (name
-{figure.2}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.232 \newpage
-               <./lista_3_files/figure-latex/train_plot-1.pdf> <./lista_3_files
-/figure-latex/test_plot-1.pdf>]
+[2] [3 <./lista_3_files/figure-latex/train_plot-1.pdf> <./lista_3_files/figure-
+latex/test_plot-1.pdf>]
 LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
-293.
+294.
 (c:/texlive/2019/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-) [4pdfTeX warning (ext4): destination with the same identifier (name{table.1})
- has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.315 \end{Shaded}
-                  pdfTeX warning (ext4): destination with the same identifier (
-name{table.2}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.315 \end{Shaded}
-                  ]
+) [4]
 <lista_3_files/figure-latex/train_plot_2-1.pdf, id=74, 433.62pt x 201.75375pt>
 File: lista_3_files/figure-latex/train_plot_2-1.pdf Graphic file (type pdf)
 <use lista_3_files/figure-latex/train_plot_2-1.pdf>
 Package pdftex.def Info: lista_3_files/figure-latex/train_plot_2-1.pdf  used on
- input line 331.
+ input line 332.
 (pdftex.def)             Requested size: 433.62555pt x 201.75632pt.
 <lista_3_files/figure-latex/test_plot_2-1.pdf, id=75, 433.62pt x 201.75375pt>
 File: lista_3_files/figure-latex/test_plot_2-1.pdf Graphic file (type pdf)
 <use lista_3_files/figure-latex/test_plot_2-1.pdf>
 Package pdftex.def Info: lista_3_files/figure-latex/test_plot_2-1.pdf  used on 
-input line 337.
+input line 338.
 (pdftex.def)             Requested size: 433.62555pt x 201.75632pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[5pdfTeX warning (ext4): destination with the same identifier (name{figure.3}) 
-has been already used, duplicate ignored
 
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.377 \end{table}
-                 pdfTeX warning (ext4): destination with the same identifier (n
-ame{figure.4}) has been already used, duplicate ignored
+LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.377 \end{table}
-                  <./lista_3_files/figure-latex/train_plot_2-1.pdf> <./lista_3_
-files/figure-latex/test_plot_2-1.pdf>]
+[5 <./lista_3_files/figure-latex/train_plot_2-1.pdf> <./lista_3_files/figure-la
+tex/test_plot_2-1.pdf>] [6]
 LaTeX Font Info:    Font shape `OT4/lmtt/bx/n' in size <12> not available
-(Font)              Font shape `OT4/lmtt/b/n' tried instead on input line 415.
+(Font)              Font shape `OT4/lmtt/b/n' tried instead on input line 405.
 LaTeX Font Info:    Trying to load font information for OMS+lmtt on input line 
-415.
-LaTeX Font Info:    No file OMSlmtt.fd. on input line 415.
+405.
+LaTeX Font Info:    No file OMSlmtt.fd. on input line 405.
 
 LaTeX Font Warning: Font shape `OMS/lmtt/m/n' undefined
 (Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbraceleft' on input line 415.
+(Font)              for symbol `textbraceleft' on input line 405.
 
-[6pdfTeX warning (ext4): destination with the same identifier (name{table.3}) h
-as been already used, duplicate ignored
+<lista_3_files/figure-latex/data boxplot-1.pdf, id=98, 433.62pt x 289.08pt>
+File: lista_3_files/figure-latex/data boxplot-1.pdf Graphic file (type pdf)
+<use lista_3_files/figure-latex/data boxplot-1.pdf>
+Package pdftex.def Info: lista_3_files/figure-latex/data boxplot-1.pdf  used on
+ input line 415.
+(pdftex.def)             Requested size: 433.63878pt x 289.09251pt.
+[7 <./lista_3_files/figure-latex/data boxplot-1.pdf>]
+<lista_3_files/figure-latex/unnamed-chunk-9-1.pdf, id=113, 433.62pt x 289.08pt>
 
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.429 \end{Shaded}
-                  pdfTeX warning (ext4): destination with the same identifier (
-name{table.4}) has been already used, duplicate ignored
+File: lista_3_files/figure-latex/unnamed-chunk-9-1.pdf Graphic file (type pdf)
+<use lista_3_files/figure-latex/unnamed-chunk-9-1.pdf>
+Package pdftex.def Info: lista_3_files/figure-latex/unnamed-chunk-9-1.pdf  used
+ on input line 464.
+(pdftex.def)             Requested size: 433.63878pt x 289.09251pt.
+[8 <./lista_3_files/figure-latex/unnamed-chunk-9-1.pdf>] (./ta.tex) (./tb.tex) 
+[9]
 
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.429 \end{Shaded}
-                  ]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 522.
-[7]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 522.
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[10]
+
+LaTeX Font Warning: Font shape `OML/lmtt/m/it' undefined
+(Font)              using `OML/cmm/m/it' instead
+(Font)              for symbol `textless' on input line 704.
+
+
+LaTeX Font Warning: Font shape `OMS/lmtt/m/it' undefined
+(Font)              using `OMS/lmtt/m/n' instead
+(Font)              for symbol `textbraceleft' on input line 705.
+
+[11]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 729.
+[12]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 729.
 (./lista_3.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 522.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 522.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 729.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 729.
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
+
+LaTeX Warning: There were multiply-defined labels.
+
  ) 
 Here is how much of TeX's memory you used:
- 15215 strings out of 480994
- 221303 string characters out of 5916032
- 520126 words of memory out of 5000000
- 30354 multiletter control sequences out of 15000+600000
- 587873 words of font info for 83 fonts, out of 8000000 for 9000
+ 16498 strings out of 480994
+ 244725 string characters out of 5916032
+ 544343 words of memory out of 5000000
+ 31602 multiletter control sequences out of 15000+600000
+ 591127 words of font info for 85 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 41i,9n,42p,855b,364s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 50i,11n,49p,855b,453s stack positions out of 5000i,500n,10000p,200000b,80000s
 {c:/texlive/2019/texmf-dist/fonts/enc/dvips/lm/lm-rmtt.enc}{c:/texlive/2019/t
-exmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{c:/texlive/2019/texmf-dist/fonts/enc/d
-vips/lm/lm-rm.enc}<c:/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+exmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{c:/texlive/2019/texmf-dist/fonts/enc/dv
+ips/lm/lm-ts1.enc}<c:/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cm
 mi12.pfb><c:/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
 <c:/texlive/2019/texmf-dist/fonts/type1/public/lm/lmbx12.pfb><c:/texlive/2019/t
-exmf-dist/fonts/type1/public/lm/lmr12.pfb><c:/texlive/2019/texmf-dist/fonts/typ
-e1/public/lm/lmr17.pfb><c:/texlive/2019/texmf-dist/fonts/type1/public/lm/lmri12
-.pfb><c:/texlive/2019/texmf-dist/fonts/type1/public/lm/lmtk10.pfb><c:/texlive/2
-019/texmf-dist/fonts/type1/public/lm/lmtt12.pfb>
-Output written on lista_3.pdf (7 pages, 243402 bytes).
+exmf-dist/fonts/type1/public/lm/lmr10.pfb><c:/texlive/2019/texmf-dist/fonts/typ
+e1/public/lm/lmr12.pfb><c:/texlive/2019/texmf-dist/fonts/type1/public/lm/lmr17.
+pfb><c:/texlive/2019/texmf-dist/fonts/type1/public/lm/lmri12.pfb><c:/texlive/20
+19/texmf-dist/fonts/type1/public/lm/lmtk10.pfb><c:/texlive/2019/texmf-dist/font
+s/type1/public/lm/lmtt12.pfb><c:/texlive/2019/texmf-dist/fonts/type1/public/lm/
+lmtti10.pfb>
+Output written on lista_3.pdf (12 pages, 313802 bytes).
 PDF statistics:
- 188 PDF objects out of 1000 (max. 8388607)
- 161 compressed objects within 2 object streams
- 39 named destinations out of 1000 (max. 500000)
- 12397 words of extra memory for PDF output out of 14400 (max. 10000000)
+ 248 PDF objects out of 1000 (max. 8388607)
+ 209 compressed objects within 3 object streams
+ 53 named destinations out of 1000 (max. 500000)
+ 14455 words of extra memory for PDF output out of 17280 (max. 10000000)
 
