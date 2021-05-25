@@ -34,6 +34,7 @@ library(mlbench)
 library(class)
 library(rpart)
 library(rpart.plot)
+library(ipred)
 library(rattle)
 library(naivebayes)
 ```
@@ -238,7 +239,7 @@ for (column in colnames(BreastCancer)) {
 
 Przyjrzyjmy się naszym danym na wykresach pudełkowych.
 
-```{r data boxplot, echo=FALSE, eval=TRUE, fig.caption="Wykresy pudelkowe dla naszch danych."}
+```{r data boxplot, echo=FALSE, eval=TRUE, fig.cap="Wykresy pudelkowe dla naszch danych."}
 plot_boxplot(BreastCancer, by="Class")
 ```
 
@@ -248,12 +249,12 @@ Podzielmy nasze dane na zbiór uczący i testowy.
 
 ```{r learning and training test}
 set.seed(42)
-train.index <- sample(n, n/7)
+train.index <- sample(n, 2/3 * n)
 train.data <- BreastCancer %>% slice(train.index)
 test.data <- BreastCancer %>% slice(-train.index)
 
-train.subset <- train.data[, c(3, 6, 10)]
-test.subset <- test.data[, c(3, 6, 10)]
+train.subset <- data.frame(train.data[, c(3, 6, 10)])
+test.subset <- data.frame(test.data[, c(3, 6, 10)])
 ```
 
 ```{r}
@@ -269,12 +270,44 @@ cv <- trainControl(method="cv", number=5)
 
 ## Metoda k-najbliższych sąsiadów 
 
-Coś tam, coś tam
+
+```{r}
+model.knn.basic <- ipredknn(Class ~ ., data = train.data, k=5)
+
+basic.knn.pred <- predict(model.knn.basic, test.data, type="class")
+
+(wynik.tablica <- table(basic.knn.pred, test.etiquettes))
+
+1 - sum(diag(wynik.tablica)) / length(test.etiquettes) 
+```
+
+
+```{r}
+knn.model.subset <- ipredknn(Class ~ ., data = train.subset, k=5)
+
+subset.knn.pred <- predict(knn.model.subset, test.subset, type="class")
+
+
+(wynik.tablica <- table(subset.knn.pred, subset.test.etiquettes))
+
+1 - sum(diag(wynik.tablica)) / length(subset.test.etiquettes) 
+```
+
+```{r}
+model <- train(Class ~ ., data = train.data, method = "knn", trControl = cv)
+confusion <- table(test.data$Class, predict(model, test.data))
+confusion
+```
+
+```{r}
+1 - sum(diag(confusion)) / nrow(test.data)
+```
+
 
 ## Drzewa klasyfikacyjne
 
 ```{r}
-basic.tree.model <- rpart(Class ~ ., data = train.data)
+basic.tree.model <- rpart(Class ~ ., data = train.data, control=rpart.control(cp=.03, minsplit=10, maxdepth=10))
 fancyRpartPlot(basic.tree.model, sub="")
 ```
 
@@ -351,15 +384,6 @@ Błędy klasyfikacji w tym przypadku to kolejno `r 1 - sum(diag(train.confusion)
 
 
 
-```{r}
-model <- train(Class ~ ., data = train.data, method = "knn", trControl = cv)
-confusion <- table(test.data$Class, predict(model, test.data))
-confusion
-```
-
-```{r}
-sum(diag(confusion)) / nrow(test.data)
-```
 
 ```{r}
 model <- train(Class ~ ., data = train.data, method = "rpart", trControl = cv)
