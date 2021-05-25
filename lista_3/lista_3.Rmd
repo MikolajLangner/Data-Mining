@@ -123,8 +123,9 @@ Wyznaczmy teraz macierz pomyłek dla zbioru uczącego.
 
 ```{r training_confusion_matrix, echo=FALSE, eval=TRUE, results='asis'}
 train.confusion <- table(train.set$Species, train.prediction)
-train.matrix <- as.matrix(train.confusion)
-train.matrix %>% kbl(caption="Macierz pomylek dla zbioru uczacego.", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
+
+tab1 <- xtable(train.confusion, digits = 3, row.names = TRUE, caption = "Macierz pomylek dla zbioru uczacego.", label = "tab:tabela1")
+print(tab1, type = "latex", table.placement = "H", comment=FALSE)
 ```
 
 Błąd klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(train.prediction)`.
@@ -132,8 +133,9 @@ Błąd klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(train.predicti
 ```{r testing_confusion_matrix, echo=FALSE, eval=TRUE, results='asis'}
 test.prediction <- colnames(test.proba)[apply(test.proba, 1, which.max)]
 test.confusion <- table(test.set$Species, test.prediction)
-test.matrix <- as.matrix(test.confusion)
-test.matrix %>% kbl(caption="Macierz pomylek dla zbioru testowego.", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
+
+tab2 <- xtable(test.confusion, digits = 3, row.names = TRUE, caption = "Macierz pomylek dla zbioru testowego.", label = "tab:tabela2")
+print(tab2, type = "latex", table.placement = "H", comment=FALSE)
 ```
 
 Błąd klasyfikacji wynosi `r  1 - sum(diag(test.confusion)) / length(test.prediction)`.
@@ -196,8 +198,9 @@ Wyznaczymy także macierze pomyłek i błędy klasyfikacji.
 ```{r training_confusion_matrix_2, echo=FALSE, eval=TRUE, results='asis'}
 train.prediction <- colnames(train.proba)[apply(train.proba, 1, which.max)]
 train.confusion <- table(train.set$Species, train.prediction)
-train.matrix <- as.matrix(train.confusion)
-train.matrix %>% kbl(caption="Macierz pomylek dla zbioru uczacego dla przypadku o rozszerzonej liczbie cech.", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
+
+tab3 <- xtable(train.confusion, digits = 3, row.names = TRUE, caption = "Macierz pomylek dla zbioru uczacego dla przypadku o rozszerzonej liczbie cech.", label = "tab:tabela3")
+print(tab3, type = "latex", table.placement = "H", comment=FALSE)
 ```
 Błąd klasyfkacji wynosi `r 1 - sum(diag(train.confusion)) / length(train.prediction)`. 
 
@@ -205,8 +208,9 @@ Błąd klasyfkacji wynosi `r 1 - sum(diag(train.confusion)) / length(train.predi
 ```{r testing_confusion_matrix_2, echo=FALSE, eval=TRUE, results='asis'}
 test.prediction <- colnames(test.proba)[apply(test.proba, 1, which.max)]
 test.confusion <- table(test.set$Species, test.prediction)
-test.matrix <- as.matrix(test.confusion)
-test.matrix %>% kbl(caption="Macierz pomylek dla zbioru testowego dla przypadku o rozszerzonej liczbie cech.", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
+
+tab4 <- xtable(test.confusion, digits = 3, row.names = TRUE, caption = "Macierz pomylek dla zbioru testowego dla przypadku o rozszerzonej liczbie cech.", label = "tab:tabela4")
+print(tab4, type = "latex", table.placement = "H", comment=FALSE)
 ```
 
 Błąd klasyfikacji wynosi `r 1 - sum(diag(test.confusion)) / length(test.prediction)`.
@@ -221,180 +225,301 @@ Wnioski i napomnienie o maskowaniu
 
 Wczytajmy i przygotujmy dane do dalszych analizy.
 
-```{r ing and preparing data}
-data("BreastCancer")
-n <- dim(BreastCancer)[1]
-
-BreastCancer <- BreastCancer %>% select(-Id)
-BreastCancer <- drop_na(BreastCancer)
-BreastCancer[, 1:9] <- data.frame(sapply(BreastCancer[, 1:9], as.numeric))
-
-
-for (column in colnames(BreastCancer)) {
-  if (is.factor(BreastCancer[, column]) & column != "Class") {
-    BreastCancer[, column] <- ordered(BreastCancer[, column])
-  }
-}
+```{r loading_and_preparing_data, message=FALSE}
+library(MASS)
+data(wine)
+n <- dim(wine)[1]
+wine <- drop_na(wine)
 ```
+
 
 Przyjrzyjmy się naszym danym na wykresach pudełkowych.
 
-```{r data boxplot, echo=FALSE, eval=TRUE, fig.cap="Wykresy pudelkowe dla naszch danych."}
-plot_boxplot(BreastCancer, by="Class")
+```{r Glass_boxplot, echo=FALSE, eval=TRUE, fig.cap="Wykresy pudelkowe naszych danych."}
+plot_boxplot(wine, by="Type")
 ```
 
-Możemy zauważyć, że zmiennymi, które dobrze \ldots
+Możemy zauważyć, że zmiennymi, które dobrze odróźniają zmienne \ldots
 
-Podzielmy nasze dane na zbiór uczący i testowy.
+Podzielmy nasze dane na zbiór uczący i testowy w stosunku $2:1$.
 
 ```{r learning and training test}
 set.seed(42)
 train.index <- sample(n, 2/3 * n)
-train.data <- BreastCancer %>% slice(train.index)
-test.data <- BreastCancer %>% slice(-train.index)
-
-train.subset <- data.frame(train.data[, c(3, 6, 10)])
-test.subset <- data.frame(test.data[, c(3, 6, 10)])
+train.data <- wine %>% slice(train.index)
+test.data <- wine %>% slice(-train.index)
+train.subset <- data.frame(train.data[, c(1, 3, 6, 10)])
+test.subset <- data.frame(test.data[, c(1, 3, 6, 10)])
 ```
 
-```{r}
-train.etiquettes <- train.data$Class
-test.etiquettes <- test.data$Class
-subset.train.etiquettes <- train.subset$Class
-subset.test.etiquettes <- test.subset$Class
+```{r classes etiquettes}
+train.etiquettes <- train.data$Type
+test.etiquettes <- test.data$Type
+subset.train.etiquettes <- train.subset$Type
+subset.test.etiquettes <- test.subset$Type
 ```
 
-```{r}
+```{r tuning}
 cv <- trainControl(method="cv", number=5)
 ```
 
 ## Metoda k-najbliższych sąsiadów 
 
 
-```{r}
-model.knn.basic <- ipredknn(Class ~ ., data = train.data, k=5)
+```{r basic_knn}
+model.knn.basic <- ipredknn(Type ~ ., data = train.data, k=5)
 
-basic.knn.pred <- predict(model.knn.basic, test.data, type="class")
-
-(wynik.tablica <- table(basic.knn.pred, test.etiquettes))
-
-1 - sum(diag(wynik.tablica)) / length(test.etiquettes) 
+basic.knn.test.pred <- predict(model.knn.basic, test.data, type="class")
+basic.knn.train.pred <- predict(model.knn.basic, train.data, type="class")
 ```
 
+```{r echo=FALSE, eval=TRUE}
+test.confusion <- table(basic.knn.test.pred, test.etiquettes)
+train.confusion <- table(basic.knn.train.pred, train.etiquettes)
 
-```{r}
-knn.model.subset <- ipredknn(Class ~ ., data = train.subset, k=5)
-
-subset.knn.pred <- predict(knn.model.subset, test.subset, type="class")
-
-
-(wynik.tablica <- table(subset.knn.pred, subset.test.etiquettes))
-
-1 - sum(diag(wynik.tablica)) / length(subset.test.etiquettes) 
-```
-
-```{r}
-model <- train(Class ~ ., data = train.data, method = "knn", trControl = cv)
-confusion <- table(test.data$Class, predict(model, test.data))
-confusion
-```
-
-```{r}
-1 - sum(diag(confusion)) / nrow(test.data)
-```
-
-
-## Drzewa klasyfikacyjne
-
-```{r}
-basic.tree.model <- rpart(Class ~ ., data = train.data, control=rpart.control(cp=.03, minsplit=10, maxdepth=10))
-fancyRpartPlot(basic.tree.model, sub="")
-```
-
-## Naiwny klasyfikator bayesowski
-
-
-```{r}
-bayes.model.basic <- naiveBayes(Class ~ ., data = train.data)
-
-basic.bayes.train.pred <- predict(bayes.model.basic, train.data) 
-basic.bayes.test.pred <- predict(bayes.model.basic, test.data)
-
-test.confusion <- table(test.etiquettes, basic.bayes.test.pred)
-train.confusion <- table(train.etiquettes, basic.bayes.train.pred)
-test.matrix <- as.matrix(test.confusion)
-train.matrix <- as.matrix(train.confusion)
-
-test.confusion %>% kbl(caption="Macierz pomylek dla zbioru testowego.", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
-
-test.matrix %>% kbl(caption="Macierz pomylek dla zbioru testowego.", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
-
-
-print(xtable(train.matrix), file="ta.tex", floating=FALSE)
-print(xtable(test.matrix), file="tb.tex", floating=FALSE)
+print(xtable(train.confusion), file="knn1.tex", floating=FALSE)
+print(xtable(test.confusion), file="knn2.tex", floating=FALSE)
 ```
 
 \begin{table}[ht]
 \centering
-\subfloat[Table x(a)]{\label{tab:tab1a}\scalebox{.7}{\input{./ta}}}\quad
-\subfloat[Table x(b)]{\label{tab:tab1b}\scalebox{.7}{\input{./tb}}}
-\caption{Caption about here}
-\label{tab:tab1}
+\subfloat[Zbior uczacy]{\label{tab:tabknn1}{\input{./knn1}}}\quad
+\subfloat[Zbior testowy]{\label{tab:tabknn2}{\input{./knn2}}}
+\caption{Macierze pomylek dla metody KNN --- wszystkie cechy.}
+\label{tab:tab_knn1}
 \end{table}
 
-Błędy klasyfikacji to kolejno `r 1 - sum(diag(train.matrix)) / length(train.etiquettes)` i `r 1 - sum(diag(test.matrix)) / length(test.etiquettes)`.
+Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
+
+```{r subset_knn}
+knn.model.subset <- ipredknn(Type ~ ., data = train.subset, k=5)
+
+subset.knn.test.pred <- predict(knn.model.subset, test.subset, type="class")
+subset.knn.train.pred <- predict(knn.model.subset, train.subset, type="class")
+```
+
+```{r echo=FALSE, eval=TRUE}
+test.confusion <- table(basic.knn.test.pred, test.etiquettes)
+train.confusion <- table(basic.knn.train.pred, train.etiquettes)
+
+print(xtable(train.confusion), file="knn3.tex", floating=FALSE)
+print(xtable(test.confusion), file="knn4.tex", floating=FALSE)
+```
+
+\begin{table}[ht]
+\centering
+\subfloat[Zbior uczacy]{\label{tab:tabknn3}{\input{./knn3}}}\quad
+\subfloat[Zbior testowy]{\label{tab:tabknn4}{\input{./knn4}}}
+\caption{Macierze pomylek dla metody KNN --- wybrance cechy.}
+\label{tab:tab_knn2}
+\end{table}
+
+Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
+
+
+```{r tuned_knn}
+model <- train(Type ~ ., data = train.data, method = "knn", trControl = cv)
+
+tuned.knn.test.pred <- predict(model, test.data)
+tuned.knn.train.pred <- predict(model, train.data)
+```
+
+```{r echo=FALSE, eval=TRUE}
+test.confusion <- table(tuned.knn.test.pred, test.etiquettes)
+train.confusion <- table(tuned.knn.train.pred, train.etiquettes)
+
+print(xtable(train.confusion), file="knn5.tex", floating=FALSE)
+print(xtable(test.confusion), file="knn6.tex", floating=FALSE)
+```
+
+\begin{table}[ht]
+\centering
+\subfloat[Zbior uczacy]{\label{tab:tabknn5}{\input{./knn5}}}\quad
+\subfloat[Zbior testowy]{\label{tab:tabknn6}{\input{./knn6}}}
+\caption{Macierze pomylek dla metody KNN --- stuningowany model.}
+\label{tab:tab_knn3}
+\end{table}
+
+Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
+
+## Drzewa klasyfikacyjne
+
+```{r}
+basic.tree.model <- rpart(Type ~ ., data = train.data)
+
+basic.tree.test.pred <- predict(basic.tree.model, newdata = test.data, 
+                                type = "class")
+basic.tree.train.pred <- predict(basic.tree.model, newdata = train.data, 
+                                 type = "class")
+```
+
+```{r echo=FALSE, eval=TRUE}
+fancyRpartPlot(basic.tree.model, sub="")
+```
+
+
+```{r echo=FALSE, eval=TRUE}
+test.confusion <- table(basic.tree.test.pred, test.etiquettes)
+train.confusion <- table(basic.tree.train.pred, train.etiquettes)
+
+print(xtable(train.confusion), file="t1.tex", floating=FALSE)
+print(xtable(test.confusion), file="t2.tex", floating=FALSE)
+```
+
+\begin{table}[ht]
+\centering
+\subfloat[Zbior uczacy]{\label{tab:tabt1}{\input{./t1}}}\quad
+\subfloat[Zbior testowy]{\label{tab:tabt2}{\input{./t2}}}
+\caption{Macierze pomylek dla metody drzew klasyfikacyjnych --- wszystkie cechy.}
+\label{tab:tab_t1}
+\end{table}
+
+Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
+
+```{r}
+subset.tree.model <- rpart(Type ~ ., data = train.subset)
+
+subset.tree.test.pred <- predict(subset.tree.model, newdata = test.subset, 
+                                 type = "class")
+subset.tree.train.pred <- predict(subset.tree.model, newdata = train.subset,
+                                  type = "class")
+```
+
+```{r echo=FALSE, eval=TRUE}
+fancyRpartPlot(subset.tree.model, sub="")
+```
+
+
+```{r echo=FALSE, eval=TRUE}
+test.confusion <- table(subset.tree.test.pred, subset.test.etiquettes)
+train.confusion <- table(subset.tree.train.pred, subset.train.etiquettes)
+
+print(xtable(train.confusion), file="t3.tex", floating=FALSE)
+print(xtable(test.confusion), file="t4.tex", floating=FALSE)
+```
+
+\begin{table}[ht]
+\centering
+\subfloat[Zbior uczacy]{\label{tab:tabt3}{\input{./t3}}}\quad
+\subfloat[Zbior testowy]{\label{tab:tabt4}{\input{./t4}}}
+\caption{Macierze pomylek dla metody drzew klasyfikacyjnych --- wybrane cechy.}
+\label{tab:tab_t2}
+\end{table}
+
+Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
+
+
+```{r}
+tuned.tree.model <- train(Type ~ ., data = train.data, method = "rpart",
+                          trControl = cv)
+
+tuned.tree.test.pred <- predict(tuned.tree.model, test.data)
+tuned.tree.train.pred <- predict(tuned.tree.model, train.data)
+```
+
+
+```{r echo=FALSE, eval=TRUE}
+fancyRpartPlot(tuned.tree.model$finalModel, sub="")
+```
+
+
+```{r echo=FALSE, eval=TRUE}
+test.confusion <- table(tuned.tree.test.pred, test.etiquettes)
+train.confusion <- table(tuned.tree.train.pred, train.etiquettes)
+
+print(xtable(train.confusion), file="t5.tex", floating=FALSE)
+print(xtable(test.confusion), file="t6.tex", floating=FALSE)
+```
+
+\begin{table}[ht]
+\centering
+\subfloat[Zbior uczacy]{\label{tab:tabt5}{\input{./t5}}}\quad
+\subfloat[Zbior testowy]{\label{tab:tabt6}{\input{./t6}}}
+\caption{Macierze pomylek dla metody drzew klasyfikacyjnych --- stuningowany model.}
+\label{tab:tab_t3}
+\end{table}
+
+Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
+
+## Naiwny klasyfikator bayesowski
+
+
+```{r basic_bayes}
+bayes.model.basic <- naiveBayes(Type ~ ., data = train.data)
+
+basic.bayes.train.pred <- predict(bayes.model.basic, train.data) 
+basic.bayes.test.pred <- predict(bayes.model.basic, test.data)
+```
+
+```{r basic_bayes_tables, echo=FALSE, eval=TRUE}
+test.confusion <- table(test.etiquettes, basic.bayes.test.pred)
+train.confusion <- table(train.etiquettes, basic.bayes.train.pred)
+
+print(xtable(train.confusion), file="b1.tex", floating=FALSE)
+print(xtable(test.confusion), file="b2.tex", floating=FALSE)
+```
+
+\begin{table}[ht]
+\centering
+\subfloat[Zbior uczacy]{\label{tab:tabb1}{\input{./b1}}}\quad
+\subfloat[Zbior testowy]{\label{tab:tabb2}{\input{./b2}}}
+\caption{Macierze pomylek dla klasyfikatora bayesowskiego --- wszystkie cechy.}
+\label{tab:tab_b1}
+\end{table}
+
+Błędy klasyfikacji to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
 
 Powtórzmy teraz powyższe dla wybranego podzbioru naszych danych.
 
-```{r}
-bayes.model.subset <- naiveBayes(Class ~ ., data = train.subset)
+```{r subset_bayes}
+bayes.model.subset <- naiveBayes(Type ~ ., data = train.subset)
 
 basic.bayes.train.pred <- predict(bayes.model.subset, train.subset) 
 basic.bayes.test.pred <- predict(bayes.model.subset, test.subset)
-
-test.confusion <- table(subset.test.etiquettes, basic.bayes.test.pred)
-train.confusion <- table(subset.train.etiquettes, basic.bayes.train.pred)
-test.matrix <- as.matrix(test.confusion)
-train.matrix <- as.matrix(train.confusion)
-
-train.matrix %>% kbl(caption="Macierz pomylek dla zbioru testowego.", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
-
-test.matrix %>% kbl(caption="Macierz pomylek dla zbioru testowego.", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
-
-
-print(xtable(train.matrix), file="tc.tex", floating=FALSE)
-print(xtable(test.matrix), file="td.tex", floating=FALSE)
 ```
 
-Błędy klasyfikacji to kolejno `r 1 - sum(diag(train.matrix)) / length(train.etiquettes)` i `r 1 - sum(diag(test.matrix)) / length(test.etiquettes)`.
+```{r subset_bayes_tables, echo=FALSE, eval=TRUE}
+test.confusion <- table(subset.test.etiquettes, basic.bayes.test.pred)
+train.confusion <- table(subset.train.etiquettes, basic.bayes.train.pred)
+
+print(xtable(train.confusion), file="b3.tex", floating=FALSE)
+print(xtable(test.confusion), file="b4.tex", floating=FALSE)
+```
+
+\begin{table}[ht]
+\centering
+\subfloat[Zbior uczacy]{\label{tab:tabb3}{\input{./b3}}}\quad
+\subfloat[Zbior testowy]{\label{tab:tabb4}{\input{./b4}}}
+\caption{Macierze pomylek dla klasyfikatora bayesowskiego --- wybrane cechy.}
+\label{tab:tab_b2}
+\end{table}
+
+Błędy klasyfikacji to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
 
 Model "stunigowany"
 
 ```{r}
-model <- train(Class ~ ., data = train.data, method = "naive_bayes", trControl = cv)
-test.confusion <- table(test.data$Class, predict(model, test.data))
-train.confusion <- table(train.data$Class, predict(model, train.data))
-
-train.confusion %>% as.matrix %>% kbl(caption="Macierz pomylek dla zbioru testowego.", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
-
-test.confusion %>% as.matrix %>% kbl(caption="Macierz pomylek dla zbioru testowego.", format="latex", digits=3) %>% kable_styling(latex_options=c('hold_position'))
+model <- train(Type ~ ., data = train.data, method = "naive_bayes", 
+               trControl = cv)
 ```
+
+```{r echo=FALSE, eval=TRUE}
+test.confusion <- table(test.data$Type, predict(model, test.data))
+train.confusion <- table(train.data$Type, predict(model, train.data))
+
+print(xtable(train.confusion), file="b5.tex", floating=FALSE)
+print(xtable(test.confusion), file="b6.tex", floating=FALSE)
+```
+
+\begin{table}[ht]
+\centering
+\subfloat[Zbior uczacy]{\label{tab:tabb5}{\input{./b5}}}\quad
+\subfloat[Zbior testowy]{\label{tab:tabb6}{\input{./b6}}}
+\caption{Macierze pomylek dla klasyfikatora bayesowskiego --- model stuningowany.}
+\label{tab:tab_b3}
+\end{table}
 
 Błędy klasyfikacji w tym przypadku to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
-
-
-
-
-```{r}
-model <- train(Class ~ ., data = train.data, method = "rpart", trControl = cv)
-confusion <- table(test.data$Class, predict(model, test.data))
-confusion
-```
-
-```{r}
-sum(diag(confusion)) / nrow(test.data)
-```
-
 
 
 ```{r}
