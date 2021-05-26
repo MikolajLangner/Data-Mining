@@ -226,7 +226,6 @@ Wnioski i napomnienie o maskowaniu
 Wczytajmy i przygotujmy dane do dalszych analizy.
 
 ```{r loading_and_preparing_data, message=FALSE}
-library(MASS)
 data(wine)
 n <- dim(wine)[1]
 wine <- drop_na(wine)
@@ -235,7 +234,7 @@ wine <- drop_na(wine)
 
 Przyjrzyjmy się naszym danym na wykresach pudełkowych.
 
-```{r Glass_boxplot, echo=FALSE, eval=TRUE, fig.cap="Wykresy pudelkowe naszych danych."}
+```{r Wine_boxplot, echo=FALSE, eval=TRUE, fig.cap="Wykresy pudelkowe naszych danych."}
 plot_boxplot(wine, by="Type")
 ```
 
@@ -248,8 +247,8 @@ set.seed(42)
 train.index <- sample(n, 2/3 * n)
 train.data <- wine %>% slice(train.index)
 test.data <- wine %>% slice(-train.index)
-train.subset <- data.frame(train.data[, c(1, 3, 6, 10)])
-test.subset <- data.frame(test.data[, c(1, 3, 6, 10)])
+train.subset <- data.frame(train.data[, c(1, 2, 7, 8)])
+test.subset <- data.frame(test.data[, c(1, 2, 7, 8)])
 ```
 
 ```{r classes etiquettes}
@@ -521,28 +520,22 @@ print(xtable(test.confusion), file="b6.tex", floating=FALSE)
 
 Błędy klasyfikacji w tym przypadku to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
 
-
+Powtórzymy teraz ocenę klasyfikacji przy pomocy metody 5-krotnej walidacji krzyżowej dla stuningowanego klasyfikatora bayesowskiego, który najlepiej poradził sobie na danym zbiorze treningowym i testowym.
 ```{r}
-# my.predict  <- function(model, newdata) 
-# { predict(model, newdata=newdata) }
-# 
-# 
-# cv <- trainControl(method="cv", number=5)
-# 
-# 
-# my.naiveBayes <- function(formula, data) 
-# { train(formula, data = data, method = "naive_bayes", trControl = cv)} 
-# 
-# 
-# my.tree <- function(formula, data)
-# { }
-# 
-# 
-# my.knn <- function(formula, data)
-# { }
-# 
-# 
-# blad.cv <- errorest(Class~., BreastCancer, model=my.naiveBayes, predict=my.predict, 
-#             estimator="cv", est.para=control.errorest(k = 5))
+predictor  <- function(model, newdata) 
+{ predict(model, newdata=newdata) }
+ 
+ 
+cv <- trainControl(method="cv", number=5)
+
+
+naiveBayes.predictor <- function(formula, data) 
+{ train(formula, data = data, method = "naive_bayes", trControl = cv)} 
+ 
+
+error.cv <- errorest(Type~., wine, model=naiveBayes.predictor, predict=predictor, 
+            estimator="cv", est.para=control.errorest(k = 5))
+
+error.cv
 ```
 
