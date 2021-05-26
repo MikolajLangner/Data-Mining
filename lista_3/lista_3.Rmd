@@ -23,7 +23,6 @@ library(DataExplorer)
 library(datasets)
 library(dplyr)
 library(tidyr)
-library(kableExtra)
 library(xtable)
 library(ggplot2)
 library(reshape2)
@@ -298,8 +297,8 @@ subset.knn.train.pred <- predict(knn.model.subset, train.subset, type="class")
 ```
 
 ```{r echo=FALSE, eval=TRUE}
-test.confusion <- table(basic.knn.test.pred, test.etiquettes)
-train.confusion <- table(basic.knn.train.pred, train.etiquettes)
+test.confusion <- table(subset.knn.test.pred, test.etiquettes)
+train.confusion <- table(subset.knn.train.pred, train.etiquettes)
 
 print(xtable(train.confusion), file="knn3.tex", floating=FALSE)
 print(xtable(test.confusion), file="knn4.tex", floating=FALSE)
@@ -315,13 +314,35 @@ print(xtable(test.confusion), file="knn4.tex", floating=FALSE)
 
 Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
 
+Zobaczmy jak zmienia się błąd klasyfikacji w zależności od parametru $k$.
+
+```{r k_comparison, echo=FALSE, eval=TRUE, fig.cap="Blad klasyfikacji w zaleznosci od parametru k."}
+ks <- seq(20)
+results <- data.frame(k=ks, train=rep(0, 20), test=rep(0, 20))
+
+for (i in ks) {
+  knn.model.subset <- ipredknn(Type ~ ., data = train.subset, k=i)
+  subset.knn.test.pred <- predict(knn.model.subset, test.subset, type="class")
+  subset.knn.train.pred <- predict(knn.model.subset, train.subset, type="class")
+  test.confusion <- table(subset.knn.test.pred, test.etiquettes)
+  train.confusion <- table(subset.knn.train.pred, train.etiquettes)
+  results[i, 2] = 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes)
+  results[i, 3] = 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)
+}
+
+ggplot(data = melt(results, id.vars = "k", variable.name = "set")) + 
+  geom_point(aes(x=k, y=value, color=set)) + geom_line(aes(x=k, y=value, color=set))
+```
+
+Widzimy, że najlepsze rezultaty otrzymujemy dla $k=9$. Potwierdza to ...
 
 ```{r tuned_knn}
-model <- train(Type ~ ., data = train.data, method = "knn", trControl = cv)
+model <- train(Type ~ ., data = train.subset, method = "knn", trControl = cv)
 
 tuned.knn.test.pred <- predict(model, test.data)
 tuned.knn.train.pred <- predict(model, train.data)
 ```
+
 
 ```{r echo=FALSE, eval=TRUE}
 test.confusion <- table(tuned.knn.test.pred, test.etiquettes)
@@ -340,6 +361,18 @@ print(xtable(test.confusion), file="knn6.tex", floating=FALSE)
 \end{table}
 
 Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
+
+```{r}
+predictor  <- function(model, newdata) 
+{ predict(model, newdata=newdata) }
+
+knn.predictor <- function(formula, data) 
+{ train(formula, data = data, method = "knn", trControl = cv)} 
+
+knn.error.cv <- errorest(Type~., wine[, c(1, 2, 7, 8)], model=knn.predictor, predict=predictor, 
+            estimator="cv", est.para=control.errorest(k = 5))
+knn.error.cv
+```
 
 ## Drzewa klasyfikacyjne
 
@@ -407,10 +440,20 @@ print(xtable(test.confusion), file="t4.tex", floating=FALSE)
 
 Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
 
+```{r}
+Cars93.tree.complex  <- rpart(Type ~ ., data=train.subset, 
+                              control=rpart.control(cp=.01, minsplit=1, maxdepth=30))
+plotcp(Cars93.tree.complex)
+printcp(Cars93.tree.complex)
+
+bestcp <- Cars93.tree.complex$cptable[which.min(Cars93.tree.complex$cptable[,"xerror"]),"CP"]
+bestcp 
+```
+
 
 ```{r}
-tuned.tree.model <- train(Type ~ ., data = train.data, method = "rpart",
-                          trControl = cv)
+tuned.tree.model <- train(Type ~ ., data = train.subset, method = "rpart",
+                          trControl = cv, tuneLength = 10)
 
 tuned.tree.test.pred <- predict(tuned.tree.model, test.data)
 tuned.tree.train.pred <- predict(tuned.tree.model, train.data)
@@ -502,6 +545,7 @@ model <- train(Type ~ ., data = train.data, method = "naive_bayes",
                trControl = cv)
 ```
 
+
 ```{r echo=FALSE, eval=TRUE}
 test.confusion <- table(test.data$Type, predict(model, test.data))
 train.confusion <- table(train.data$Type, predict(model, train.data))
@@ -521,18 +565,14 @@ print(xtable(test.confusion), file="b6.tex", floating=FALSE)
 Błędy klasyfikacji w tym przypadku to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
 
 Powtórzymy teraz ocenę klasyfikacji przy pomocy metody 5-krotnej walidacji krzyżowej dla stuningowanego klasyfikatora bayesowskiego, który najlepiej poradził sobie na danym zbiorze treningowym i testowym.
+
 ```{r}
 predictor  <- function(model, newdata) 
 { predict(model, newdata=newdata) }
  
- 
-cv <- trainControl(method="cv", number=5)
-
-
 naiveBayes.predictor <- function(formula, data) 
 { train(formula, data = data, method = "naive_bayes", trControl = cv)} 
  
-
 error.cv <- errorest(Type~., wine, model=naiveBayes.predictor, predict=predictor, 
             estimator="cv", est.para=control.errorest(k = 5))
 
