@@ -36,6 +36,7 @@ library(rpart.plot)
 library(ipred)
 library(rattle)
 library(naivebayes)
+library(nnet)
 ```
 
 
@@ -43,17 +44,16 @@ library(naivebayes)
 
 Raport zawiera rozwiązania listy $3$.
 
-W zadaniu pierwszym budujemy klasyfikator na bazie metody regresji liniowej i oceniamy jego skuteczność i dokładność.
+W zadaniu pierwszym zbudujemy klasyfikator na bazie metody regresji liniowej i oceniamy jego skuteczność i dokładność.
 
-W zadaniu drugim \ldots.Porównamy ze sobą rezultaty zastosowania:
+W zadaniu drugim porównamy ze sobą rezultaty zastosowania następujących metod klasyfikacji:
 
 \begin{itemize}
   \item metoda k-najblizszych sasiadów (\textit{k-Nearest Neighbors}),
   \item drzewa klasyfikacyjne (\textit{classification trees}),
-  \item naiwny klasyfikator bayesowski (\textit{na{\"\i}ve Bayes classifier}).
+  \item naiwny klasyfikator bayesowski (\textit{na{\"\i}ve Bayes classifier}),
+  \item wieloklasowa regresja logistyczna.
 \end{itemize}
-
-\newpage
 
 # Zadanie 1
 
@@ -74,7 +74,7 @@ test.set <- iris %>% slice(-train.set.index) %>% arrange(Species)
 
 ## Konstrukcja klasyfikatora i wyznaczenie prognoz
 
-Stworzymy teraz macierze eksperymentu i wskaźnikową zarówno dla zbioru uczącego, jak i testowego. W tym celu wykorzystamy funckję `dummyVars` z pakietu Caret.
+Stworzymy teraz macierze eksperymentu i wskaźnikową zarówno dla zbioru uczącego, jak i testowego. W tym celu wykorzystamy funkcję `dummyVars` z pakietu \verb|caret|.
 
 ```{r}
 dummies <- dummyVars(" ~ .", data=iris)
@@ -90,6 +90,7 @@ test.Y <- test.dummies[, 5:7]
 ```
 
 Wykorzystując metodę najmniejszych kwadratów, wyznaczamy przewidywane prognozy klas dla obu zbiorów.
+
 ```{r}
 Y.hat <- solve(t(train.X) %*% train.X) %*% t(train.X) %*% train.Y
 
@@ -99,14 +100,14 @@ test.proba <- test.X %*% Y.hat
 
 Przedstawmy prognozy klas na wykresach.
 
-```{r train_plot, echo=FALSE, message=FALSE, fig.height=3, fig.cap="Prognozy klas dla zbioru uczacego."}
+```{r train_plot, echo=FALSE, message=FALSE, fig.height=3, fig.cap="\\label{fig:fig1}Prognozy klas dla zbioru uczacego."}
 train.plot <- melt(as.data.frame(train.proba))
 train.plot$id <- as.integer(rownames(train.proba))
 ggplot(train.plot, aes(x=id, y=value, color=variable)) +
   geom_point()
 ```
 
-```{r test_plot, echo=FALSE, message=FALSE, fig.height=3, fig.cap="Prognozy klas dla zbioru testowego."}
+```{r test_plot, echo=FALSE, message=FALSE, fig.height=3, fig.cap="\\label{fig:fig2}Prognozy klas dla zbioru testowego."}
 train.prediction <- colnames(train.proba)[apply(train.proba, 1, which.max)]
 test.plot <- melt(as.data.frame(test.proba))
 test.plot$id <- as.integer(rownames(test.proba))
@@ -129,6 +130,8 @@ print(tab1, type = "latex", table.placement = "H", comment=FALSE)
 
 Błąd klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(train.prediction)`.
 
+Podobnie, wyznaczymy teraz macierz pomyłek dla zbioru testowego.
+
 ```{r testing_confusion_matrix, echo=FALSE, eval=TRUE, results='asis'}
 test.prediction <- colnames(test.proba)[apply(test.proba, 1, which.max)]
 test.confusion <- table(test.set$Species, test.prediction)
@@ -139,7 +142,7 @@ print(tab2, type = "latex", table.placement = "H", comment=FALSE)
 
 Błąd klasyfikacji wynosi `r  1 - sum(diag(test.confusion)) / length(test.prediction)`.
 
-Wnioski i napomnienie o maskowaniu
+Przypatując się wykresom (\ref{fig:fig1}), (\ref{fig:fig2}) możemy zauważyć, że zachodzi zjawisko maskowania --- klasa \verb|versicolor| jest przysłaniona.
 
 
 ## Zastosowanie regresji liniowej do modelu o rozszerzonej ilości cech
@@ -178,14 +181,14 @@ train.proba <- train.X %*% Y.hat
 test.proba <- test.X %*% Y.hat
 ```
 
-```{r train_plot_2, echo=FALSE, message=FALSE, fig.height=2.8, fig.cap="Prognozy klas dla zbioru uczacego o rozszerzonej liczbie cech."}
+```{r train_plot_2, echo=FALSE, message=FALSE, fig.height=2.8, fig.cap="\\label{fig:fig3}Prognozy klas dla zbioru uczacego o rozszerzonej liczbie cech."}
 train.plot <- melt(as.data.frame(train.proba))
 train.plot$id <- as.integer(rownames(train.proba))
 ggplot(train.plot, aes(x=id, y=value, color=variable)) +
   geom_point()
 ```
 
-```{r test_plot_2, echo=FALSE, message=FALSE, fig.height=2.8, fig.cap="Prognozy klas dla zbioru uczacego o rozszerzonej liczbie cech."}
+```{r test_plot_2, echo=FALSE, message=FALSE, fig.height=2.8, fig.cap="\\label{fig:fig4}Prognozy klas dla zbioru uczacego o rozszerzonej liczbie cech."}
 test.plot <- melt(as.data.frame(test.proba))
 test.plot$id <- as.integer(rownames(test.proba))
 ggplot(test.plot, aes(x=id, y=value, color=variable)) +
@@ -214,7 +217,11 @@ print(tab4, type = "latex", table.placement = "H", comment=FALSE)
 
 Błąd klasyfikacji wynosi `r 1 - sum(diag(test.confusion)) / length(test.prediction)`.
 
-Wnioski i napomnienie o maskowaniu
+Po przeanalizowaniu wykresów (\ref{fig:fig3}) i (\ref{fig:fig4}) dochodzimy do wniosku, że w tym przypadku nie występują zjawisko maskowania klas.
+
+## Wnioski
+
+Przede wszystkim zauważamy, że model oparty na rozszerzonej ilości cech dał znacznie lepsze rezultaty --- błędy klasyfikacji były mniejsze zarówno dla zbioru uczącego, jak i testowego. W drugim modelu nie wystąpiło także zjawisko maskowania.
 
 \newpage
 
@@ -222,24 +229,29 @@ Wnioski i napomnienie o maskowaniu
 
 ## Wczytanie i krótka anliza danych
 
-Wczytajmy i przygotujmy dane do dalszych analizy.
+Wczytajmy i zapoznajmy się z danymi.
 
 ```{r loading_and_preparing_data, message=FALSE}
 data(wine)
 n <- dim(wine)[1]
-wine <- drop_na(wine)
+variable.number <- ncol(wine)
+observations.number <- nrow(wine)
+NaN.number <- sum(is.na(wine))
+class.number <- length(unique(wine$Type))
 ```
 
+Mamy `r variable.number` zmiennych i `r observations.number` obserwacji. Są trzy klasy, informację o nich zawiera zmienna \verb|Type|. Nie występują wartości brakujące (\verb|NaN.number| = `r NaN.number`).
 
 Przyjrzyjmy się naszym danym na wykresach pudełkowych.
 
 ```{r Wine_boxplot, echo=FALSE, eval=TRUE, fig.cap="Wykresy pudelkowe naszych danych."}
-plot_boxplot(wine, by="Type")
+plot_boxplot(wine[, c(1, 2:9)], by="Type")
+plot_boxplot(wine[, c(1, 10:13)], by="Type")
 ```
 
-Możemy zauważyć, że zmiennymi, które dobrze odróźniają zmienne \ldots
+Możemy zauważyć, że zmiennymi, które dobrze dywersyfikują klasy są: \verb|Alcohol|, \verb|Flavanoids| i  \verb|Phenols|.
 
-Podzielmy nasze dane na zbiór uczący i testowy w stosunku $2:1$.
+Podzielimy nasze dane na zbiór uczący i testowy w stosunku $2:1$. Utworzymy także podzbiory, które będą zawierać tylko najlepiej dywersyfikujące cechy.
 
 ```{r learning and training test}
 set.seed(42)
@@ -250,6 +262,8 @@ train.subset <- data.frame(train.data[, c(1, 2, 7, 8)])
 test.subset <- data.frame(test.data[, c(1, 2, 7, 8)])
 ```
 
+Zdefiniujmy też od razu rzeczywiste etykietki klas dla wcześniej utworzonych zbiorów.
+
 ```{r classes etiquettes}
 train.etiquettes <- train.data$Type
 test.etiquettes <- test.data$Type
@@ -257,12 +271,15 @@ subset.train.etiquettes <- train.subset$Type
 subset.test.etiquettes <- test.subset$Type
 ```
 
+Poniżej tworzymy także obiekt \verb|trainControl|, który wykorzystamy przy przeprowadzaniu $5$-krotnej walidacji krzyżowej. 
+
 ```{r tuning}
 cv <- trainControl(method="cv", number=5)
 ```
 
 ## Metoda k-najbliższych sąsiadów 
 
+Na początku wytrenujmy nasz klasyfikator na zbiorze uczącym zawierającym wszystkie cechy (przyjmujemy $k=5$).
 
 ```{r basic_knn}
 model.knn.basic <- ipredknn(Type ~ ., data = train.data, k=5)
@@ -270,6 +287,8 @@ model.knn.basic <- ipredknn(Type ~ ., data = train.data, k=5)
 basic.knn.test.pred <- predict(model.knn.basic, test.data, type="class")
 basic.knn.train.pred <- predict(model.knn.basic, train.data, type="class")
 ```
+
+Wyznaczmy dla niego macierze pomyłek.
 
 ```{r echo=FALSE, eval=TRUE}
 test.confusion <- table(basic.knn.test.pred, test.etiquettes)
@@ -289,12 +308,16 @@ print(xtable(test.confusion), file="knn2.tex", floating=FALSE)
 
 Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
 
+Teraz stworzymy klasyfikator na zbiorze uczącym zawierającym wybrane cechy (przyjmujemy $k=5$).
+
 ```{r subset_knn}
 knn.model.subset <- ipredknn(Type ~ ., data = train.subset, k=5)
 
 subset.knn.test.pred <- predict(knn.model.subset, test.subset, type="class")
 subset.knn.train.pred <- predict(knn.model.subset, train.subset, type="class")
 ```
+
+Macierze pomyłek wyglądają następująco:
 
 ```{r echo=FALSE, eval=TRUE}
 test.confusion <- table(subset.knn.test.pred, test.etiquettes)
@@ -314,7 +337,10 @@ print(xtable(test.confusion), file="knn4.tex", floating=FALSE)
 
 Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
 
-Zobaczmy jak zmienia się błąd klasyfikacji w zależności od parametru $k$.
+Widzimy, że klasyfikator wyćwiczony na \verb|train.subset| poradził sobie lepiej.
+Zobaczmy więc jak zmienia się błąd klasyfikacji w zależności od parametru $k$.
+
+\newpage
 
 ```{r k_comparison, echo=FALSE, eval=TRUE, fig.cap="Blad klasyfikacji w zaleznosci od parametru k."}
 ks <- seq(20)
@@ -334,7 +360,9 @@ ggplot(data = melt(results, id.vars = "k", variable.name = "set")) +
   geom_point(aes(x=k, y=value, color=set)) + geom_line(aes(x=k, y=value, color=set))
 ```
 
-Widzimy, że najlepsze rezultaty otrzymujemy dla $k=9$. Potwierdza to ...
+Widzimy, że najlepsze rezultaty otrzymujemy dla $k=9$. 
+
+Wykorzystamy teraz pakiet \verb|caret| do stworzenia modelu stuningowanego. By taki model powstał, wykorzystamy $5$-krotną walidację krzyżową.
 
 ```{r tuned_knn}
 model <- train(Type ~ ., data = train.subset, method = "knn", trControl = cv)
@@ -343,6 +371,9 @@ tuned.knn.test.pred <- predict(model, test.data)
 tuned.knn.train.pred <- predict(model, train.data)
 ```
 
+Jak się okazuje, model ten również przyjmuje $k = 9$ ($\verb|model\$bestTune| = $`r model$bestTune`).
+
+Dla tego klasyfikatora  także wyznaczymy macierze pomyłek i błędy klasyfikacji.
 
 ```{r echo=FALSE, eval=TRUE}
 test.confusion <- table(tuned.knn.test.pred, test.etiquettes)
@@ -362,6 +393,8 @@ print(xtable(test.confusion), file="knn6.tex", floating=FALSE)
 
 Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
 
+Jak widzimy model stuningowany poradził sobie najlepiej. Wyznaczymy teraz dla niego błąd predykcji --- skorzystamy z $5$-krotnej walidacji krzyżowej.
+
 ```{r}
 predictor  <- function(model, newdata) 
 { predict(model, newdata=newdata) }
@@ -369,14 +402,19 @@ predictor  <- function(model, newdata)
 knn.predictor <- function(formula, data) 
 { train(formula, data = data, method = "knn", trControl = cv)} 
 
-knn.error.cv <- errorest(Type~., wine[, c(1, 2, 7, 8)], model=knn.predictor, predict=predictor, 
-            estimator="cv", est.para=control.errorest(k = 5))
-knn.error.cv
+knn.error.cv <- errorest(Type~., wine[, c(1, 2, 7, 8)], model=knn.predictor, 
+                         predict=predictor, estimator="cv", 
+                         est.para=control.errorest(k = 5))
 ```
+
+Błąd wyniósł `r knn.error.cv$error`.
+
 
 ## Drzewa klasyfikacyjne
 
-```{r}
+Najpierw wytrenujemy model na zbiorze uczącym zawierającym wszystkie cechy.
+
+```{r basic_tree_model}
 basic.tree.model <- rpart(Type ~ ., data = train.data)
 
 basic.tree.test.pred <- predict(basic.tree.model, newdata = test.data, 
@@ -385,10 +423,13 @@ basic.tree.train.pred <- predict(basic.tree.model, newdata = train.data,
                                  type = "class")
 ```
 
-```{r echo=FALSE, eval=TRUE}
+To drzewo klasyfikacyjne wygląda następująco (\ref{fig:fig5}).
+
+```{r basic_tree_plot, echo=FALSE, eval=TRUE, fig.cap="\\label{fig:fig5}Drzewo decyzyjne --- wszystkie cechy."}
 fancyRpartPlot(basic.tree.model, sub="")
 ```
 
+Wyznaczymy dla tego modelu macierze pomyłek i błędy klasyfikacji.
 
 ```{r echo=FALSE, eval=TRUE}
 test.confusion <- table(basic.tree.test.pred, test.etiquettes)
@@ -408,7 +449,10 @@ print(xtable(test.confusion), file="t2.tex", floating=FALSE)
 
 Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
 
-```{r}
+
+Teraz stworzymy model, który wytrenujemy na \verb|train.subset|.
+
+```{r subset_tree_model}
 subset.tree.model <- rpart(Type ~ ., data = train.subset)
 
 subset.tree.test.pred <- predict(subset.tree.model, newdata = test.subset, 
@@ -417,10 +461,13 @@ subset.tree.train.pred <- predict(subset.tree.model, newdata = train.subset,
                                   type = "class")
 ```
 
-```{r echo=FALSE, eval=TRUE}
+To drzewo decyzyjne wygląda następująco (\ref{fig:fig6}).
+
+```{r subset_tree_plot, echo=FALSE, eval=TRUE, fig.cap="\\label{fig:fig6} Drzewo decyzyjne --- wybrane cechy."}
 fancyRpartPlot(subset.tree.model, sub="")
 ```
 
+Podobnie jak wczęśniej, wyznaczymy dla niego macierze pomyłek i błędy klasyfikacji.
 
 ```{r echo=FALSE, eval=TRUE}
 test.confusion <- table(subset.tree.test.pred, subset.test.etiquettes)
@@ -440,27 +487,17 @@ print(xtable(test.confusion), file="t4.tex", floating=FALSE)
 
 Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
 
-```{r}
-Cars93.tree.complex  <- rpart(Type ~ ., data=train.subset, 
-                              control=rpart.control(cp=.01, minsplit=1, maxdepth=30))
-plotcp(Cars93.tree.complex)
-printcp(Cars93.tree.complex)
-
-bestcp <- Cars93.tree.complex$cptable[which.min(Cars93.tree.complex$cptable[,"xerror"]),"CP"]
-bestcp 
-```
-
 
 ```{r}
 tuned.tree.model <- train(Type ~ ., data = train.subset, method = "rpart",
                           trControl = cv, tuneLength = 10)
 
-tuned.tree.test.pred <- predict(tuned.tree.model, test.data)
-tuned.tree.train.pred <- predict(tuned.tree.model, train.data)
+tuned.tree.test.pred <- predict(tuned.tree.model, test.subset)
+tuned.tree.train.pred <- predict(tuned.tree.model, train.subset)
 ```
 
 
-```{r echo=FALSE, eval=TRUE}
+```{r echo=FALSE, eval=TRUE, fig.cap="Drzewo decyzyjne --- stunigowany model."}
 fancyRpartPlot(tuned.tree.model$finalModel, sub="")
 ```
 
@@ -483,8 +520,47 @@ print(xtable(test.confusion), file="t6.tex", floating=FALSE)
 
 Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
 
+
+Zobaczmy jak wpłynie na model wytrenowany na \verb|train.subset| zmiana parametrów drzewa --- tabela (\ref{tab:tab101}).
+
+```{r message=FALSE, warning=FALSE}
+search_grid <- expand.grid(cp=seq(0,0.1,0.001))
+
+best.model.tree <- train(Type ~., data = train.subset, method = "rpart",
+                          trControl = cv, tuneGrid = search_grid)
+
+a  <- best.model.tree$results %>% top_n(5, wt = Accuracy) %>%
+  arrange(desc(Accuracy))
+```
+
+
+```{r results='asis', eval=TRUE, echo=FALSE}
+results <- xtable(a[1:5, ], digits = 3, row.names = TRUE, caption = "5 najlepszych modeli drzewa decyzyjnego.", label = "tab:tab101")
+print(results, type = "latex", table.placement = "H", comment=FALSE)
+```
+
+Widzimy, że najlepsze reultaty otrzymujemy dla cp = $0$ --- drzewa nie trzeba w ogóle przycinać.
+
+Jak widzimy model stuningowany poradził sobie najlepiej. Wyznaczymy teraz dla niego błąd predykcji --- skorzystamy z $5$-krotnej walidacji krzyżowej.
+
+```{r}
+predictor  <- function(model, newdata) 
+{ predict(model, newdata=newdata, type = "class") }
+
+decision.tree.predictor <- function(formula, data) 
+{ rpart(formula, data = data, cp = 0)}
+
+decision.tree.error.cv <- errorest(Type~., wine[, c(1, 2, 7, 8)], 
+                                   model=decision.tree.predictor, 
+                                   predict=predictor, estimator="cv", 
+                                   est.para=control.errorest(k = 5))
+```
+
+Błąd wyniósł `r decision.tree.error.cv$error`.
+
 ## Naiwny klasyfikator bayesowski
 
+Najpierw wytrenujemy model na zbiorze uczącym zawierającym wszystkie zmienne.
 
 ```{r basic_bayes}
 bayes.model.basic <- naiveBayes(Type ~ ., data = train.data)
@@ -492,6 +568,8 @@ bayes.model.basic <- naiveBayes(Type ~ ., data = train.data)
 basic.bayes.train.pred <- predict(bayes.model.basic, train.data) 
 basic.bayes.test.pred <- predict(bayes.model.basic, test.data)
 ```
+
+Wyznaczmy dla tego modelu macierze pomyłek i wartości błędów klasyfikacji.
 
 ```{r basic_bayes_tables, echo=FALSE, eval=TRUE}
 test.confusion <- table(test.etiquettes, basic.bayes.test.pred)
@@ -511,6 +589,7 @@ print(xtable(test.confusion), file="b2.tex", floating=FALSE)
 
 Błędy klasyfikacji to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
 
+
 Powtórzmy teraz powyższe dla wybranego podzbioru naszych danych.
 
 ```{r subset_bayes}
@@ -519,6 +598,7 @@ bayes.model.subset <- naiveBayes(Type ~ ., data = train.subset)
 basic.bayes.train.pred <- predict(bayes.model.subset, train.subset) 
 basic.bayes.test.pred <- predict(bayes.model.subset, test.subset)
 ```
+
 
 ```{r subset_bayes_tables, echo=FALSE, eval=TRUE}
 test.confusion <- table(subset.test.etiquettes, basic.bayes.test.pred)
@@ -538,7 +618,7 @@ print(xtable(test.confusion), file="b4.tex", floating=FALSE)
 
 Błędy klasyfikacji to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
 
-Model "stunigowany"
+Ponownie skorzystamy z pakietu \verb|caret|, by stworzyć model stunigowany. Wyznaczymy dla niego macierze pomyłek i błędy klasyfikacji.
 
 ```{r}
 model <- train(Type ~ ., data = train.data, method = "naive_bayes", 
@@ -564,7 +644,9 @@ print(xtable(test.confusion), file="b6.tex", floating=FALSE)
 
 Błędy klasyfikacji w tym przypadku to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
 
-Powtórzymy teraz ocenę klasyfikacji przy pomocy metody 5-krotnej walidacji krzyżowej dla stuningowanego klasyfikatora bayesowskiego, który najlepiej poradził sobie na danym zbiorze treningowym i testowym.
+Widzimy, że poradził on sobie najlepiej z trzech rozważanych modeli.  
+
+Powtórzymy teraz ocenę klasyfikacji przy pomocy metody $5$-krotnej walidacji krzyżowej dla stuningowanego klasyfikatora bayesowskiego.
 
 ```{r}
 predictor  <- function(model, newdata) 
@@ -575,7 +657,142 @@ naiveBayes.predictor <- function(formula, data)
  
 error.cv <- errorest(Type~., wine, model=naiveBayes.predictor, predict=predictor, 
             estimator="cv", est.para=control.errorest(k = 5))
-
-error.cv
 ```
 
+Błąd predykcji wynosi `r error.cv$error`. 
+
+## Wieloklasowa regresja logistyczna 
+
+Najpierw wytrenujemy model na zbiorze uczącym zawierającym wszystkie zmienne.
+
+```{r mlr_basic, message=FALSE, results = "hide"}
+mlr.model.basic <- multinom(Type ~ ., data = train.data)
+
+basic.mlr.train.pred <- predict(mlr.model.basic, newdata = train.data, type = "class") 
+basic.mlr.test.pred <- predict(mlr.model.basic, newdata = test.data, type = "class")
+```
+
+Wyznaczmy dla tego modelu macierze pomyłek i wartości błędów klasyfikacji.
+
+```{r basic_mlr_tables, echo=FALSE, eval=TRUE}
+test.confusion <- table(test.etiquettes, basic.mlr.test.pred)
+train.confusion <- table(train.etiquettes, basic.mlr.train.pred)
+
+print(xtable(train.confusion), file="mlr1.tex", floating=FALSE)
+print(xtable(test.confusion), file="mlr2.tex", floating=FALSE)
+```
+
+\begin{table}[ht]
+\centering
+\subfloat[Zbior uczacy]{\label{tab:tabmlr1}{\input{./mlr1}}}\quad
+\subfloat[Zbior testowy]{\label{tab:tabmlr2}{\input{./mlr2}}}
+\caption{Macierze pomylek dla regresji wielorakiej --- wszystkie cechy.}
+\label{tab:tab_mlr1}
+\end{table}
+
+Błędy klasyfikacji to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
+
+
+Powtórzmy teraz powyższe dla wybranego podzbioru naszych danych.
+
+```{r subset_mlr, message=FALSE, results = "hide"}
+mlr.model.subset <- multinom(Type ~ ., data = train.subset)
+
+mlr.subset.train.pred <- predict(mlr.model.subset, train.subset, type = "class") 
+mlr.subset.test.pred <- predict(mlr.model.subset, test.subset, type = "class")
+```
+
+
+```{r subset_mlr_tables, echo=FALSE, eval=TRUE}
+test.confusion <- table(subset.test.etiquettes, mlr.subset.test.pred)
+train.confusion <- table(subset.train.etiquettes, mlr.subset.train.pred)
+
+print(xtable(train.confusion), file="mlr3.tex", floating=FALSE)
+print(xtable(test.confusion), file="mlr4.tex", floating=FALSE)
+```
+
+\begin{table}[ht]
+\centering
+\subfloat[Zbior uczacy]{\label{tab:tabmlr3}{\input{./mlr3}}}\quad
+\subfloat[Zbior testowy]{\label{tab:tabmlr4}{\input{./mlr4}}}
+\caption{Macierze pomylek dla wielorakiej regresji --- wybrane cechy.}
+\label{tab:tab_mlr2}
+\end{table}
+
+Błędy klasyfikacji to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
+
+Ponownie skorzystamy z pakietu \verb|caret|, by stworzyć model stunigowany. Wyznaczymy dla niego macierze pomyłek i błędy klasyfikacji.
+
+```{r tuned_mlr, message=FALSE, results = "hide"}
+model <- train(Type ~ ., data = train.data, method = "multinom", 
+               trControl = cv)
+```
+
+
+```{r echo=FALSE, eval=TRUE}
+test.confusion <- table(test.data$Type, predict(model, test.data))
+train.confusion <- table(train.data$Type, predict(model, train.data))
+
+print(xtable(train.confusion), file="mlr5.tex", floating=FALSE)
+print(xtable(test.confusion), file="mlr6.tex", floating=FALSE)
+```
+
+\begin{table}[ht]
+\centering
+\subfloat[Zbior uczacy]{\label{tab:tabmlr5}{\input{./mlr5}}}\quad
+\subfloat[Zbior testowy]{\label{tab:tabmlr6}{\input{./mlr6}}}
+\caption{Macierze pomylek dla klasyfikatora regresji wielorakiej --- model stuningowany.}
+\label{tab:tab_mlr3}
+\end{table}
+
+Błędy klasyfikacji w tym przypadku to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
+
+Widzimy, że poradził on sobie najlepiej z trzech rozważanych modeli.  
+
+Powtórzymy teraz ocenę klasyfikacji przy pomocy metody $5$-krotnej walidacji krzyżowej dla stuningowanego klasyfikatora bayesowskiego.
+
+```{r cross_validation_mlr, message=FALSE, results = "hide"}
+predictor  <- function(model, newdata) 
+{ predict(model, newdata=newdata) }
+ 
+mlr.predictor <- function(formula, data) 
+{ train(formula, data = data, method = "multinom", trControl = cv)} 
+ 
+mlr.error.cv <- errorest(Type~., wine, model=mlr.predictor, predict=predictor, 
+            estimator="cv", est.para=control.errorest(k = 5))
+```
+
+Błąd predykcji wynosi `r mlr.error.cv$error`. 
+
+## Podsumowanie
+
+Porównaliśmy ze sobą 4 klasyfikatory. Dla każdego z nich badaliśmy jaki wpływ na dokładność i ch predykcji ma zmiana charaktrystycznych dla nich parametrów czy zmiany w zbiorze uczącym (klasyfikatory trenowliśmy na zbiorach, które albo zawierały wszystkie zmienne, albo te wybrane przez nas, które wprowadzły najlepszy podział na zmienne).
+
+\begin{itemize}
+  \item Dla metody $k$ najbliższych sąsiadów najlepsze rezultaty otrzymaliśmy dla $k = 9$ i zbioru uczącego o zawężonej ilości cech.
+  \item Dla metody drzew decyzyjnych najlepszy okazała się wartość parametru $cp = 0$ i wyuczenie modelu na zbiorze z wybranymi przez nas cechami.
+  \item Dla naiwnego klasyfikatora bayesowskiego najlepsze efekty otrzymaliśmy, gdy wyuczyliśmy model na zbiorze uczącym zawierającym wszystkie zmienne.
+  \item Dla wieloklasowej regresji logistycznej najefektywniejsze okazało się wyuczenie modelu na zbiorze zawierającym wszystkie zmienne.
+  
+\end{itemize}
+
+Błędy predykacji dla $5$-krotnej walidacji krzyżowej wyglądają następująco --- patrz tabela. 
+
+
+\begin{table}[ht]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{c|c|c|c}
+\hline
+KNN & Drzewa decyzyjne & Naiwny klasyfikator bayesowski & Wieloklasowa regresja logistyczna \\
+\hline
+`r knn.error.cv$error` & `r decision.tree.error.cv$error` & `r error.cv$error` & `r mlr.error.cv$error` \\
+\hline
+\end{tabular}
+}
+\caption{Wartości błędów predykcji.}
+\label{tab:tab_last}
+\end{table}
+
+
+Możemy zauważyć, że najlepszą metodą okazał się naiwny klasyfikator bayesowski. Najgorzej natomiast poradziły sobie drzewa decyzyjne. 
