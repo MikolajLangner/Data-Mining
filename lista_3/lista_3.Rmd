@@ -166,10 +166,12 @@ test.set <- iris %>% slice(-train.set.index) %>% arrange(Species)
 
 dummies <- dummyVars(" ~ .", data=iris)
 train.dummies <- predict(dummies, newdata = train.set)
-train.X <- as.matrix(cbind(rep(1, nrow(train.dummies)), train.dummies[, -c(5:7)]))
+train.X <- as.matrix(cbind(rep(1, nrow(train.dummies)), 
+                           train.dummies[, -c(5:7)]))
 train.Y <- train.dummies[, 5:7]
 test.dummies <- predict(dummies, newdata = test.set) 
-test.X <- as.matrix(cbind(rep(1, nrow(test.dummies)), test.dummies[, -c(5:7)]))
+test.X <- as.matrix(cbind(rep(1, nrow(test.dummies)), 
+                          test.dummies[, -c(5:7)]))
 test.Y <- test.dummies[, 5:7]
 ```
 
@@ -317,7 +319,8 @@ Teraz stworzymy klasyfikator na zbiorze uczącym zawierającym wybrane cechy (pr
 knn.model.subset <- ipredknn(Type ~ ., data = train.subset, k=5)
 
 subset.knn.test.pred <- predict(knn.model.subset, test.subset, type="class")
-subset.knn.train.pred <- predict(knn.model.subset, train.subset, type="class")
+subset.knn.train.pred <- predict(knn.model.subset, train.subset, 
+                                 type="class")
 ```
 
 Macierze pomyłek wyglądają następująco:
@@ -368,7 +371,7 @@ Widzimy, że najlepsze rezultaty otrzymujemy dla $k=9$.
 Wykorzystamy teraz pakiet \verb|caret| do stworzenia modelu stuningowanego. By taki model powstał, wykorzystamy $5$-krotną walidację krzyżową.
 
 ```{r tuned_knn}
-model <- train(Type ~ ., data = train.subset, method = "knn", trControl = cv)
+model <- train(Type ~ ., data = train.subset, method = "knn", trControl=cv)
 
 tuned.knn.test.pred <- predict(model, test.data)
 tuned.knn.train.pred <- predict(model, train.data)
@@ -430,7 +433,8 @@ drawparti(wine$Type, x=wine$Alcohol, y=wine$Flavanoids, method = "sknn",
 ```
 
 ```{r}
-model <- train(Type ~ Alcohol + Flavanoids, data = train.subset, method = "knn", trControl = cv)
+model <- train(Type ~ Alcohol + Flavanoids, data = train.subset, method = "knn",
+               trControl = cv)
 
 tuned.knn.test.pred <- predict(model, test.data)
 tuned.knn.train.pred <- predict(model, train.data)
@@ -681,7 +685,7 @@ print(xtable(test.confusion), file="b4.tex", floating=FALSE)
 
 Błędy klasyfikacji to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
 
-Ponownie skorzystamy z pakietu \verb|caret|, by stworzyć model stunigowany, wytrenowany na wsszystkich cechach. Wyznaczymy dla niego macierze pomyłek i błędy klasyfikacji.
+Ponownie skorzystamy z pakietu \verb|caret|, by stworzyć model stunigowany, wytrenowany na wszystkich cechach. Wyznaczymy dla niego macierze pomyłek i błędy klasyfikacji.
 
 ```{r}
 model <- train(Type ~ ., data = train.data, method = "naive_bayes", 
@@ -741,8 +745,10 @@ Najpierw wytrenujemy model na zbiorze uczącym zawierającym wszystkie zmienne.
 ```{r mlr_basic, message=FALSE, results = "hide"}
 mlr.model.basic <- multinom(Type ~ ., data = train.data)
 
-basic.mlr.train.pred <- predict(mlr.model.basic, newdata = train.data, type = "class") 
-basic.mlr.test.pred <- predict(mlr.model.basic, newdata = test.data, type = "class")
+basic.mlr.train.pred <- predict(mlr.model.basic, newdata = train.data,
+                                type = "class") 
+basic.mlr.test.pred <- predict(mlr.model.basic, newdata = test.data,
+                               type = "class")
 ```
 
 Wyznaczmy dla tego modelu macierze pomyłek i wartości błędów klasyfikacji.
@@ -771,8 +777,10 @@ Powtórzmy teraz powyższe dla wybranego podzbioru naszych danych.
 ```{r subset_mlr, message=FALSE, results = "hide"}
 mlr.model.subset <- multinom(Type ~ ., data = train.subset)
 
-mlr.subset.train.pred <- predict(mlr.model.subset, train.subset, type = "class") 
-mlr.subset.test.pred <- predict(mlr.model.subset, test.subset, type = "class")
+mlr.subset.train.pred <- predict(mlr.model.subset, train.subset, 
+                                 type = "class") 
+mlr.subset.test.pred <- predict(mlr.model.subset, test.subset, 
+                                type = "class")
 ```
 
 
@@ -829,8 +837,9 @@ predictor  <- function(model, newdata)
 mlr.predictor <- function(formula, data) 
 { train(formula, data = data, method = "multinom", trControl = cv)} 
  
-mlr.error.cv <- errorest(Type~., wine, model=mlr.predictor, predict=predictor, 
-            estimator="cv", est.para=control.errorest(k = 5))
+mlr.error.cv <- errorest(Type~., wine, model=mlr.predictor, 
+                         predict=predictor, 
+                         estimator="cv", est.para=control.errorest(k = 5))
 
 mlr.error.boot <- errorest(Type~., wine[, c(1, 2, 7, 8)], 
                                      model=mlr.predictor, 
