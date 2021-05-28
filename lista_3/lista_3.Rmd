@@ -421,6 +421,46 @@ knn.error.632 <- errorest(Type~., wine[, c(1, 2, 7, 8)], model=knn.predictor,
 Błędy wyniosły kolejno `r knn.error.cv$error`, `r knn.error.boot$error` oraz `r knn.error.632$error`.
 
 
+```{r}
+library(klaR)
+drawparti(wine$Type, x=wine$Alcohol, y=wine$Flavanoids, method = "sknn",
+          plot.matrix = FALSE, imageplot = TRUE, col.contour = "red",
+          col.wrong = "red", image.colors = wes_palette("GrandBudapest1", 3),
+          col.correct = "black", xlab="Alcohol", ylab="Flavanoids")
+```
+
+```{r}
+model <- train(Type ~ Alcohol + Flavanoids, data = train.subset, method = "knn", trControl = cv)
+
+tuned.knn.test.pred <- predict(model, test.data)
+tuned.knn.train.pred <- predict(model, train.data)
+
+tuned.predictions <- predict(model, test.subset)
+
+var1 <- wine$Alcohol
+var2 <- wine$Flavanoids
+
+var3 <- test.subset$Alcohol
+var4 <- test.subset$Flavanoids
+
+tuned.predictions <- predict(model, test.subset)
+
+test.confusion <- table(tuned.predictions, test.etiquettes)
+
+x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1), 
+                      Flavanoids = seq(min(var2), max(var2), by=0.1))
+
+x.test.pred <- predict(model, x.test)
+
+df1 <- data.frame(x.test, class = x.test.pred)
+df2 <- data.frame(x = var3, y = var4, class = tuned.predictions)
+
+ggplot() +
+  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
+  geom_point(aes(x = x, y = y, col = class), data = df2, size = 4.5, shape = 1) + 
+  theme_bw() 
+```
+
 ## Drzewa klasyfikacyjne
 
 Najpierw wytrenujemy model na zbiorze uczącym zawierającym wszystkie cechy.

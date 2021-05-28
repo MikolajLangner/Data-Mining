@@ -58,10 +58,6 @@ x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1),
                       Flavanoids = seq(min(var2), max(var2), by=0.1))
 
 x.test.pred <- predict(model, x.test)
-x.test.prob <- predict(model, x.test,type = "prob")
-
-mat <- cbind(seq(1, 1872, by=1), sapply(as.numeric(x.test.pred), max))
-x.test.prob <- x.test.prob[mat]
 
 df1 <- data.frame(x.test, class = x.test.pred,
                   prob = x.test.prob)
@@ -70,9 +66,7 @@ df2 <- data.frame(x = var3, y = var4, class = tuned.predictions)
 ggplot() +
   geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
   geom_point(aes(x = x, y = y, col = class), data = df2, size = 4.5, shape = 1) + 
-  theme_bw() +
-  geom_contour(aes(x=Alcohol, y=Flavanoids, z = df1$prob, col = class), 
-                   data = df1, size = 1, bins = 1)
+  theme_bw() 
 
 prob15 <- matrix(x.test.prob, length(df1$Alcohol), length(df1$Flavanoids))
 contour(df1$Alcohol, df1$Flavanoids, prob15, labels="", xlab="", ylab="", main=
