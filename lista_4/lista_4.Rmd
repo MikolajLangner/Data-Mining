@@ -1,0 +1,37 @@
+---
+title: "Raport 4"
+subtitle: "Eksploracja danych"
+author:   |
+          |    Mikołaj Langner, Marcin Kostrzewa
+          |    nr albumów: 255716, 255749
+date: "2021-05-28"
+output: 
+  pdf_document:
+    toc: true
+    fig_caption: yes
+    fig_width: 5 
+    fig_height: 4 
+    number_sections: true
+    includes:
+      in_header: "preambula.tex" 
+fontsize: 12pt 
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4, fig.pos='H')
+```
+
+
+# Wstęp
+
+
+
+# Zadanie 1
+
+
+
+# Zadanie 2
+
+
