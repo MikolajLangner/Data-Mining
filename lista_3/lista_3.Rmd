@@ -4,7 +4,7 @@ subtitle: "Eksploracja danych"
 author:   |
           |    Mikołaj Langner, Marcin Kostrzewa
           |    nr albumów: 255716, 255749
-date: "2021-04-19"
+date: "2021-05-28"
 output: 
   pdf_document:
     toc: true
@@ -52,7 +52,7 @@ W zadaniu drugim porównamy ze sobą rezultaty zastosowania następujących meto
   \item metoda k-najblizszych sasiadów (\textit{k-Nearest Neighbors}),
   \item drzewa klasyfikacyjne (\textit{classification trees}),
   \item naiwny klasyfikator bayesowski (\textit{na{\"\i}ve Bayes classifier}),
-  \item wieloklasowa regresja logistyczna.
+  \item wieloklasowa regresja logistyczna (\textit{multinomial logistic regression}).
 \end{itemize}
 
 # Zadanie 1
@@ -142,7 +142,7 @@ print(tab2, type = "latex", table.placement = "H", comment=FALSE)
 
 Błąd klasyfikacji wynosi `r  1 - sum(diag(test.confusion)) / length(test.prediction)`.
 
-Przypatując się wykresom (\ref{fig:fig1}), (\ref{fig:fig2}) możemy zauważyć, że zachodzi zjawisko maskowania --- klasa \verb|versicolor| jest przysłaniona.
+Przypatując się wykresom (\ref{fig:fig1}), (\ref{fig:fig2}) możemy zauważyć, że zachodzi zjawisko maskowania --- klasa \verb|versicolor| jest przysłaniana.
 
 
 ## Zastosowanie regresji liniowej do modelu o rozszerzonej ilości cech
@@ -217,7 +217,7 @@ print(tab4, type = "latex", table.placement = "H", comment=FALSE)
 
 Błąd klasyfikacji wynosi `r 1 - sum(diag(test.confusion)) / length(test.prediction)`.
 
-Po przeanalizowaniu wykresów (\ref{fig:fig3}) i (\ref{fig:fig4}) dochodzimy do wniosku, że w tym przypadku nie występują zjawisko maskowania klas.
+Po przeanalizowaniu wykresów (\ref{fig:fig3}) i (\ref{fig:fig4}) dochodzimy do wniosku, że w tym przypadku zjawisko maskowania klas zostało zniwelowane.
 
 ## Wnioski
 
@@ -341,7 +341,7 @@ print(xtable(test.confusion), file="knn4.tex", floating=FALSE)
 Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
 
 Widzimy, że klasyfikator wyćwiczony na \verb|train.subset| poradził sobie lepiej.
-Zobaczmy więc jak zmienia się błąd klasyfikacji w zależności od parametru $k$.
+Zobaczmy więc jak zmienia się błąd klasyfikacji w zależności od parametru $k$ na zbiorze z ograniczoną liczbą cech.
 
 \newpage
 
@@ -374,9 +374,9 @@ tuned.knn.test.pred <- predict(model, test.data)
 tuned.knn.train.pred <- predict(model, train.data)
 ```
 
-Jak się okazuje, model ten również przyjmuje $k = 9$ ($\verb|model\$bestTune| = $`r model$bestTune`).
+Jak się okazuje, model ten również przyjmuje $k = $ `r model$bestTune`.
 
-Dla tego klasyfikatora  także wyznaczymy macierze pomyłek i błędy klasyfikacji.
+Dla tego klasyfikatora także wyznaczymy macierze pomyłek i błędy klasyfikacji.
 
 ```{r echo=FALSE, eval=TRUE}
 test.confusion <- table(tuned.knn.test.pred, test.etiquettes)
@@ -396,7 +396,7 @@ print(xtable(test.confusion), file="knn6.tex", floating=FALSE)
 
 Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
 
-Jak widzimy model stuningowany poradził sobie najlepiej. Wyznaczymy teraz dla niego błąd predykcji --- skorzystamy z $5$-krotnej walidacji krzyżowej.
+Jak widzimy model stuningowany poradził sobie najlepiej. Wyznaczymy teraz dla niego błąd predykcji --- skorzystamy z $5$-krotnej walidacji krzyżowej, metody bootstrap oraz \verb|.632+|.
 
 ```{r}
 predictor  <- function(model, newdata) 
@@ -418,7 +418,7 @@ knn.error.632 <- errorest(Type~., wine[, c(1, 2, 7, 8)], model=knn.predictor,
                          est.para=control.errorest(nboot = 25))
 ```
 
-Błędy wyniosły kolejno `r knn.error.cv$error` i `r knn.error.boot$error`.
+Błędy wyniosły kolejno `r knn.error.cv$error`, `r knn.error.boot$error` oraz `r knn.error.632$error`.
 
 
 ## Drzewa klasyfikacyjne
@@ -499,6 +499,8 @@ print(xtable(test.confusion), file="t4.tex", floating=FALSE)
 Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
 
 
+Ponownie stworzymy stuningowany model, zmieniając parametr \verb|cp|, przy pomocy 5-krotnej walidacji krzyżowej. 
+
 ```{r}
 tuned.tree.model <- train(Type ~ ., data = train.subset, method = "rpart",
                           trControl = cv, tuneLength = 10)
@@ -550,9 +552,9 @@ results <- xtable(a[1:5, ], digits = 3, row.names = TRUE, caption = "5 najlepszy
 print(results, type = "latex", table.placement = "H", comment=FALSE)
 ```
 
-Widzimy, że najlepsze reultaty otrzymujemy dla cp = $0$ --- drzewa nie trzeba w ogóle przycinać.
+Widzimy, że najlepsze reultaty otrzymujemy dla \verb|cp| = $0$ --- drzewa nie trzeba w ogóle przycinać.
 
-Jak widzimy model stuningowany poradził sobie najlepiej. Wyznaczymy teraz dla niego błąd predykcji --- skorzystamy z $5$-krotnej walidacji krzyżowej.
+Jak widzimy model stuningowany poradził sobie najlepiej. Wyznaczymy teraz dla niego błąd predykcji --- skorzystamy ponownie z $5$-krotnej walidacji krzyżowej, metody bootstrap oraz \verb|.632+|.
 
 ```{r}
 predictor  <- function(model, newdata) 
@@ -577,7 +579,7 @@ decision.tree.error.632 <- errorest(Type~., wine[, c(1, 2, 7, 8)],
                                      est.para=control.errorest(nboot = 25))
 ```
 
-Błędy wyniosły kolejno `r decision.tree.error.cv$error` i `r decision.tree.error.boot$error`.
+Błędy wyniosły kolejno `r decision.tree.error.cv$error`, `r decision.tree.error.boot$error` oraz `r decision.tree.error.632$error`.
 
 ## Naiwny klasyfikator bayesowski
 
@@ -639,7 +641,7 @@ print(xtable(test.confusion), file="b4.tex", floating=FALSE)
 
 Błędy klasyfikacji to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
 
-Ponownie skorzystamy z pakietu \verb|caret|, by stworzyć model stunigowany. Wyznaczymy dla niego macierze pomyłek i błędy klasyfikacji.
+Ponownie skorzystamy z pakietu \verb|caret|, by stworzyć model stunigowany, wytrenowany na wsszystkich cechach. Wyznaczymy dla niego macierze pomyłek i błędy klasyfikacji.
 
 ```{r}
 model <- train(Type ~ ., data = train.data, method = "naive_bayes", 
@@ -667,7 +669,7 @@ Błędy klasyfikacji w tym przypadku to kolejno `r 1 - sum(diag(train.confusion)
 
 Widzimy, że poradził on sobie najlepiej z trzech rozważanych modeli.  
 
-Powtórzymy teraz ocenę klasyfikacji przy pomocy metody $5$-krotnej walidacji krzyżowej dla stuningowanego klasyfikatora bayesowskiego.
+Powtórzymy teraz ocenę klasyfikacji, podobnie jak dla wcześniej, dla stuningowanego klasyfikatora bayesowskiego.
 
 ```{r}
 predictor  <- function(model, newdata) 
@@ -690,7 +692,7 @@ naiveBayes.error.632 <- errorest(Type~., wine, model=naiveBayes.predictor,
                                      est.para=control.errorest(nboot = 25))
 ```
 
-Błędy predykcji wyniosły kolejno `r naiveBayes.error.cv$error` i `r naiveBayes.error.boot$error`. 
+Błędy predykcji wyniosły kolejno `r naiveBayes.error.cv$error`, `r naiveBayes.error.boot$error` oraz `r naiveBayes.error.632$error`. 
 
 ## Wieloklasowa regresja logistyczna 
 
@@ -717,7 +719,7 @@ print(xtable(test.confusion), file="mlr2.tex", floating=FALSE)
 \centering
 \subfloat[Zbior uczacy]{\label{tab:tabmlr1}{\input{./mlr1}}}\quad
 \subfloat[Zbior testowy]{\label{tab:tabmlr2}{\input{./mlr2}}}
-\caption{Macierze pomylek dla regresji wielorakiej --- wszystkie cechy.}
+\caption{Macierze pomylek dla regresji wieloklasowej --- wszystkie cechy.}
 \label{tab:tab_mlr1}
 \end{table}
 
@@ -746,7 +748,7 @@ print(xtable(test.confusion), file="mlr4.tex", floating=FALSE)
 \centering
 \subfloat[Zbior uczacy]{\label{tab:tabmlr3}{\input{./mlr3}}}\quad
 \subfloat[Zbior testowy]{\label{tab:tabmlr4}{\input{./mlr4}}}
-\caption{Macierze pomylek dla wielorakiej regresji --- wybrane cechy.}
+\caption{Macierze pomylek dla wieloklasowej regresji --- wybrane cechy.}
 \label{tab:tab_mlr2}
 \end{table}
 
@@ -772,15 +774,13 @@ print(xtable(test.confusion), file="mlr6.tex", floating=FALSE)
 \centering
 \subfloat[Zbior uczacy]{\label{tab:tabmlr5}{\input{./mlr5}}}\quad
 \subfloat[Zbior testowy]{\label{tab:tabmlr6}{\input{./mlr6}}}
-\caption{Macierze pomylek dla klasyfikatora regresji wielorakiej --- model stuningowany.}
+\caption{Macierze pomylek dla klasyfikatora regresji wieloklasowej --- model stuningowany.}
 \label{tab:tab_mlr3}
 \end{table}
 
 Błędy klasyfikacji w tym przypadku to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
 
-Widzimy, że poradził on sobie najlepiej z trzech rozważanych modeli.  
-
-Powtórzymy teraz ocenę klasyfikacji przy pomocy metody $5$-krotnej walidacji krzyżowej dla stuningowanego klasyfikatora bayesowskiego.
+Powtórzymy teraz podobną jak wcześniej ocenę klasyfikacji dla stuningowanego modelu regresji wieloklasowej.
 
 ```{r cross_validation_mlr, message=FALSE, results = "hide"}
 predictor  <- function(model, newdata) 
@@ -803,21 +803,21 @@ mlr.error.632 <- errorest(Type~., wine[, c(1, 2, 7, 8)],
                                      est.para=control.errorest(nboot = 25))
 ```
 
-Błędy predykcji wyniosły `r mlr.error.cv$error` i `r mlr.error.boot$error`. 
+Błędy predykcji wyniosły `r mlr.error.cv$error`, `r mlr.error.boot$error` oraz `r mlr.error.632$error`. 
 
 ## Podsumowanie
 
-Porównaliśmy ze sobą 4 klasyfikatory. Dla każdego z nich badaliśmy jaki wpływ na dokładność i ch predykcji ma zmiana charaktrystycznych dla nich parametrów czy zmiany w zbiorze uczącym (klasyfikatory trenowliśmy na zbiorach, które albo zawierały wszystkie zmienne, albo te wybrane przez nas, które wprowadzły najlepszy podział na zmienne).
+Porównaliśmy ze sobą 4 klasyfikatory. Dla każdego z nich badaliśmy jaki wpływ na dokładność ich predykcji ma zmiana charaktrystycznych dla nich parametrów czy zmiany w zbiorze uczącym (klasyfikatory trenowliśmy na zbiorach, które albo zawierały wszystkie zmienne, albo te wybrane przez nas, które wprowadzły najlepszy podział na zmienne).
 
 \begin{itemize}
-  \item Dla metody $k$ najbliższych sąsiadów najlepsze rezultaty otrzymaliśmy dla $k = 9$ i zbioru uczącego o zawężonej ilości cech.
+  \item Dla metody $k$ najbliższych sąsiadów najlepsze rezultaty otrzymaliśmy dla $k = 9$ i zbioru uczącego o zawężonej liczbie cech.
   \item Dla metody drzew decyzyjnych najlepszy okazała się wartość parametru $cp = 0$ i wyuczenie modelu na zbiorze z wybranymi przez nas cechami.
   \item Dla naiwnego klasyfikatora bayesowskiego najlepsze efekty otrzymaliśmy, gdy wyuczyliśmy model na zbiorze uczącym zawierającym wszystkie zmienne.
   \item Dla wieloklasowej regresji logistycznej najefektywniejsze okazało się wyuczenie modelu na zbiorze zawierającym wszystkie zmienne.
   
 \end{itemize}
 
-Błędy predykacji dla $5$-krotnej walidacji krzyżowej wyglądają następująco --- patrz tabela. 
+Błędy predykacji dla $5$-krotnej walidacji krzyżowej, metody bootstrap oraz \verb|.632+| wyglądają następująco --- patrz tabela. 
 
 
 \begin{table}[ht]
