@@ -242,10 +242,13 @@ class.number <- length(unique(wine$Type))
 
 Mamy `r variable.number` zmiennych i `r observations.number` obserwacji. Są trzy klasy, informację o nich zawiera zmienna \verb|Type|. Nie występują wartości brakujące (\verb|NaN.number| = `r NaN.number`).
 
-Przyjrzyjmy się naszym danym na wykresach pudełkowych.
+Przyjrzyjmy się naszym danym na wykresach pudełkowych --- wykresy (\ref{box::1}) i (\ref{box::2}).
 
-```{r Wine_boxplot, echo=FALSE, eval=TRUE, fig.cap="Wykresy pudelkowe naszych danych."}
+```{r Wine_boxplot_1, echo=FALSE, eval=TRUE, fig.cap="\\label{box::1}Wykresy pudelkowe naszych danych."}
 plot_boxplot(wine[, c(1, 2:9)], by="Type")
+```
+
+```{r Wine_boxplot_2, echo=FALSE, eval=TRUE, fig.cap="\\label{box::2}Wykresy pudelkowe naszych danych.", fig.height=3}
 plot_boxplot(wine[, c(1, 10:13)], by="Type")
 ```
 
@@ -405,9 +408,17 @@ knn.predictor <- function(formula, data)
 knn.error.cv <- errorest(Type~., wine[, c(1, 2, 7, 8)], model=knn.predictor, 
                          predict=predictor, estimator="cv", 
                          est.para=control.errorest(k = 5))
+
+knn.error.boot <- errorest(Type~., wine[, c(1, 2, 7, 8)], model=knn.predictor, 
+                         predict=predictor, estimator="boot", 
+                         est.para=control.errorest(nboot = 25))
+
+knn.error.632 <- errorest(Type~., wine[, c(1, 2, 7, 8)], model=knn.predictor, 
+                         predict=predictor, estimator="632plus", 
+                         est.para=control.errorest(nboot = 25))
 ```
 
-Błąd wyniósł `r knn.error.cv$error`.
+Błędy wyniosły kolejno `r knn.error.cv$error` i `r knn.error.boot$error`.
 
 
 ## Drzewa klasyfikacyjne
@@ -554,9 +565,19 @@ decision.tree.error.cv <- errorest(Type~., wine[, c(1, 2, 7, 8)],
                                    model=decision.tree.predictor, 
                                    predict=predictor, estimator="cv", 
                                    est.para=control.errorest(k = 5))
+
+decision.tree.error.boot <- errorest(Type~., wine[, c(1, 2, 7, 8)], 
+                                     model=decision.tree.predictor, 
+                                     predict=predictor, estimator="boot", 
+                                     est.para=control.errorest(nboot = 25))
+
+decision.tree.error.632 <- errorest(Type~., wine[, c(1, 2, 7, 8)], 
+                                     model=decision.tree.predictor, 
+                                     predict=predictor, estimator="632plus", 
+                                     est.para=control.errorest(nboot = 25))
 ```
 
-Błąd wyniósł `r decision.tree.error.cv$error`.
+Błędy wyniosły kolejno `r decision.tree.error.cv$error` i `r decision.tree.error.boot$error`.
 
 ## Naiwny klasyfikator bayesowski
 
@@ -595,14 +616,14 @@ Powtórzmy teraz powyższe dla wybranego podzbioru naszych danych.
 ```{r subset_bayes}
 bayes.model.subset <- naiveBayes(Type ~ ., data = train.subset)
 
-basic.bayes.train.pred <- predict(bayes.model.subset, train.subset) 
-basic.bayes.test.pred <- predict(bayes.model.subset, test.subset)
+bayes.subset.train.pred <- predict(bayes.model.subset, train.subset) 
+bayes.subset.test.pred <- predict(bayes.model.subset, test.subset)
 ```
 
 
 ```{r subset_bayes_tables, echo=FALSE, eval=TRUE}
-test.confusion <- table(subset.test.etiquettes, basic.bayes.test.pred)
-train.confusion <- table(subset.train.etiquettes, basic.bayes.train.pred)
+test.confusion <- table(subset.test.etiquettes, bayes.subset.test.pred)
+train.confusion <- table(subset.train.etiquettes, bayes.subset.train.pred)
 
 print(xtable(train.confusion), file="b3.tex", floating=FALSE)
 print(xtable(test.confusion), file="b4.tex", floating=FALSE)
@@ -655,11 +676,21 @@ predictor  <- function(model, newdata)
 naiveBayes.predictor <- function(formula, data) 
 { train(formula, data = data, method = "naive_bayes", trControl = cv)} 
  
-error.cv <- errorest(Type~., wine, model=naiveBayes.predictor, predict=predictor, 
-            estimator="cv", est.para=control.errorest(k = 5))
+naiveBayes.error.cv <- errorest(Type~., wine, model=naiveBayes.predictor, 
+                                   predict=predictor, 
+                                   estimator="cv", 
+                                   est.para=control.errorest(k = 5))
+
+naiveBayes.error.boot <- errorest(Type~., wine, model=naiveBayes.predictor, 
+                                     predict=predictor, estimator="boot", 
+                                     est.para=control.errorest(nboot = 25))
+
+naiveBayes.error.632 <- errorest(Type~., wine, model=naiveBayes.predictor, 
+                                     predict=predictor, estimator="632plus", 
+                                     est.para=control.errorest(nboot = 25))
 ```
 
-Błąd predykcji wynosi `r error.cv$error`. 
+Błędy predykcji wyniosły kolejno `r naiveBayes.error.cv$error` i `r naiveBayes.error.boot$error`. 
 
 ## Wieloklasowa regresja logistyczna 
 
@@ -760,9 +791,19 @@ mlr.predictor <- function(formula, data)
  
 mlr.error.cv <- errorest(Type~., wine, model=mlr.predictor, predict=predictor, 
             estimator="cv", est.para=control.errorest(k = 5))
+
+mlr.error.boot <- errorest(Type~., wine[, c(1, 2, 7, 8)], 
+                                     model=mlr.predictor, 
+                                     predict=predictor, estimator="boot", 
+                                     est.para=control.errorest(nboot = 25))
+
+mlr.error.632 <- errorest(Type~., wine[, c(1, 2, 7, 8)], 
+                                     model=mlr.predictor, 
+                                     predict=predictor, estimator="632plus", 
+                                     est.para=control.errorest(nboot = 25))
 ```
 
-Błąd predykcji wynosi `r mlr.error.cv$error`. 
+Błędy predykcji wyniosły `r mlr.error.cv$error` i `r mlr.error.boot$error`. 
 
 ## Podsumowanie
 
@@ -782,11 +823,13 @@ Błędy predykacji dla $5$-krotnej walidacji krzyżowej wyglądają następując
 \begin{table}[ht]
 \centering
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{c|c|c|c}
+\begin{tabular}{c|c|c|c|c}
 \hline
-KNN & Drzewa decyzyjne & Naiwny klasyfikator bayesowski & Wieloklasowa regresja logistyczna \\
+Metoda & KNN & Drzewa decyzyjne & Naiwny klasyfikator bayesowski & Wieloklasowa regresja logistyczna \\
 \hline
-`r knn.error.cv$error` & `r decision.tree.error.cv$error` & `r error.cv$error` & `r mlr.error.cv$error` \\
+CV & `r knn.error.cv$error` & `r decision.tree.error.cv$error` & `r naiveBayes.error.cv$error` & `r mlr.error.cv$error` \\
+Bootstrap & `r knn.error.boot$error` & `r decision.tree.error.boot$error` & `r naiveBayes.error.boot$error` & `r mlr.error.boot$error`\\
+632+ & `r knn.error.632$error` & `r decision.tree.error.632$error` & `r naiveBayes.error.632$error` & `r mlr.error.632$error`\\
 \hline
 \end{tabular}
 }
