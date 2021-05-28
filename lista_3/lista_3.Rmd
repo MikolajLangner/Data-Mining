@@ -59,7 +59,6 @@ W zadaniu drugim porównamy ze sobą rezultaty zastosowania następujących meto
 
 ## Wczytanie danych i podział na zbiór uczący i testowy
 
-<!--Tutaj jeszcze trochę napiszę o klasach irysów-->
 Wczytajmy dane o irysach i podzielmy je na zbiór uczący i testowy w proporcji $1:2$.
 
 ```{r}
@@ -254,7 +253,7 @@ plot_boxplot(wine[, c(1, 2:9)], by="Type")
 plot_boxplot(wine[, c(1, 10:13)], by="Type")
 ```
 
-Możemy zauważyć, że zmiennymi, które dobrze dywersyfikują klasy są: \verb|Alcohol|, \verb|Flavanoids| i  \verb|Phenols|.
+Możemy zauważyć, że zmiennymi, które dobrze dywersyfikują klasy są: \verb|Alcohol| i \verb|Flavanoids|. \verb|Phenols| też dobrze dywersyfikują nasze zmienne, ale są silne skorelowane z \verb|Flavanoids| (współczynnik korelacji Pearsona wynosi `r cor(wine$Flavanoids, wine$Phenols, method="pearson")`).
 
 Podzielimy nasze dane na zbiór uczący i testowy w stosunku $2:1$. Utworzymy także podzbiory, które będą zawierać tylko najlepiej dywersyfikujące cechy.
 
@@ -263,8 +262,8 @@ set.seed(42)
 train.index <- sample(n, 2/3 * n)
 train.data <- wine %>% slice(train.index)
 test.data <- wine %>% slice(-train.index)
-train.subset <- data.frame(train.data[, c(1, 2, 7, 8)])
-test.subset <- data.frame(test.data[, c(1, 2, 7, 8)])
+train.subset <- data.frame(train.data[, c(1, 2, 8)])
+test.subset <- data.frame(test.data[, c(1, 2, 8)])
 ```
 
 Zdefiniujmy też od razu rzeczywiste etykietki klas dla wcześniej utworzonych zbiorów.
@@ -366,7 +365,7 @@ ggplot(data = melt(results, id.vars = "k", variable.name = "set")) +
   geom_point(aes(x=k, y=value, color=set)) + geom_line(aes(x=k, y=value, color=set))
 ```
 
-Widzimy, że najlepsze rezultaty otrzymujemy dla $k=9$. 
+Widzimy, że najlepsze rezultaty otrzymujemy dla $k=5,\, 6,\, 7$. 
 
 Wykorzystamy teraz pakiet \verb|caret| do stworzenia modelu stuningowanego. By taki model powstał, wykorzystamy $5$-krotną walidację krzyżową.
 
@@ -377,7 +376,7 @@ tuned.knn.test.pred <- predict(model, test.data)
 tuned.knn.train.pred <- predict(model, train.data)
 ```
 
-Jak się okazuje, model ten również przyjmuje $k = $ `r model$bestTune`.
+Jak się okazuje, model ten również przyjmuje k = 5.
 
 Dla tego klasyfikatora także wyznaczymy macierze pomyłek i błędy klasyfikacji.
 
@@ -408,60 +407,39 @@ predictor  <- function(model, newdata)
 knn.predictor <- function(formula, data) 
 { train(formula, data = data, method = "knn", trControl = cv)} 
 
-knn.error.cv <- errorest(Type~., wine[, c(1, 2, 7, 8)], model=knn.predictor, 
+knn.error.cv <- errorest(Type~., wine[, c(1, 2, 8)], model=knn.predictor, 
                          predict=predictor, estimator="cv", 
                          est.para=control.errorest(k = 5))
 
-knn.error.boot <- errorest(Type~., wine[, c(1, 2, 7, 8)], model=knn.predictor, 
+knn.error.boot <- errorest(Type~., wine[, c(1, 2, 8)], model=knn.predictor, 
                          predict=predictor, estimator="boot", 
                          est.para=control.errorest(nboot = 25))
 
-knn.error.632 <- errorest(Type~., wine[, c(1, 2, 7, 8)], model=knn.predictor, 
+knn.error.632 <- errorest(Type~., wine[, c(1, 2, 8)], model=knn.predictor, 
                          predict=predictor, estimator="632plus", 
                          est.para=control.errorest(nboot = 25))
 ```
 
 Błędy wyniosły kolejno `r knn.error.cv$error`, `r knn.error.boot$error` oraz `r knn.error.632$error`.
 
+Poniżej wykres granic decyzyjnych dla najlepszego modelu.
 
-```{r}
-library(klaR)
-drawparti(wine$Type, x=wine$Alcohol, y=wine$Flavanoids, method = "sknn",
-          plot.matrix = FALSE, imageplot = TRUE, col.contour = "red",
-          col.wrong = "red", image.colors = wes_palette("GrandBudapest1", 3),
-          col.correct = "black", xlab="Alcohol", ylab="Flavanoids")
-```
-
-```{r}
+```{r boundary_decision_knn, eval=TRUE, echo=FALSE, fig.cap="Obszary decyzyjne dla $k = 5$.", fig.height=3.7}
 model <- train(Type ~ Alcohol + Flavanoids, data = train.subset, method = "knn",
                trControl = cv)
 
-tuned.knn.test.pred <- predict(model, test.data)
-tuned.knn.train.pred <- predict(model, train.data)
-
-tuned.predictions <- predict(model, test.subset)
-
 var1 <- wine$Alcohol
 var2 <- wine$Flavanoids
-
-var3 <- test.subset$Alcohol
-var4 <- test.subset$Flavanoids
-
-tuned.predictions <- predict(model, test.subset)
-
-test.confusion <- table(tuned.predictions, test.etiquettes)
-
 x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1), 
-                      Flavanoids = seq(min(var2), max(var2), by=0.1))
+                      Flavanoids = seq(min(var2), max(var2), by = 0.1))
 
-x.test.pred <- predict(model, x.test)
-
-df1 <- data.frame(x.test, class = x.test.pred)
-df2 <- data.frame(x = var3, y = var4, class = tuned.predictions)
+df1 <- data.frame(x.test, class = predict(model, x.test))
+df2 <- data.frame(x = test.subset$Alcohol, y = test.subset$Flavanoids,
+                  class = test.subset$Type)
 
 ggplot() +
   geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
-  geom_point(aes(x = x, y = y, col = class), data = df2, size = 4.5, shape = 1) + 
+  geom_point(aes(x=x, y=y, col=class), data = df2, size = 4.5, shape = 1) + 
   theme_bw() 
 ```
 
@@ -502,7 +480,7 @@ print(xtable(test.confusion), file="t2.tex", floating=FALSE)
 \label{tab:tab_t1}
 \end{table}
 
-Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
+Błędy klasyfikacji to `r 1 - sum(diag(train.confusion)) / length(subset.train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(subset.test.etiquettes)`.
 
 
 Teraz stworzymy model, który wytrenujemy na \verb|train.subset|.
@@ -607,23 +585,47 @@ predictor  <- function(model, newdata)
 decision.tree.predictor <- function(formula, data) 
 { rpart(formula, data = data, cp = 0)}
 
-decision.tree.error.cv <- errorest(Type~., wine[, c(1, 2, 7, 8)], 
+decision.tree.error.cv <- errorest(Type~., wine[, c(1, 2, 8)], 
                                    model=decision.tree.predictor, 
                                    predict=predictor, estimator="cv", 
                                    est.para=control.errorest(k = 5))
 
-decision.tree.error.boot <- errorest(Type~., wine[, c(1, 2, 7, 8)], 
+decision.tree.error.boot <- errorest(Type~., wine[, c(1, 2, 8)], 
                                      model=decision.tree.predictor, 
                                      predict=predictor, estimator="boot", 
                                      est.para=control.errorest(nboot = 25))
 
-decision.tree.error.632 <- errorest(Type~., wine[, c(1, 2, 7, 8)], 
+decision.tree.error.632 <- errorest(Type~., wine[, c(1, 2, 8)], 
                                      model=decision.tree.predictor, 
                                      predict=predictor, estimator="632plus", 
                                      est.para=control.errorest(nboot = 25))
 ```
 
 Błędy wyniosły kolejno `r decision.tree.error.cv$error`, `r decision.tree.error.boot$error` oraz `r decision.tree.error.632$error`.
+
+Poniżej wykres granic decyzyjnych dla najlepszego modelu.
+
+```{r boundary_decision_tree, eval=TRUE, echo=FALSE, fig.cap="Obszary decyzyjne dla drzewa decyzyjnego."}
+model <- rpart(Type ~ Alcohol + Flavanoids, data = train.data, cp = 0)
+
+var1 <- wine$Alcohol
+var2 <- wine$Flavanoids
+
+x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1), 
+                      Flavanoids = seq(min(var2), max(var2), by = 0.1))
+
+df1 <- data.frame(x.test, class = predict(model, newdata = x.test, 
+                                 type = "class"))
+
+df2 <- data.frame(x = test.subset$Alcohol, y = test.subset$Flavanoids,
+                  class = test.subset$Type)
+
+ggplot() +
+  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
+  geom_point(aes(x=x, y=y, col=class), data = df2, size = 4.5, shape = 1) + 
+  theme_bw() 
+```
+
 
 ## Naiwny klasyfikator bayesowski
 
@@ -683,9 +685,12 @@ print(xtable(test.confusion), file="b4.tex", floating=FALSE)
 \label{tab:tab_b2}
 \end{table}
 
+
 Błędy klasyfikacji to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes)` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
 
+
 Ponownie skorzystamy z pakietu \verb|caret|, by stworzyć model stunigowany, wytrenowany na wszystkich cechach. Wyznaczymy dla niego macierze pomyłek i błędy klasyfikacji.
+
 
 ```{r}
 model <- train(Type ~ ., data = train.data, method = "naive_bayes", 
@@ -700,6 +705,7 @@ train.confusion <- table(train.data$Type, predict(model, train.data))
 print(xtable(train.confusion), file="b5.tex", floating=FALSE)
 print(xtable(test.confusion), file="b6.tex", floating=FALSE)
 ```
+
 
 \begin{table}[ht]
 \centering
@@ -736,7 +742,31 @@ naiveBayes.error.632 <- errorest(Type~., wine, model=naiveBayes.predictor,
                                      est.para=control.errorest(nboot = 25))
 ```
 
-Błędy predykcji wyniosły kolejno `r naiveBayes.error.cv$error`, `r naiveBayes.error.boot$error` oraz `r naiveBayes.error.632$error`. 
+Błędy predykcji wyniosły kolejno `r naiveBayes.error.cv$error`, `r naiveBayes.error.boot$error` oraz `r naiveBayes.error.632$error`.
+
+Poniżej wykres granic decyzyjnych dla najlepszego modelu.
+
+```{r boundary_decision_bayes, eval=TRUE, echo=FALSE, fig.cap="Obszary decyzyjne dla naiwnego klasyfikatora Bayesowskiego."}
+model <- train(Type ~ Alcohol + Flavanoids, data = train.data, method = "naive_bayes", 
+               trControl = cv)
+
+var1 <- wine$Alcohol
+var2 <- wine$Flavanoids
+
+x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1), 
+                      Flavanoids = seq(min(var2), max(var2), by = 0.1))
+
+df1 <- data.frame(x.test, class = predict(model, x.test))
+
+df2 <- data.frame(x = test.subset$Alcohol, y = test.subset$Flavanoids,
+                  class = test.subset$Type)
+
+ggplot() +
+  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
+  geom_point(aes(x=x, y=y, col=class), data = df2, size = 4.5, shape = 1) + 
+  theme_bw() 
+```
+
 
 ## Wieloklasowa regresja logistyczna 
 
@@ -809,6 +839,7 @@ model <- train(Type ~ ., data = train.data, method = "multinom",
                trControl = cv)
 ```
 
+\newpage 
 
 ```{r echo=FALSE, eval=TRUE}
 test.confusion <- table(test.data$Type, predict(model, test.data))
@@ -841,12 +872,12 @@ mlr.error.cv <- errorest(Type~., wine, model=mlr.predictor,
                          predict=predictor, 
                          estimator="cv", est.para=control.errorest(k = 5))
 
-mlr.error.boot <- errorest(Type~., wine[, c(1, 2, 7, 8)], 
+mlr.error.boot <- errorest(Type~., wine, 
                                      model=mlr.predictor, 
                                      predict=predictor, estimator="boot", 
                                      est.para=control.errorest(nboot = 25))
 
-mlr.error.632 <- errorest(Type~., wine[, c(1, 2, 7, 8)], 
+mlr.error.632 <- errorest(Type~., wine, 
                                      model=mlr.predictor, 
                                      predict=predictor, estimator="632plus", 
                                      est.para=control.errorest(nboot = 25))
@@ -854,20 +885,43 @@ mlr.error.632 <- errorest(Type~., wine[, c(1, 2, 7, 8)],
 
 Błędy predykcji wyniosły `r mlr.error.cv$error`, `r mlr.error.boot$error` oraz `r mlr.error.632$error`. 
 
+
+Poniżej wykres granic decyzyjnych dla najlepszego modelu --- rysunek (\ref{fig:b101}).
+
+```{r boundary_decision_mlr, eval=TRUE, echo=FALSE, results='hide', fig.cap="\\label{fig:b101}Obszary decyzyjne dla wieloklasowej regresji logistycznej."}
+model <- train(Type ~ Alcohol + Flavanoids, data = train.data, method = "multinom", 
+               trControl = cv)
+
+var1 <- wine$Alcohol
+var2 <- wine$Flavanoids
+
+x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1), 
+                      Flavanoids = seq(min(var2), max(var2), by = 0.1))
+
+df1 <- data.frame(x.test, class = predict(model, x.test))
+
+df2 <- data.frame(x = test.subset$Alcohol, y = test.subset$Flavanoids,
+                  class = test.subset$Type)
+
+ggplot() + 
+  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
+  geom_point(aes(x=x, y=y, col=class), data = df2, size = 4.5, shape = 1) + 
+  theme_bw() 
+```
+
+
 ## Podsumowanie
 
 Porównaliśmy ze sobą 4 klasyfikatory. Dla każdego z nich badaliśmy jaki wpływ na dokładność ich predykcji ma zmiana charakterystycznych dla nich parametrów czy zmiany w zbiorze uczącym (klasyfikatory trenowaliśmy na zbiorach, które albo zawierały wszystkie zmienne, albo te wybrane przez nas, które wprowadziły najlepszy podział na zmienne).
 
 \begin{itemize}
-  \item Dla metody $k$ najbliższych sąsiadów najlepsze rezultaty otrzymaliśmy dla $k = 9$ i zbioru uczącego o zawężonej liczbie cech.
+  \item Dla metody $k$ najbliższych sąsiadów najlepsze rezultaty otrzymaliśmy dla $k = 5$ i zbioru uczącego o zawężonej liczbie cech.
   \item Dla metody drzew decyzyjnych najlepsze okazało się przyjęcie wartości parametru $cp = 0$ i wyuczenie modelu na zbiorze z wybranymi przez nas cechami.
   \item Dla naiwnego klasyfikatora bayesowskiego najlepsze efekty otrzymaliśmy, gdy wyuczyliśmy model na zbiorze uczącym zawierającym wszystkie zmienne.
   \item Dla wieloklasowej regresji logistycznej najefektywniejsze okazało się wyuczenie modelu na zbiorze zawierającym wszystkie zmienne.
-  
 \end{itemize}
 
 Błędy predykacji dla $5$-krotnej walidacji krzyżowej, metody bootstrap oraz \verb|.632+| wyglądają następująco --- tabela (\ref{tab:tab_last}). 
-
 
 \begin{table}[ht]
 \centering
