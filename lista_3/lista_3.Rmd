@@ -856,17 +856,17 @@ Błędy predykcji wyniosły `r mlr.error.cv$error`, `r mlr.error.boot$error` ora
 
 ## Podsumowanie
 
-Porównaliśmy ze sobą 4 klasyfikatory. Dla każdego z nich badaliśmy jaki wpływ na dokładność ich predykcji ma zmiana charaktrystycznych dla nich parametrów czy zmiany w zbiorze uczącym (klasyfikatory trenowliśmy na zbiorach, które albo zawierały wszystkie zmienne, albo te wybrane przez nas, które wprowadzły najlepszy podział na zmienne).
+Porównaliśmy ze sobą 4 klasyfikatory. Dla każdego z nich badaliśmy jaki wpływ na dokładność ich predykcji ma zmiana charakterystycznych dla nich parametrów czy zmiany w zbiorze uczącym (klasyfikatory trenowaliśmy na zbiorach, które albo zawierały wszystkie zmienne, albo te wybrane przez nas, które wprowadziły najlepszy podział na zmienne).
 
 \begin{itemize}
   \item Dla metody $k$ najbliższych sąsiadów najlepsze rezultaty otrzymaliśmy dla $k = 9$ i zbioru uczącego o zawężonej liczbie cech.
-  \item Dla metody drzew decyzyjnych najlepszy okazała się wartość parametru $cp = 0$ i wyuczenie modelu na zbiorze z wybranymi przez nas cechami.
+  \item Dla metody drzew decyzyjnych najlepsze okazało się przyjęcie wartości parametru $cp = 0$ i wyuczenie modelu na zbiorze z wybranymi przez nas cechami.
   \item Dla naiwnego klasyfikatora bayesowskiego najlepsze efekty otrzymaliśmy, gdy wyuczyliśmy model na zbiorze uczącym zawierającym wszystkie zmienne.
   \item Dla wieloklasowej regresji logistycznej najefektywniejsze okazało się wyuczenie modelu na zbiorze zawierającym wszystkie zmienne.
   
 \end{itemize}
 
-Błędy predykacji dla $5$-krotnej walidacji krzyżowej, metody bootstrap oraz \verb|.632+| wyglądają następująco --- patrz tabela. 
+Błędy predykacji dla $5$-krotnej walidacji krzyżowej, metody bootstrap oraz \verb|.632+| wyglądają następująco --- tabela (\ref{tab:tab_last}). 
 
 
 \begin{table}[ht]
