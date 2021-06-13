@@ -21,6 +21,14 @@ fontsize: 12pt
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4, fig.pos='H')
+library(ggplot2)
+library(caret)
+library(kernlab)
+library(rattle)
+library(dplyr)
+library(emdbook)
+library(xtable)
+library(tidyr)
 ```
 
 
@@ -30,7 +38,149 @@ knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4, fig.pos='H')
 
 # Zadanie 1
 
+```{r load.data, echo=FALSE}
+data(wine)
+wine <- wine %>% select(c(Type, Alcohol, Flavanoids))
+```
 
+## a)
+
+## b)
+
+```{r SVM.class.err, echo=FALSE, fig.cap="Dokładność klasyfikatora od parametru kosztu"}
+models <- train(Type ~.,
+               data = wine,
+               method = "svmLinear",
+               trControl = trainControl(method = "cv"),
+               tuneGrid = expand.grid(C = lseq(1e-1, 1e3, 5)))
+ggplot(models$results, aes(C, Accuracy)) + geom_line() + scale_y_log10() + scale_x_log10()
+```
+
+```{r SVM.decision.bound.01, echo=FALSE, message=FALSE, fig.cap="Obszary decyzyjne dla $C=0.1$"}
+model <- ksvm(Type ~., data = wine, kernel = "vanilladot", C = 1e-1)
+
+var1 <- wine$Alcohol
+var2 <- wine$Flavanoids
+x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1), 
+                      Flavanoids = seq(min(var2), max(var2), by = 0.1))
+
+df1 <- data.frame(x.test, class = predict(model, x.test))
+df2 <- data.frame(x = wine$Alcohol, y = wine$Flavanoids,
+                  class = wine$Type)
+
+ggplot() +
+  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
+  geom_point(aes(x=x, y=y, col=class), data = df2, size = 4.5, shape = 1) + 
+  theme_bw() 
+```
+
+```{r SVM.decision.bound.1, echo=FALSE, message=FALSE, fig.cap="Obszary decyzyjne dla $C=1$"}
+model <- ksvm(Type ~., data = wine, kernel = "vanilladot", C = 1e0)
+
+var1 <- wine$Alcohol
+var2 <- wine$Flavanoids
+x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1), 
+                      Flavanoids = seq(min(var2), max(var2), by = 0.1))
+
+df1 <- data.frame(x.test, class = predict(model, x.test))
+df2 <- data.frame(x = wine$Alcohol, y = wine$Flavanoids,
+                  class = wine$Type)
+
+ggplot() +
+  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
+  geom_point(aes(x=x, y=y, col=class), data = df2, size = 4.5, shape = 1) + 
+  theme_bw() 
+```
+
+```{r SVM.decision.bound.10, echo=FALSE, message=FALSE, fig.cap="Obszary decyzyjne dla $C=10$"}
+model <- ksvm(Type ~., data = wine, kernel = "vanilladot", C = 1e1)
+
+var1 <- wine$Alcohol
+var2 <- wine$Flavanoids
+x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1), 
+                      Flavanoids = seq(min(var2), max(var2), by = 0.1))
+
+df1 <- data.frame(x.test, class = predict(model, x.test))
+df2 <- data.frame(x = wine$Alcohol, y = wine$Flavanoids,
+                  class = wine$Type)
+
+ggplot() +
+  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
+  geom_point(aes(x=x, y=y, col=class), data = df2, size = 4.5, shape = 1) + 
+  theme_bw() 
+```
+```{r SVM.decision.bound.100, echo=FALSE, message=FALSE, fig.cap="Obszary decyzyjne dla $C=100$"}
+model <- ksvm(Type ~., data = wine, kernel = "vanilladot", C = 1e2)
+
+var1 <- wine$Alcohol
+var2 <- wine$Flavanoids
+x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1), 
+                      Flavanoids = seq(min(var2), max(var2), by = 0.1))
+
+df1 <- data.frame(x.test, class = predict(model, x.test))
+df2 <- data.frame(x = wine$Alcohol, y = wine$Flavanoids,
+                  class = wine$Type)
+
+ggplot() +
+  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
+  geom_point(aes(x=x, y=y, col=class), data = df2, size = 4.5, shape = 1) + 
+  theme_bw() 
+```
+
+```{r SVM.decision.bound.1000, echo=FALSE, message=FALSE, fig.cap="Obszary decyzyjne dla $C=1000$"}
+model <- ksvm(Type ~., data = wine, kernel = "vanilladot", C = 1e3)
+
+var1 <- wine$Alcohol
+var2 <- wine$Flavanoids
+x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1), 
+                      Flavanoids = seq(min(var2), max(var2), by = 0.1))
+
+df1 <- data.frame(x.test, class = predict(model, x.test))
+df2 <- data.frame(x = wine$Alcohol, y = wine$Flavanoids,
+                  class = wine$Type)
+
+ggplot() +
+  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
+  geom_point(aes(x=x, y=y, col=class), data = df2, size = 4.5, shape = 1) + 
+  theme_bw() 
+```
+
+
+```{r SVM.kernels, results='asis', echo=FALSE, message=FALSE, warning=FALSE}
+models.linear <- train(Type ~.,
+               data = wine,
+               method = "svmLinear",
+               trControl = trainControl(method = "cv"),
+               tuneGrid = expand.grid(C = lseq(1e-1, 1e3, 5)))
+models.poly <- train(Type ~.,
+               data = wine,
+               method = "svmPoly",
+               trControl = trainControl(method = "cv"),
+               tuneGrid = expand.grid(C = lseq(1e-1, 1e3, 5), degree = seq(1, 5, 1), scale = seq(.2, 1, .2)))
+models.radial <- train(Type ~.,
+               data = wine,
+               method = "svmRadial",
+               trControl = trainControl(method = "cv"),
+               tuneGrid = expand.grid(C = lseq(1e-1, 1e3, 5), sigma = lseq(1e-4, 1e0, 5)))
+
+result.linear <- models.linear$results[which.max(models.linear$results$Accuracy), "Accuracy"]
+result.poly <- models.poly$results[which.max(models.poly$results$Accuracy), "Accuracy"]
+result.radial <- models.radial$results[which.max(models.radial$results$Accuracy), "Accuracy"]
+print(xtable(as.tibble(list(linear=result.linear, polynomial=result.poly, radial=result.radial)), digits=3, caption="Porównanie klasyfikatorów dla różnych jąder"), include.rownames=FALSE)
+```
+
+```{r tune.radial, echo=FALSE, message=FALSE, fig.cap="Mapa ciepła dokładności klasyfikatora"}
+models.radial <- train(Type ~.,
+               data = wine,
+               method = "svmRadial",
+               trControl = trainControl(method = "cv"),
+               tuneGrid = expand.grid(C = lseq(1e-1, 1e3, 5), sigma = lseq(1e-4, 1e0, 5)))
+ggplot(models.radial$results, aes(C, sigma, fill=Accuracy)) + geom_tile() + scale_y_log10() + scale_x_log10()
+```
+
+```{r tune.radial.table, results='asis', echo=FALSE, message=FALSE}
+print(xtable(models.radial$bestTune, caption = "Parametry dla najlepszego klasyfikatora"), include.rownames=FALSE)
+```
 
 # Zadanie 2
 
