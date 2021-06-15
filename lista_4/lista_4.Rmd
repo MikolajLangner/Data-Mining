@@ -29,6 +29,8 @@ library(dplyr)
 library(emdbook)
 library(xtable)
 library(tidyr)
+library(ggfortify)
+library(cluster)
 ```
 
 
@@ -61,15 +63,15 @@ model <- ksvm(Type ~., data = wine, kernel = "vanilladot", C = 1e-1)
 
 var1 <- wine$Alcohol
 var2 <- wine$Flavanoids
-x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1), 
-                      Flavanoids = seq(min(var2), max(var2), by = 0.1))
+x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.05), 
+                      Flavanoids = seq(min(var2), max(var2), by = 0.05))
 
 df1 <- data.frame(x.test, class = predict(model, x.test))
 df2 <- data.frame(x = wine$Alcohol, y = wine$Flavanoids,
                   class = wine$Type)
 
 ggplot() +
-  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
+  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = .5) + 
   geom_point(aes(x=x, y=y, col=class), data = df2, size = 4.5, shape = 1) + 
   theme_bw() 
 ```
@@ -79,15 +81,15 @@ model <- ksvm(Type ~., data = wine, kernel = "vanilladot", C = 1e0)
 
 var1 <- wine$Alcohol
 var2 <- wine$Flavanoids
-x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1), 
-                      Flavanoids = seq(min(var2), max(var2), by = 0.1))
+x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.05), 
+                      Flavanoids = seq(min(var2), max(var2), by = 0.05))
 
 df1 <- data.frame(x.test, class = predict(model, x.test))
 df2 <- data.frame(x = wine$Alcohol, y = wine$Flavanoids,
                   class = wine$Type)
 
 ggplot() +
-  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
+  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = .5) + 
   geom_point(aes(x=x, y=y, col=class), data = df2, size = 4.5, shape = 1) + 
   theme_bw() 
 ```
@@ -97,15 +99,15 @@ model <- ksvm(Type ~., data = wine, kernel = "vanilladot", C = 1e1)
 
 var1 <- wine$Alcohol
 var2 <- wine$Flavanoids
-x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1), 
-                      Flavanoids = seq(min(var2), max(var2), by = 0.1))
+x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.05), 
+                      Flavanoids = seq(min(var2), max(var2), by = 0.05))
 
 df1 <- data.frame(x.test, class = predict(model, x.test))
 df2 <- data.frame(x = wine$Alcohol, y = wine$Flavanoids,
                   class = wine$Type)
 
 ggplot() +
-  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
+  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = .5) + 
   geom_point(aes(x=x, y=y, col=class), data = df2, size = 4.5, shape = 1) + 
   theme_bw() 
 ```
@@ -114,15 +116,15 @@ model <- ksvm(Type ~., data = wine, kernel = "vanilladot", C = 1e2)
 
 var1 <- wine$Alcohol
 var2 <- wine$Flavanoids
-x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1), 
-                      Flavanoids = seq(min(var2), max(var2), by = 0.1))
+x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.05), 
+                      Flavanoids = seq(min(var2), max(var2), by = 0.05))
 
 df1 <- data.frame(x.test, class = predict(model, x.test))
 df2 <- data.frame(x = wine$Alcohol, y = wine$Flavanoids,
                   class = wine$Type)
 
 ggplot() +
-  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
+  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = .5) + 
   geom_point(aes(x=x, y=y, col=class), data = df2, size = 4.5, shape = 1) + 
   theme_bw() 
 ```
@@ -132,15 +134,15 @@ model <- ksvm(Type ~., data = wine, kernel = "vanilladot", C = 1e3)
 
 var1 <- wine$Alcohol
 var2 <- wine$Flavanoids
-x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.1), 
-                      Flavanoids = seq(min(var2), max(var2), by = 0.1))
+x.test <- expand.grid(Alcohol = seq(min(var1), max(var1), by = 0.05), 
+                      Flavanoids = seq(min(var2), max(var2), by = 0.05))
 
 df1 <- data.frame(x.test, class = predict(model, x.test))
 df2 <- data.frame(x = wine$Alcohol, y = wine$Flavanoids,
                   class = wine$Type)
 
 ggplot() +
-  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = 1) + 
+  geom_point(aes(x=Alcohol, y=Flavanoids, col = class), data = df1, size = .5) + 
   geom_point(aes(x=x, y=y, col=class), data = df2, size = 4.5, shape = 1) + 
   theme_bw() 
 ```
@@ -184,4 +186,11 @@ print(xtable(models.radial$bestTune, caption = "Parametry dla najlepszego klasyf
 
 # Zadanie 2
 
+```{r clusters, echo=FALSE, message=FALSE, warning=FALSE}
+data(wine)
+clusters <- pam(scale(wine %>% select(-Type)), 3)
+wine$Predicted <- as.factor(clusters$clustering)
+autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
+         data = wine, colour = 'Predicted', shape='Type')
+```
 
