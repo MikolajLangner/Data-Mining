@@ -191,10 +191,32 @@ print(xtable(models.radial$bestTune, caption = "Parametry dla najlepszego klasyf
 
 # Zadanie 2
 
-```{r clusters, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8}
+```{r clusters pam, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8}
 data(wine)
 clusters <- pam(scale(wine %>% select(-Type)), 3)
 wine$Predicted <- as.factor(clusters$clustering)
+p1 <- autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
+         data = wine, colour = 'Predicted', shape='Type', frame=TRUE, frame.type='norm')
+p2 <- autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
+         data = wine, colour = 'Type', shape='Predicted', frame=TRUE, frame.type='norm')
+plot_grid(p1, p2, ncol=1)
+```
+
+```{r clusters agnes single, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8}
+data(wine)
+clusters <- cutree(agnes(scale(wine %>% select(-Type)), method='single'), 3)
+wine$Predicted <- as.factor(clusters)
+p1 <- autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
+         data = wine, colour = 'Predicted', shape='Type', frame=TRUE, frame.type='norm')
+p2 <- autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
+         data = wine, colour = 'Type', shape='Predicted', frame=TRUE, frame.type='norm')
+plot_grid(p1, p2, ncol=1)
+```
+
+```{r clusters agnes complete, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8}
+data(wine)
+clusters <- cutree(agnes(scale(wine %>% select(-Type)), method='complete'), 3)
+wine$Predicted <- as.factor(clusters)
 p1 <- autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
          data = wine, colour = 'Predicted', shape='Type', frame=TRUE, frame.type='norm')
 p2 <- autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
