@@ -31,6 +31,11 @@ library(xtable)
 library(tidyr)
 library(ggfortify)
 library(cluster)
+library(cowplot)
+library(clValid)
+library(e1071)
+library(reshape2)
+library(DataExplorer)
 ```
 
 
@@ -186,11 +191,74 @@ print(xtable(models.radial$bestTune, caption = "Parametry dla najlepszego klasyf
 
 # Zadanie 2
 
-```{r clusters, echo=FALSE, message=FALSE, warning=FALSE}
+```{r clusters, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8}
 data(wine)
 clusters <- pam(scale(wine %>% select(-Type)), 3)
 wine$Predicted <- as.factor(clusters$clustering)
-autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
-         data = wine, colour = 'Predicted', shape='Type')
+p1 <- autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
+         data = wine, colour = 'Predicted', shape='Type', frame=TRUE, frame.type='norm')
+p2 <- autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
+         data = wine, colour = 'Type', shape='Predicted', frame=TRUE, frame.type='norm')
+plot_grid(p1, p2, ncol=1)
+```
+
+```{r internal, echo=FALSE}
+data(wine)
+cl.methods <- c("agnes", "pam")
+cl.range <- 2:10
+internal <- clValid(wine %>% select(-Type),
+                    nClust=cl.range, clMethods=cl.methods, validation="internal")
+summary(internal)
+optimalScores(internal)
+
+par(mfrow = c(2, 2))
+plot(internal, legend = FALSE, lwd=2)
+plot.new()
+legend("center", clusterMethods(internal), col=1:9, lty=1:9, pch=paste(1:9))
+```
+
+```{r external, echo=FALSE}
+pam.match <- Vectorize(function(k) {
+  pam.table <-  table(pam(scale(wine %>% select(-Type)), k)$clustering, wine$Type)
+  sum(diag(pam.table)) / sum(pam.table)
+}
+)
+
+agnes.single.match <- Vectorize(function(k) {
+  agnes.single.table <-  table(cutree(agnes(scale(wine %>% select(-Type)), method='single'), k), wine$Type)
+  sum(diag(agnes.single.table)) / sum(agnes.single.table)
+}
+)
+
+agnes.complete.match <- Vectorize(function(k) {
+  agnes.complete.table <-  table(cutree(agnes(scale(wine %>% select(-Type)), method='complete'), k), wine$Type)
+  sum(diag(agnes.complete.table)) / sum(agnes.complete.table)
+}
+)
+
+df <- data.frame(k = seq(2, 10))
+df$pam <- pam.match(df$k)
+df$agnes.single <- agnes.single.match(df$k)
+df$agnes.complete <- agnes.complete.match(df$k)
+
+ggplot(melt(df, id.vars = 'k', variable.name = 'method', value.name = 'agreement')) +
+  geom_line(aes(x=k, y=agreement, color=method))
+
+```
+
+
+```{r cluster boxplots}
+wine.pam <- pam(scale(wine %>% select(-Type)), 3)
+wine.agnes <- cutree(agnes(scale(wine %>% select(-Type)), method='complete'), 3)
+
+wine$pam <- as.factor(wine.pam$clustering)
+wine$agnes <- as.factor(wine.agnes)
+
+plot_boxplot(wine, by='pam')
+plot_boxplot(wine, by='agnes')
+```
+
+```{r medoids}
+wine.pam$medoids
 ```
 
