@@ -191,7 +191,7 @@ print(xtable(models.radial$bestTune, caption = "Parametry dla najlepszego klasyf
 
 # Zadanie 2
 
-```{r clusters pam, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8}
+```{r clusters pam, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8, fig.cap="Skupienia dla metody PAM"}
 data(wine)
 clusters <- pam(scale(wine %>% select(-Type)), 3)
 wine$Predicted <- as.factor(clusters$clustering)
@@ -202,7 +202,7 @@ p2 <- autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
 plot_grid(p1, p2, ncol=1)
 ```
 
-```{r clusters agnes single, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8}
+```{r clusters agnes single, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8, fig.cap="Skupienia dla metody AGNES z single-linkage"}
 data(wine)
 clusters <- cutree(agnes(scale(wine %>% select(-Type)), method='single'), 3)
 wine$Predicted <- as.factor(clusters)
@@ -213,7 +213,7 @@ p2 <- autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
 plot_grid(p1, p2, ncol=1)
 ```
 
-```{r clusters agnes complete, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8}
+```{r clusters agnes complete, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8, fig.cap="Skupienia dla metody AGNES z complete-linkage"}
 data(wine)
 clusters <- cutree(agnes(scale(wine %>% select(-Type)), method='complete'), 3)
 wine$Predicted <- as.factor(clusters)
@@ -224,22 +224,34 @@ p2 <- autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
 plot_grid(p1, p2, ncol=1)
 ```
 
-```{r internal, echo=FALSE}
+```{r internal, echo=FALSE, warning=FALSE, fig.cap="Wskaźniki wewnętrzne dla PAM i AGNES z complete-linkage"}
 data(wine)
 cl.methods <- c("agnes", "pam")
 cl.range <- 2:10
 internal <- clValid(wine %>% select(-Type),
-                    nClust=cl.range, clMethods=cl.methods, validation="internal")
+                    nClust=cl.range, clMethods=cl.methods, validation="internal",
+                    method='complete')
 summary(internal)
 optimalScores(internal)
 
-par(mfrow = c(2, 2))
-plot(internal, legend = FALSE, lwd=2)
-plot.new()
-legend("center", clusterMethods(internal), col=1:9, lty=1:9, pch=paste(1:9))
+my_plot <- list()
+for(i in internal@measNames){
+  p <- as.data.frame(internal@measures[i, ,]) %>%
+    tibble::rownames_to_column(var = "cluster") %>%
+    mutate(cluster = factor(cluster, levels = as.numeric(cluster))) %>%
+    melt() %>%
+    ggplot(., aes(x = cluster, y = value, colour = variable, group = variable)) +
+    geom_line() +
+    geom_point() +
+    theme_bw() +
+    ggtitle(i)
+  my_plot[[i]] <- p
+}
+ 
+plot_grid(plotlist = my_plot, ncol = 1)
 ```
 
-```{r external, echo=FALSE}
+```{r external, echo=FALSE, fig.cap="Porównanie wskaźników zewnętrznych"}
 pam.match <- Vectorize(function(k) {
   pam.table <-  table(pam(scale(wine %>% select(-Type)), k)$clustering, wine$Type)
   sum(diag(pam.table)) / sum(pam.table)
@@ -269,7 +281,12 @@ ggplot(melt(df, id.vars = 'k', variable.name = 'method', value.name = 'agreement
 ```
 
 
-```{r cluster boxplots}
+```{r external pam-agnes, echo=FALSE}
+matchClasses(table(pam(scale(wine %>% select(-Type)), 3)$clustering,
+                   cutree(agnes(scale(wine %>% select(-Type)), method='complete'), 3)))
+```
+
+```{r cluster boxplots, echo=FALSE}
 wine.pam <- pam(scale(wine %>% select(-Type)), 3)
 wine.agnes <- cutree(agnes(scale(wine %>% select(-Type)), method='complete'), 3)
 
@@ -280,7 +297,7 @@ plot_boxplot(wine, by='pam')
 plot_boxplot(wine, by='agnes')
 ```
 
-```{r medoids}
-wine.pam$medoids
+```{r medoids, echo=FALSE, results='asis'}
+print(xtable(t(data.frame(wine.pam$medoids)), caption="Medoidy dla metody PAM przy K=3"))
 ```
 
