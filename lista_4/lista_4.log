@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/W32TeX) (preloaded format=pdflatex 2020.3.12)  19 JUN 2021 15:17
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/W32TeX) (preloaded format=pdflatex 2020.3.12)  19 JUN 2021 15:24
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -676,134 +676,148 @@ File: lista_4_files/figure-latex/tune.radial-1.pdf Graphic file (type pdf)
 Package pdftex.def Info: lista_4_files/figure-latex/tune.radial-1.pdf  used on 
 input line 448.
 (pdftex.def)             Requested size: 433.63878pt x 289.09251pt.
-<lista_4_files/figure-latex/clusters-1.pdf, id=96, 433.62pt x 578.16pt>
-File: lista_4_files/figure-latex/clusters-1.pdf Graphic file (type pdf)
-<use lista_4_files/figure-latex/clusters-1.pdf>
-Package pdftex.def Info: lista_4_files/figure-latex/clusters-1.pdf  used on inp
-ut line 470.
+<lista_4_files/figure-latex/clusters pam-1.pdf, id=96, 433.62pt x 578.16pt>
+File: lista_4_files/figure-latex/clusters pam-1.pdf Graphic file (type pdf)
+<use lista_4_files/figure-latex/clusters pam-1.pdf>
+Package pdftex.def Info: lista_4_files/figure-latex/clusters pam-1.pdf  used on
+ input line 472.
 (pdftex.def)             Requested size: 433.63878pt x 578.18504pt.
 [6] [7 <./lista_4_files/figure-latex/importance_plot-1.pdf> <./lista_4_files/fi
 gure-latex/SVM.class.err-1.pdf>] [8 <./lista_4_files/figure-latex/SVM.decision.
 bound.01-1.pdf> <./lista_4_files/figure-latex/SVM.decision.bound.1-1.pdf>] [9 <
 ./lista_4_files/figure-latex/SVM.decision.bound.10-1.pdf> <./lista_4_files/figu
 re-latex/SVM.decision.bound.100-1.pdf>] [10 <./lista_4_files/figure-latex/SVM.d
-ecision.bound.1000-1.pdf> <./lista_4_files/figure-latex/tune.radial-1.pdf>] [11
-] [12 <./lista_4_files/figure-latex/clusters-1.pdf>]
-Overfull \hbox (110.68126pt too wide) in paragraph at lines 501--501
+ecision.bound.1000-1.pdf> <./lista_4_files/figure-latex/tune.radial-1.pdf>]
+<lista_4_files/figure-latex/clusters agnes single-1.pdf, id=177, 433.62pt x 578
+.16pt>
+File: lista_4_files/figure-latex/clusters agnes single-1.pdf Graphic file (type
+ pdf)
+<use lista_4_files/figure-latex/clusters agnes single-1.pdf>
+Package pdftex.def Info: lista_4_files/figure-latex/clusters agnes single-1.pdf
+  used on input line 478.
+(pdftex.def)             Requested size: 433.63878pt x 578.18504pt.
+<lista_4_files/figure-latex/clusters agnes complete-1.pdf, id=178, 433.62pt x 5
+78.16pt>
+File: lista_4_files/figure-latex/clusters agnes complete-1.pdf Graphic file (ty
+pe pdf)
+<use lista_4_files/figure-latex/clusters agnes complete-1.pdf>
+Package pdftex.def Info: lista_4_files/figure-latex/clusters agnes complete-1.p
+df  used on input line 484.
+(pdftex.def)             Requested size: 433.63878pt x 578.18504pt.
+
+Overfull \hbox (110.68126pt too wide) in paragraph at lines 512--512
 []\OT4/lmtt/m/n/12 ##                           2       3       4       5      
  6       7       8       9      10[] 
  []
 
 
-Overfull \hbox (110.63223pt too wide) in paragraph at lines 501--501
-[]\OT4/lmtt/m/n/12 ## agnes Connectivity   2.2329  6.9567 10.5615 15.4302 18.24
-68 23.0460 24.5746 26.5770 27.2048[] 
+Overfull \hbox (110.65324pt too wide) in paragraph at lines 512--512
+[]\OT4/lmtt/m/n/12 ## agnes Connectivity   4.4925  8.0972 12.8210 17.7913 21.45
+91 22.9877 25.8044 30.6730 31.3008[] 
  []
 
 
-Overfull \hbox (110.67426pt too wide) in paragraph at lines 501--501
-[]\OT4/lmtt/m/n/12 ##       Dunn           0.0716  0.0830  0.0343  0.0417  0.04
-17  0.0532  0.0636  0.0725  0.0725[] 
+Overfull \hbox (110.66025pt too wide) in paragraph at lines 512--512
+[]\OT4/lmtt/m/n/12 ##       Dunn           0.0374  0.0227  0.0417  0.0347  0.03
+68  0.0544  0.0561  0.0656  0.0776[] 
  []
 
 
-Overfull \hbox (110.66025pt too wide) in paragraph at lines 501--501
-[]\OT4/lmtt/m/n/12 ##       Silhouette     0.6587  0.6101  0.5296  0.5458  0.54
-09  0.5101  0.5202  0.5051  0.5025[] 
+Overfull \hbox (110.66725pt too wide) in paragraph at lines 512--512
+[]\OT4/lmtt/m/n/12 ##       Silhouette     0.6413  0.5419  0.5336  0.4806  0.48
+24  0.5075  0.5055  0.5024  0.5128[] 
  []
 
 
-Overfull \hbox (110.65324pt too wide) in paragraph at lines 501--501
+Overfull \hbox (110.65324pt too wide) in paragraph at lines 512--512
 []\OT4/lmtt/m/n/12 ## pam   Connectivity   1.5286  5.1048 16.2798 20.0643 23.11
 55 27.8393 31.0163 33.5841 37.0111[] 
  []
 
 
-Overfull \hbox (110.67426pt too wide) in paragraph at lines 501--501
+Overfull \hbox (110.67426pt too wide) in paragraph at lines 512--512
 []\OT4/lmtt/m/n/12 ##       Dunn           0.0434  0.0229  0.0340  0.0340  0.02
 33  0.0502  0.0478  0.0359  0.0359[] 
  []
 
 
-Overfull \hbox (110.64624pt too wide) in paragraph at lines 501--501
+Overfull \hbox (110.64624pt too wide) in paragraph at lines 512--512
 []\OT4/lmtt/m/n/12 ##       Silhouette     0.6494  0.5708  0.5620  0.5469  0.54
 14  0.5622  0.5401  0.5353  0.5249[] 
  []
 
-<lista_4_files/figure-latex/internal-1.pdf, id=195, 433.62pt x 289.08pt>
+<lista_4_files/figure-latex/internal-1.pdf, id=179, 433.62pt x 289.08pt>
 File: lista_4_files/figure-latex/internal-1.pdf Graphic file (type pdf)
 <use lista_4_files/figure-latex/internal-1.pdf>
 Package pdftex.def Info: lista_4_files/figure-latex/internal-1.pdf  used on inp
-ut line 510.
+ut line 529.
 (pdftex.def)             Requested size: 433.63878pt x 289.09251pt.
-[13]
-<lista_4_files/figure-latex/external-1.pdf, id=201, 433.62pt x 289.08pt>
+<lista_4_files/figure-latex/external-1.pdf, id=180, 433.62pt x 289.08pt>
 File: lista_4_files/figure-latex/external-1.pdf Graphic file (type pdf)
 <use lista_4_files/figure-latex/external-1.pdf>
 Package pdftex.def Info: lista_4_files/figure-latex/external-1.pdf  used on inp
-ut line 512.
+ut line 535.
 (pdftex.def)             Requested size: 433.63878pt x 289.09251pt.
-LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
-517.
-(c:/texlive/2019/texmf-dist/tex/latex/lm/ts1lmtt.fd
-File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
-Underfull \vbox (badness 10000) detected at line 524
- []
-
-[14 <./lista_4_files/figure-latex/internal-1.pdf> <./lista_4_files/figure-latex
-/external-1.pdf>]
-<lista_4_files/figure-latex/cluster boxplots-1.pdf, id=218, 433.62pt x 289.08pt
+[11] [12 <./lista_4_files/figure-latex/clusters pam-1.pdf>] [13 <./lista_4_file
+s/figure-latex/clusters agnes single-1.pdf>] [14 <./lista_4_files/figure-latex/
+clusters agnes complete-1.pdf>] [15 <./lista_4_files/figure-latex/internal-1.pd
+f> <./lista_4_files/figure-latex/external-1.pdf>]
+<lista_4_files/figure-latex/cluster boxplots-1.pdf, id=243, 433.62pt x 289.08pt
 >
 File: lista_4_files/figure-latex/cluster boxplots-1.pdf Graphic file (type pdf)
 
 <use lista_4_files/figure-latex/cluster boxplots-1.pdf>
 Package pdftex.def Info: lista_4_files/figure-latex/cluster boxplots-1.pdf  use
-d on input line 526.
+d on input line 548.
 (pdftex.def)             Requested size: 433.63878pt x 289.09251pt.
-<lista_4_files/figure-latex/cluster boxplots-2.pdf, id=219, 433.62pt x 289.08pt
+<lista_4_files/figure-latex/cluster boxplots-2.pdf, id=244, 433.62pt x 289.08pt
 >
 File: lista_4_files/figure-latex/cluster boxplots-2.pdf Graphic file (type pdf)
 
 <use lista_4_files/figure-latex/cluster boxplots-2.pdf>
 Package pdftex.def Info: lista_4_files/figure-latex/cluster boxplots-2.pdf  use
-d on input line 527.
+d on input line 549.
 (pdftex.def)             Requested size: 433.63878pt x 289.09251pt.
-
-Underfull \hbox (badness 10000) in paragraph at lines 526--528
-[][]
- []
-
-[15 <./lista_4_files/figure-latex/cluster boxplots-1.pdf>]
-<lista_4_files/figure-latex/cluster boxplots-3.pdf, id=229, 433.62pt x 289.08pt
+<lista_4_files/figure-latex/cluster boxplots-3.pdf, id=245, 433.62pt x 289.08pt
 >
 File: lista_4_files/figure-latex/cluster boxplots-3.pdf Graphic file (type pdf)
 
 <use lista_4_files/figure-latex/cluster boxplots-3.pdf>
 Package pdftex.def Info: lista_4_files/figure-latex/cluster boxplots-3.pdf  use
-d on input line 535.
+d on input line 550.
 (pdftex.def)             Requested size: 433.63878pt x 289.09251pt.
-<lista_4_files/figure-latex/cluster boxplots-4.pdf, id=230, 433.62pt x 289.08pt
+<lista_4_files/figure-latex/cluster boxplots-4.pdf, id=246, 433.62pt x 289.08pt
 >
 File: lista_4_files/figure-latex/cluster boxplots-4.pdf Graphic file (type pdf)
 
 <use lista_4_files/figure-latex/cluster boxplots-4.pdf>
 Package pdftex.def Info: lista_4_files/figure-latex/cluster boxplots-4.pdf  use
-d on input line 536.
+d on input line 551.
 (pdftex.def)             Requested size: 433.63878pt x 289.09251pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 535--537
+Underfull \hbox (badness 10000) in paragraph at lines 548--552
 [][]
  []
 
-[16 <./lista_4_files/figure-latex/cluster boxplots-2.pdf> <./lista_4_files/figu
-re-latex/cluster boxplots-3.pdf>]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 559.
-[17 <./lista_4_files/figure-latex/cluster boxplots-4.pdf>]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 559.
+
+Underfull \hbox (badness 10000) in paragraph at lines 548--552
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 548--552
+[]
+ []
+
+[16 <./lista_4_files/figure-latex/cluster boxplots-1.pdf> <./lista_4_files/figu
+re-latex/cluster boxplots-2.pdf>]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 580.
+[17 <./lista_4_files/figure-latex/cluster boxplots-3.pdf> <./lista_4_files/figu
+re-latex/cluster boxplots-4.pdf>] [18]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 580.
 (./lista_4.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 559.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 559.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 580.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 580.
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
@@ -812,16 +826,16 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 15131 strings out of 480994
- 227847 string characters out of 5916032
+ 15111 strings out of 480994
+ 228021 string characters out of 5916032
  519518 words of memory out of 5000000
- 30276 multiletter control sequences out of 15000+600000
- 590750 words of font info for 83 fonts, out of 8000000 for 9000
+ 30251 multiletter control sequences out of 15000+600000
+ 590444 words of font info for 82 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 50i,10n,49p,806b,453s stack positions out of 5000i,500n,10000p,200000b,80000s
-{c:/texlive/2019/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{c:/texlive/2019/te
-xmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{c:/texlive/2019/texmf-dist/fonts/enc
-/dvips/lm/lm-rm.enc}{c:/texlive/2019/texmf-dist/fonts/enc/dvips/lm/lm-rmtt.enc}
+ 50i,10n,49p,806b,461s stack positions out of 5000i,500n,10000p,200000b,80000s
+{c:/texlive/2019/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{c:/texlive/2019
+/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{c:/texlive/2019/texmf-dist/fonts/enc/
+dvips/lm/lm-rmtt.enc}{c:/texlive/2019/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}
 <c:/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb><c:/texli
 ve/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><c:/texlive/2019/t
 exmf-dist/fonts/type1/public/lm/lmbx12.pfb><c:/texlive/2019/texmf-dist/fonts/ty
@@ -830,10 +844,10 @@ pe1/public/lm/lmmi12.pfb><c:/texlive/2019/texmf-dist/fonts/type1/public/lm/lmr1
 019/texmf-dist/fonts/type1/public/lm/lmr17.pfb><c:/texlive/2019/texmf-dist/font
 s/type1/public/lm/lmri12.pfb><c:/texlive/2019/texmf-dist/fonts/type1/public/lm/
 lmtk10.pfb><c:/texlive/2019/texmf-dist/fonts/type1/public/lm/lmtt12.pfb>
-Output written on lista_4.pdf (17 pages, 1856136 bytes).
+Output written on lista_4.pdf (18 pages, 1901966 bytes).
 PDF statistics:
- 324 PDF objects out of 1000 (max. 8388607)
- 255 compressed objects within 3 object streams
- 58 named destinations out of 1000 (max. 500000)
- 14467 words of extra memory for PDF output out of 17280 (max. 10000000)
+ 350 PDF objects out of 1000 (max. 8388607)
+ 276 compressed objects within 3 object streams
+ 65 named destinations out of 1000 (max. 500000)
+ 14477 words of extra memory for PDF output out of 17280 (max. 10000000)
 
