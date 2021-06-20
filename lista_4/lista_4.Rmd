@@ -407,9 +407,13 @@ Mieliśmy także porównać czasy potrzebne do zbudowania modelu dla kolejnych m
 Widać, że algorytm boosting potrzebuje znacznie więcej czasu na stworzenie modelu od pozostałych algorytmów.
 ## b)
 
+Teraz zbudujemy klasyfikator oparty na algorytmie SVM. W celu późniejszej wizualizacji obszarów decyzyjnych oraz dla uproszczenia modelu wybierzemy tylko 2 cechu \verb|Alcohol| i \verb|Flavanoids|.
+
 ```{r}
 wine <- wine %>% select(c(Type, Alcohol, Flavanoids))
 ```
+
+Korzystająć z walidacji krzyżowej sprawdzimy jak klasyfikator z jądrem liniowym radzi sobie przy różnych wartościach parametru kosztu $C$.
 
 ```{r SVM.class.err, echo=FALSE, fig.cap="Dokładność klasyfikatora od parametru kosztu"}
 models <- train(Type~.,
@@ -419,6 +423,10 @@ models <- train(Type~.,
                tuneGrid = expand.grid(C = lseq(1e-1, 1e3, 5)))
 ggplot(models$results, aes(C, Accuracy)) + geom_line() + scale_y_log10() + scale_x_log10()
 ```
+
+Możemy zauważyć, że najlepsze wyniki uzyskujemy dla stosunkowo małej wartości parametru kosztu ($C=0.1$).
+
+Zbadamy teraz jak wyglądają obszary decyzyjne dla poszczegółnych wartości tego parametru.
 
 ```{r SVM.decision.bound.01, echo=FALSE, message=FALSE, fig.cap="Obszary decyzyjne dla $C=0.1$"}
 model <- ksvm(Type~., data = wine, kernel = "vanilladot", C = 1e-1)
@@ -510,6 +518,9 @@ ggplot() +
   theme_bw() 
 ```
 
+Można zaobserwować, że granica pomiędzy typami \verb|Type=1| oraz \verb|Type=2| się praktycznie nie zmienia. Zwiększenie parametru $C$ wpływa jednakże na poszerzenie się obszaru dla \verb|Type=3|.
+
+Sprawdzimy teraz dokładność klasyfikatora przy zastosowaniu różnych jąder.
 
 ```{r SVM.kernels, results='asis', echo=FALSE, message=FALSE, warning=FALSE}
 models.linear <- train(Type ~.,
@@ -534,6 +545,10 @@ result.radial <- models.radial$results[which.max(models.radial$results$Accuracy)
 print(xtable(as.tibble(list(linear=result.linear, polynomial=result.poly, radial=result.radial)), digits=3, caption="Porównanie klasyfikatorów dla różnych jąder"), include.rownames=FALSE, comment=FALSE)
 ```
 
+Można zauważyć, że zastosowanie nieliniowych jąder trochę poprawiło dokładność klasyfikatora, natomiast różnice pomiędzy jądrem wielomianowym i gaussowskim są nieznaczne.
+
+Sprawdzimy teraz jak wygląda dokładność dla różnych parametrów przy zastosowaniu jądra gaussowskiego.
+
 ```{r tune.radial, echo=FALSE, message=FALSE, fig.cap="Mapa ciepła dokładności klasyfikatora"}
 models.radial <- train(Type ~.,
                data = wine,
@@ -542,6 +557,8 @@ models.radial <- train(Type ~.,
                tuneGrid = expand.grid(C = lseq(1e-1, 1e3, 5), sigma = lseq(1e-4, 1e0, 5)))
 ggplot(models.radial$results, aes(C, sigma, fill=Accuracy)) + geom_tile() + scale_y_log10() + scale_x_log10()
 ```
+
+Mapa ciepła pokazuje, że optymalnymi parametrami są $\sigma=1$ oraz $C=0.1$.
 
 ```{r tune.radial.table, results='asis', echo=FALSE, message=FALSE}
 print(xtable(models.radial$bestTune, caption = "Parametry dla najlepszego klasyfikatora"), include.rownames=FALSE, comment=FALSE)
