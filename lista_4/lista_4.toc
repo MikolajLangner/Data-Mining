@@ -1,0 +1,9 @@
+\contentsline {section}{\numberline {1}Wstęp}{1}{section.1}%
+\contentsline {subsubsection}{\numberline {1.0.1}Wnioski}{2}{subsubsection.1.0.1}%
+\contentsline {subsection}{\numberline {1.1}b)}{2}{subsection.1.1}%
+\contentsline {section}{\numberline {2}Zadanie 2}{6}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Wizualizacja wyników grupowania (\(K=3\))}{6}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Ocena jakości grupowania}{10}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}Wkaźniki wewnętrzne}{10}{subsubsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {2.2.2}Wskaźniki zewnętrzne}{10}{subsubsection.2.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.3}Ocena otrzymanych rezultatów}{13}{subsubsection.2.2.3}%
