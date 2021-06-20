@@ -25,7 +25,9 @@ library(ggplot2)
 library(caret)
 library(kernlab)
 library(rattle)
+library(factoextra)
 library(ipred)
+library(adabag)
 library(randomForest)
 library(dplyr)
 library(emdbook)
@@ -39,6 +41,8 @@ library(clValid)
 library(e1071)
 library(reshape2)
 library(DataExplorer)
+
+bagging = ipred::bagging
 ```
 
 
@@ -79,6 +83,8 @@ cv <- trainControl(method="cv", number=5)
 
 ## a)
 
+Naszym zadaniem będzie zbadanie tego jak wygląda
+
 ### Pojedyncze drzewo decyzyjne
 
 Przypomnijmy najpierw jak radziła sobie metoda drzewa klasyfikacyjnego.
@@ -89,13 +95,11 @@ tree.model <- rpart(Type ˜ ., data = train.subset, cp=0)
 
 Wyglądało ono następująco --- rysunek (\ref{fig::fig1}).
 
-```{r basic_tree_plot, echo=FALSE, eval=TRUE, width=4.5, height=3,fig.cap="\\label{fig:fig1}Pojedyncze drzewo decyzyjne."}
+```{r basic_tree_plot, echo=FALSE, eval=TRUE, width=4.5, height=3,fig.cap="\\label{fig::fig1}Pojedyncze drzewo decyzyjne."}
 fancyRpartPlot(tree.model, sub="")
 ```
 
-Przypomnimy także jak wyglądały błędy klasyfikacji dla drzewa.
-
-```{r}
+```{r decision_tree_error, echo=FALSE}
 predictor  <- function(model, newdata) 
 { predict(model, newdata=newdata, type = "class") }
 
@@ -106,9 +110,20 @@ decision.tree.error.cv <- errorest(Type~., wine[, c(1, 2, 8)],
                                    model=decision.tree.predictor, 
                                    predict=predictor, estimator="cv", 
                                    est.para=control.errorest(k = 5))
+decision.tree.error.boot <- errorest(Type~., wine[, c(1, 2, 8)], 
+                                     model=decision.tree.predictor, 
+                                     predict=predictor, estimator="boot", 
+                                     est.para=control.errorest(nboot = 25))
+
+decision.tree.error.632 <- errorest(Type~., wine[, c(1, 2, 8)], 
+                                     model=decision.tree.predictor, 
+                                     predict=predictor, estimator="632plus", 
+                                     est.para=control.errorest(nboot = 25))
 ```
 
-Wyniósł on `r decision.tree.error.cv$error`.
+
+Błędy predykcji wyznaczone za pomocą metod: $5$-krotnej walidacji krzyżowej, bootstrap oraz \verb|.632+|, wyniosły kolejno `r decision.tree.error.cv$error`, `r decision.tree.error.boot$error` oraz `r decision.tree.error.632$error`.
+
 
 ### Bagging
 
@@ -123,12 +138,12 @@ bagging.error.rates <- sapply(B.vector, function(b)
 choice <- B.vector[which.min(bagging.error.rates)]
 ```
 
-```{r nbagg_plot, eval=TRUE, echo=FALSE, fig.cap="\\label{fig::2} Wplyw ilosci replikacji na blad klasyfikacji."}
+```{r nbagg_plot, eval=TRUE, echo=FALSE, fig.width=5.5, fig.height=3, fig.cap="\\label{fig::2} Wplyw ilosci replikacji na blad klasyfikacji."}
 ggplot(data = data.frame(B=B.vector, x=bagging.error.rates), aes(B, x)) + 
   geom_line(color="red") + geom_point() + xlab('Ilosc replikacji') + ylab('Wartosc bledu')
 ```
 
-Jak widać, najlepiej zbudować model dla nbagg równego `r choice`.
+Jak widać, najlepiej zbudować model dla nbagg równego `r choice`. Parametr złożoności \verb|cp| przyjmujemy równy $0$, tak jak w przypadku pojedynczego drzewa.
 
 ```{r bagging_pred}
 bagging.model <- bagging(Type~., data=train.data, nbagg=choice,
@@ -152,12 +167,12 @@ print(xtable(test.confusion), file="bag2.tex", floating=FALSE)
 \subfloat[Zbior uczacy]{\label{tab:bag1}{\input{./bag1}}}\quad
 \subfloat[Zbior testowy]{\label{tab:bag2}{\input{./bag2}}}
 \caption{Macierze pomylek dla algorytmu bagging.}
-\label{tab:tab_bag1}
+\label{tab:tab_bag}
 \end{table}
 
 Błędy klasyfikacji to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
 
-Wyznaczymy teraz dla tego modelu klasyfikacyjnego błąd predykcji --- skorzystamy z $5$-krotnej walidacji krzyżowej, metody bootstrap oraz \verb|.632+|.
+Wyznaczymy teraz dla tego modelu klasyfikacyjnego błędy predykcji podobnie jak dla drzewa decyzyjnego.
 
 ```{r bagging_errors}
 predictor  <- function(model, newdata) 
@@ -185,15 +200,79 @@ Błędy wyniosły kolejno `r bagging.error.cv$error`, `r bagging.error.boot$erro
 
 ### Boosting
 
+Wykorzystamy teraz algorytm boosting --- skorzystamy z funkcji \verb|boosting| z pakietu \verb|adabag|.
+
+Najpierw dobierzemy optymalnie wartość parametru \verb|mfinal| --- ilość wykorzystanych przez algorytm drzew.
+
+```{r mfinal}
+mfinal.vector <- seq(5, 100, by=20)
+predictor  <- function(model, newdata) 
+{ as.factor(predict(model, newdata=newdata, type = "class")$class)}
+boosting.error.rates <- sapply(mfinal.vector, function(m)  
+  { errorest(Type~., wine, predict=predictor,
+           model=boosting, mfinal=m,
+           estimator="cv", 
+           est.para=control.errorest(k = 5))$error})
+mfinal.choice <- mfinal.vector[which.min(boosting.error.rates)]
+```
+
+```{r mfinal_plot, echo=FALSE, eval=TRUE, fig.cap="\\label{fig::fig3} Zaleznosc bledu od ilosci drzew."}
+ggplot(data = data.frame(M=mfinal.vector, error=boosting.error.rates), aes(M, error)) + 
+  geom_line(color="red") + geom_point() + xlab('Ilosc drzew') + ylab('Wartosc bledu')
+```
+
+Wybieramy wartość mfinal równą `r mfinal.choice`.
+
+```{r boosting_model}
+boosting.model <- boosting(Type~., data = train.data, boos = TRUE, 
+                           mfinal = mfinal.choice)
+boosting.test.pred <- predict(boosting.model, test.data)
+boosting.train.pred <- predict(boosting.model, train.data)
+```
+
+```{r boosting_matrices}
+test.confusion <- boosting.test.pred$confusion
+train.confusion <- boosting.train.pred$confusion
+
+print(xtable(train.confusion), file="boost1.tex", floating=FALSE)
+print(xtable(test.confusion), file="boost2.tex", floating=FALSE)
+```
+
+\begin{table}[ht]
+\centering
+\subfloat[Zbior uczacy]{\label{tab:boost1}{\input{./boost1}}}\quad
+\subfloat[Zbior testowy]{\label{tab:boost2}{\input{./boost2}}}
+\caption{Macierze pomylek dla algorytmu boosting.}
+\label{tab:tab_boost}
+\end{table}
+
+Błędy klasyfikacji to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
+
+
+Wyznaczymy też teraz błędy predykcji (tym razem z racji złożoności obliczeniowej i długiego czasu wykonania tylko dla metody $5$-krotnej walidacji krzyżowej).
+
+
+```{r boosting_error}
+boosting.predictor <- function(formula, data) 
+{ boosting(formula, data = data, mfinal=mfinal.choice, boos = TRUE)}
+
+boosting.error.cv <- errorest(Type~., wine, 
+                                   model=boosting.predictor, 
+                                   predict=predictor, estimator="cv", 
+                                   est.para=control.errorest(k = 5))
+```
+
+Błąd wyniosł `r boosting.error.cv$error`.
+
 
 ### Random Forest
 
-Teraz wykorzystamy algorytm random forrest.
+Teraz wykorzystamy algorytm random forest.
 
 Postaramy się odpowiednio dobrać parametry \verb|ntree| (ilość drzew) i \verb|mtry| (ilość losowo wybieranych cech).
 
 
-```{r}
+```{r ntree_mtry}
 ntree.vector <- seq(10, 500, by=20)
 ntree.error.rates <- sapply(ntree.vector, function(b)  
   {errorest(Type~., data=train.data, model=randomForest, 
@@ -209,12 +288,12 @@ mtry.error.rates <- sapply(mtry.vector, function(m)
 mtry.choice <- mtry.vector[which.min(mtry.error.rates)]
 ```
 
-```{r mtry_ntree_plots, echo=FALSE, eval=TRUE, fig.cap="\\label{fig:3} Wykresy zaleznosci bledu klasyfikacji od parametrow mtry i ntree."}
+```{r mtry_ntree_plots, echo=FALSE, eval=TRUE, fig.width=6.5, fig.height=3.5, fig.cap="\\label{fig::fig4} Wykresy zaleznosci bledu klasyfikacji od parametrow mtry i ntree."}
 p1 <- ggplot(data = data.frame(ntree=ntree.vector, error=ntree.error.rates), aes(ntree, error)) + 
-  geom_line() + geom_point() + theme_dark()
+  geom_line(color="red") + geom_point() 
 
 p2 <- ggplot(data = data.frame(mtry=mtry.vector, error=mtry.error.rates), aes(mtry, error)) + 
-  geom_line() + geom_point() + theme_dark()
+  geom_line(color="red") + geom_point() 
 
 plot_grid(p1, p2)
 ```
@@ -222,7 +301,7 @@ plot_grid(p1, p2)
 Podobnie jak wcześniej wyznaczamy za pomocą modelu etykietki klas i wyznaczamy macierze pomyłek i błędy klasyfikacji.
 
 ```{r randomforrest_model}
-rf.model <- randomForest(Type ~., data = train.data, ntree=ntree.choice,
+rf.model <- randomForest(Type~., data = train.data, ntree=ntree.choice,
                          mtry=mtry.choice, importance=TRUE)
 rf.test.pred <- predict(rf.model, test.data)
 rf.train.pred <- predict(rf.model, train.data)
@@ -246,7 +325,7 @@ print(xtable(test.confusion), file="rf2.tex", floating=FALSE)
 
 Błędy klasyfikacji to kolejno `r 1 - sum(diag(train.confusion)) / length(train.etiquettes) ` i `r 1 - sum(diag(test.confusion)) / length(test.etiquettes)`.
 
-Tak jak wcześniej wyznaczymy dla tego modelu błędy predykcji.
+Tak jak dla wcześniejszych algorytmów, wyznaczymy teraz błędy predykcji.
 
 ```{r rf_errors}
 predictor  <- function(model, newdata) 
@@ -266,12 +345,12 @@ rf.error.632 <- errorest(Type~., wine, model=rf.predictor,
                                      est.para=control.errorest(nboot = 25))
 ```
 
-Błędy wyniosły kolejno `r rf.error.cv$error`, `r rf.error.boot$error` oraz `r rf.error.632$error`.
+Wyniosły one kolejno `r rf.error.cv$error`, `r rf.error.boot$error` oraz `r rf.error.632$error`.
 
 
 Wykorzystamy teraz algorytm random forest do wyznaczenia rankingu cech (\textit{variable importance}). 
 
-```{r importance_plot, echo=FALSE, eval=TRUE, fig.cap="\\label{fig::4} Wykres waznosci zmiennych."}
+```{r importance_plot, echo=FALSE, eval=TRUE, fig.cap="\\label{fig::fig5} Wykres waznosci zmiennych."}
 acc = data.frame(variable=as.vector(colnames(wine))[-1], val=importance(rf.model)[, 4]) %>%
   arrange(desc(val))
 gini = data.frame(variable=as.vector(colnames(wine))[-1], val=importance(rf.model)[, 5]) %>%
@@ -283,10 +362,12 @@ p2 <- ggplot(data = gini, aes(x=reorder(variable, val), y=val, fill=variable)) +
 plot_grid(p1, p2)
 ```
 
-Widzimy, że \ldots
+Przypomnijmy, że na ostatniej liście za zmienne istotne, takie, które dobrze dywersyfikowały klasy ze zbioru \verb|wine|, były \verb|Alcohol| i \verb|Flavanoids|. Tak jak widzimy to na rysunku (\ref{fig::fig5}) dokonaliśmy wtedy całkiem dobrej decyzji, ponieważ zmienne te są w czołówce najważniejszych zmiennych. Wykresy wskazują, że najważniejsze są zmienne \verb|Color| i \verb|Proline|, które w trakcie dokonywania wyboru, odrzuciliśmy. 
 
 
 ### Wnioski
+
+uwagii, tabelka, wniosek, że klasyfikatory wzmocnione radzą sobie lepiej
 
 ## b)
 
@@ -295,7 +376,7 @@ wine <- wine %>% select(c(Type, Alcohol, Flavanoids))
 ```
 
 ```{r SVM.class.err, echo=FALSE, fig.cap="Dokładność klasyfikatora od parametru kosztu"}
-models <- train(Type ~.,
+models <- train(Type~.,
                data = wine,
                method = "svmLinear",
                trControl = trainControl(method = "cv"),
@@ -304,7 +385,7 @@ ggplot(models$results, aes(C, Accuracy)) + geom_line() + scale_y_log10() + scale
 ```
 
 ```{r SVM.decision.bound.01, echo=FALSE, message=FALSE, fig.cap="Obszary decyzyjne dla $C=0.1$"}
-model <- ksvm(Type ~., data = wine, kernel = "vanilladot", C = 1e-1)
+model <- ksvm(Type~., data = wine, kernel = "vanilladot", C = 1e-1)
 
 var1 <- wine$Alcohol
 var2 <- wine$Flavanoids
@@ -414,7 +495,7 @@ models.radial <- train(Type ~.,
 result.linear <- models.linear$results[which.max(models.linear$results$Accuracy), "Accuracy"]
 result.poly <- models.poly$results[which.max(models.poly$results$Accuracy), "Accuracy"]
 result.radial <- models.radial$results[which.max(models.radial$results$Accuracy), "Accuracy"]
-print(xtable(as.tibble(list(linear=result.linear, polynomial=result.poly, radial=result.radial)), digits=3, caption="Porównanie klasyfikatorów dla różnych jąder"), include.rownames=FALSE)
+print(xtable(as.tibble(list(linear=result.linear, polynomial=result.poly, radial=result.radial)), digits=3, caption="Porównanie klasyfikatorów dla różnych jąder"), include.rownames=FALSE, comment=FALSE)
 ```
 
 ```{r tune.radial, echo=FALSE, message=FALSE, fig.cap="Mapa ciepła dokładności klasyfikatora"}
@@ -427,12 +508,19 @@ ggplot(models.radial$results, aes(C, sigma, fill=Accuracy)) + geom_tile() + scal
 ```
 
 ```{r tune.radial.table, results='asis', echo=FALSE, message=FALSE}
-print(xtable(models.radial$bestTune, caption = "Parametry dla najlepszego klasyfikatora"), include.rownames=FALSE)
+print(xtable(models.radial$bestTune, caption = "Parametry dla najlepszego klasyfikatora"), include.rownames=FALSE, comment=FALSE)
 ```
 
 # Zadanie 2
 
-```{r clusters pam, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8, fig.cap="Skupienia dla metody PAM"}
+W tym zadaniu zastosujemy algorytmy analizy skupień do wyznaczenia klastrów dla zbioru \verb|wine|,
+ocenimy ich skuteczność i porównamy je ze sobą. Sięgniemy po dwa algorytmy: PAM i AGNES.
+
+## Wizualizacja wyników grupowania ($K=3$)
+
+Przyjrzyjmy się najpierw jakie wyniki daje nam zastosowanie algorytmu PAM.
+
+```{r clusters pam, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Skupienia dla metody PAM"}
 data(wine)
 clusters <- pam(scale(wine %>% select(-Type)), 3)
 wine$Predicted <- as.factor(clusters$clustering)
@@ -443,9 +531,12 @@ p2 <- autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
 plot_grid(p1, p2, ncol=1)
 ```
 
-```{r clusters agnes single, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8, fig.cap="Skupienia dla metody AGNES z single-linkage"}
+
+Zobaczmy teraz, jak poradził sobie algorytm AGNES z single-linkage.
+
+```{r clusters agnes single, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Skupienia dla metody AGNES z single-linkage"}
 data(wine)
-clusters <- cutree(agnes(scale(wine %>% select(-Type)), method='single'), 3)
+clusters <- cutree(agnes(scale(wine %>% select(-Type)),  method='single'), 3)
 wine$Predicted <- as.factor(clusters)
 p1 <- autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
          data = wine, colour = 'Predicted', shape='Type', frame=TRUE, frame.type='norm')
@@ -454,7 +545,9 @@ p2 <- autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
 plot_grid(p1, p2, ncol=1)
 ```
 
-```{r clusters agnes complete, echo=FALSE, message=FALSE, warning=FALSE, fig.height=8, fig.cap="Skupienia dla metody AGNES z complete-linkage"}
+Poniżej wyniki dla algorytmu AGNES z complete-linkage.
+
+```{r clusters agnes complete, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Skupienia dla metody AGNES z complete-linkage"}
 data(wine)
 clusters <- cutree(agnes(scale(wine %>% select(-Type)), method='complete'), 3)
 wine$Predicted <- as.factor(clusters)
@@ -464,6 +557,14 @@ p2 <- autoplot(prcomp(wine %>% select(-c(Type, Predicted)), scale = TRUE),
          data = wine, colour = 'Type', shape='Predicted', frame=TRUE, frame.type='norm')
 plot_grid(p1, p2, ncol=1)
 ```
+
+
+## Ocena jakości grupowania 
+
+W tej części zadania, porównamy ze sobą algorytmy, jakość uzyskanego dzięk nim grupowania w zależności od przyjętej ilości skupień. Wykorzystamy wskźniki wewnętrzne, jak i zewnętrzne.
+
+
+### Wkaźniki wewnętrzne
 
 ```{r internal, echo=FALSE, warning=FALSE, fig.cap="Wskaźniki wewnętrzne dla PAM i AGNES z complete-linkage"}
 data(wine)
@@ -491,6 +592,10 @@ for(i in internal@measNames){
  
 plot_grid(plotlist = my_plot, ncol = 1)
 ```
+
+
+### Wskaźniki zewnętrzne
+
 
 ```{r external, echo=FALSE, fig.cap="Porównanie wskaźników zewnętrznych"}
 pam.match <- Vectorize(function(k) {
@@ -527,6 +632,8 @@ matchClasses(table(pam(scale(wine %>% select(-Type)), 3)$clustering,
                    cutree(agnes(scale(wine %>% select(-Type)), method='complete'), 3)))
 ```
 
+
+### Ocena otrzymanych rezultatów
 ```{r cluster boxplots, echo=FALSE}
 wine.pam <- pam(scale(wine %>% select(-Type)), 3)
 wine.agnes <- cutree(agnes(scale(wine %>% select(-Type)), method='complete'), 3)
@@ -539,6 +646,6 @@ plot_boxplot(wine, by='agnes')
 ```
 
 ```{r medoids, echo=FALSE, results='asis'}
-print(xtable(t(data.frame(wine.pam$medoids)), caption="Medoidy dla metody PAM przy K=3"))
+print(xtable(t(data.frame(wine.pam$medoids)), caption="Medoidy dla metody PAM przy K=3"), comment=FALSE)
 ```
 
